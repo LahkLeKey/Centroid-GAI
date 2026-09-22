@@ -1,0 +1,58 @@
+name: centroid-gai
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-centroid_gai}
+      POSTGRES_USER: ${POSTGRES_USER:-centroid_gai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-centroid_gai_dev}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+  database-init:
+    build:
+      context: .
+      dockerfile: persistence/prisma-postgres/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-centroid_gai}:${POSTGRES_PASSWORD:-centroid_gai_dev}@postgres:5432/${POSTGRES_DB:-centroid_gai}
+    command:
+      - /bin/sh
+      - -c
+      - npm run db:verify || npm run db:init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: persistence/prisma-postgres/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-centroid_gai}:${POSTGRES_PASSWORD:-centroid_gai_dev}@postgres:5432/${POSTGRES_DB:-centroid_gai}
+      PORT: 3000
+      MAX_REQUEST_BYTES: ${MAX_REQUEST_BYTES:-67108864}
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${API_PORT:-3000}:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+

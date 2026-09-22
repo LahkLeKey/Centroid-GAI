@@ -1,0 +1,16 @@
+C:\Github\Centroid-GAI\persistence\prisma-postgres\native\addon.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\native\addon.obj
+C:\Github\Centroid-GAI\src\abi.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\abi.obj
+C:\Github\Centroid-GAI\src\abi_config.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\abi_config.obj
+C:\Github\Centroid-GAI\src\abi_model.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\abi_model.obj
+C:\Github\Centroid-GAI\src\centroid_gai.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\centroid_gai.obj
+C:\Github\Centroid-GAI\src\error.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\error.obj
+C:\Github\Centroid-GAI\src\file_utils.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\file_utils.obj
+C:\Github\Centroid-GAI\src\model_decode.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\model_decode.obj
+C:\Github\Centroid-GAI\src\model_encode.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\model_encode.obj
+C:\Github\Centroid-GAI\src\model_generation.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\model_generation.obj
+C:\Github\Centroid-GAI\src\model_math.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\model_math.obj
+C:\Github\Centroid-GAI\src\model_sampling.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\model_sampling.obj
+C:\Github\Centroid-GAI\src\model_training.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\model_training.obj
+C:\Github\Centroid-GAI\src\tokenizer.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\tokenizer.obj
+C:\Github\Centroid-GAI\src\vocabulary.c;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\src\vocabulary.obj
+C:\Github\Centroid-GAI\persistence\prisma-postgres\node_modules\node-gyp\src\win_delay_load_hook.cc;C:\Github\Centroid-GAI\persistence\prisma-postgres\build\Release\obj\centroid_gai_native\win_delay_load_hook.obj

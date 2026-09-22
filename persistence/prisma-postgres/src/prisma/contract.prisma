@@ -1,0 +1,20 @@
+// use prisma-8
+
+model ModelArtifact {
+  id             Uuid              @id
+  name           String            @unique
+  formatVersion  Int
+  libraryVersion String
+  dimensions     Int
+  centroidCount  Int
+  contextWindow  Int
+  vocabularySize BigInt
+  examplesSeen   BigInt
+  checksumSha256 String
+  payload        Bytes
+  createdAt      TimestamptzString @default(now())
+  updatedAt      TimestamptzString @default(now())
+
+  @@index([checksumSha256])
+  @@map("model_artifact")
+}

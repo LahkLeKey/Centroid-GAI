@@ -1,0 +1,16 @@
+/** @file model_format.h @brief Private serialized model header layout. */
+
+#ifndef CGAI_MODEL_FORMAT_H
+#define CGAI_MODEL_FORMAT_H
+
+enum {
+    CGAI_HEADER_DIMENSIONS = 0,
+    CGAI_HEADER_CENTROID_COUNT,
+    CGAI_HEADER_CONTEXT_WINDOW,
+    CGAI_HEADER_SEED,
+    CGAI_HEADER_VOCABULARY_SIZE,
+    CGAI_HEADER_INITIALIZED_CENTROIDS,
+    CGAI_HEADER_EXAMPLES_SEEN
+};
+
+#endif

@@ -1,0 +1,13 @@
+/build/
+/out/
+*.cgai
+*.obj
+*.o
+*.exe
+*.pdb
+.vs/
+.vscode/
+.env
+node_modules/
+*.tsbuildinfo
+

@@ -1,0 +1,5 @@
+centroids group similar contexts together. Similar contexts suggest similar next words.
+small models are easy to inspect. Small models are easy to embed.
+centroid models learn online. Centroid models generate one token at a time.
+the model finds a nearby centroid. The centroid votes for the next token.
+

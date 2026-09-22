@@ -1,0 +1,15 @@
+Checks: '-*,readability-function-size'
+WarningsAsErrors: 'readability-function-size'
+HeaderFilterRegex: '(^|/)src/.*\\.(c|h)$'
+FormatStyle: file
+CheckOptions:
+  # Keep the line check permissive because detailed comments are part of the
+  # implementation contract; statements remain capped at twenty.
+  - key: readability-function-size.LineThreshold
+    value: '1000'
+  - key: readability-function-size.StatementThreshold
+    value: '20'
+  - key: readability-function-size.BranchThreshold
+    value: '8'
+  - key: readability-function-size.ParameterThreshold
+    value: '7'

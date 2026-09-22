@@ -1,0 +1,13 @@
+.git
+.github
+build
+build-docs
+out
+*.cgai
+*.pdb
+*.obj
+*.o
+persistence/prisma-postgres/build
+persistence/prisma-postgres/node_modules
+persistence/prisma-postgres/.env
+
