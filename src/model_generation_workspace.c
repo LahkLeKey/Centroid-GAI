@@ -33,9 +33,11 @@ void cgai_generation_workspace_destroy(generation_workspace *workspace) {
  * allocations and must invoke the workspace destructor.
  *
  * @param model Non-NULL model supplying the vector dimension count.
- * @param history_capacity Number of token-ID slots requested for initial context and generated tokens.
+ * @param history_capacity Number of token-ID slots requested for initial context and generated
+ * tokens.
  * @param workspace Non-NULL workspace with empty numeric-pointer fields.
- * @return CGAI_STATUS_OK when all allocations succeed, otherwise CGAI_STATUS_ERROR with a diagnostic.
+ * @return CGAI_STATUS_OK when all allocations succeed, otherwise CGAI_STATUS_ERROR with a
+ * diagnostic.
  */
 static cgai_status generation_workspace_allocate(const cgai_model *model, size_t history_capacity,
                                                  generation_workspace *workspace) {
@@ -68,8 +70,10 @@ static cgai_status generation_workspace_allocate(const cgai_model *model, size_t
  * @param model Non-NULL validated model, borrowed without mutation.
  * @param prompt Non-NULL borrowed NUL-terminated prompt.
  * @param max_tokens Maximum generated IDs to reserve in addition to initial context.
- * @param workspace Non-NULL zero-initialized workspace receiving ownership, even on partial failure.
- * @return CGAI_STATUS_OK when storage is ready, otherwise CGAI_STATUS_ERROR; always destroy the workspace.
+ * @param workspace Non-NULL zero-initialized workspace receiving ownership, even on partial
+ * failure.
+ * @return CGAI_STATUS_OK when storage is ready, otherwise CGAI_STATUS_ERROR; always destroy the
+ * workspace.
  */
 cgai_status cgai_generation_prepare(const cgai_model *model, const char *prompt, size_t max_tokens,
                                     generation_workspace *workspace) {
@@ -98,7 +102,8 @@ cgai_status cgai_generation_prepare(const cgai_model *model, const char *prompt,
  * window. The post-increment expression writes at the old count, then advances the count.
  *
  * @param model Non-NULL borrowed model with reserved vocabulary entries.
- * @param workspace Prepared workspace containing prompt tokens and sufficient writable history slots.
+ * @param workspace Prepared workspace containing prompt tokens and sufficient writable history
+ * slots.
  * @param history_count Non-NULL output receiving the number of initialized history IDs.
  */
 void cgai_generation_prepare_history(const cgai_model *model, generation_workspace *workspace,

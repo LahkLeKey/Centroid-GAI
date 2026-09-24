@@ -14,9 +14,9 @@
  * value-only result with no cleanup or pointers into model storage.
  */
 typedef struct sampling_mass {
-    cgai_token_id best; /**< Earliest token with greatest raw count, or EOS if none. */
+    cgai_token_id best;  /**< Earliest token with greatest raw count, or EOS if none. */
     uint64_t best_count; /**< Raw observation count for the current greedy winner. */
-    double total; /**< Sum of count^(1/temperature) for eligible positive counts. */
+    double total;        /**< Sum of count^(1/temperature) for eligible positive counts. */
 } sampling_mass;
 
 /**
@@ -28,7 +28,8 @@ typedef struct sampling_mass {
  *
  * @param model Non-NULL model with a consistent token-count matrix.
  * @param cluster Valid centroid row to inspect.
- * @param temperature Nonnegative finite value supplied by generation; zero requests greedy selection.
+ * @param temperature Nonnegative finite value supplied by generation; zero requests greedy
+ * selection.
  * @return Value structure containing the greedy fallback, its raw count, and total sampling weight.
  */
 static sampling_mass calculate_mass(const cgai_model *model, cgai_centroid_id cluster,
@@ -43,7 +44,8 @@ static sampling_mass calculate_mass(const cgai_model *model, cgai_centroid_id cl
             mass.best_count = count;
             mass.best = cgai_token_id_from_size(token);
         }
-        /* Step 4: Accumulate powered positive counts only when probabilistic sampling is requested. */
+        /* Step 4: Accumulate powered positive counts only when probabilistic sampling is requested.
+         */
         if (temperature > 0.0 && count > 0U) {
             mass.total += pow((double)count, 1.0 / temperature);
         }
@@ -80,7 +82,8 @@ static cgai_token_id consume_threshold(const cgai_model *model, cgai_centroid_id
             }
         }
     }
-    /* Step 4: Retain a defined choice if rounding or an unusable mass leaves no selected interval. */
+    /* Step 4: Retain a defined choice if rounding or an unusable mass leaves no selected interval.
+     */
     return fallback;
 }
 

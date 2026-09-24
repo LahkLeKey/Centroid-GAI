@@ -11,7 +11,10 @@
  *
  * @param argc Argument count including the executable name.
  * @param argv Process-owned argument strings, borrowed for the lifetime of main.
- * @return The CLI's process-style exit code: zero for success, one for runtime failure, two for syntax errors.
+ * @return The CLI's process-style exit code: zero for success, one for runtime failure, two for
+ * syntax errors.
  */
-int main(int argc, char **argv) { /* Step 1: Delegate parsing and execution, preserving the resulting process status. */
- return cgai_cli_run(argc, argv); }
+int main(int argc, char **argv) { /* Step 1: Delegate parsing and execution, preserving the
+                                     resulting process status. */
+    return cgai_cli_run(argc, argv);
+}

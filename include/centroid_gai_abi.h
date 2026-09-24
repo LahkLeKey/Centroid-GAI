@@ -140,7 +140,8 @@ CGAI_ABI_EXPORT const char *cgai_abi_last_error(void);
  * is set to zero because nonzero values are rejected by model creation.
  *
  * @param output Non-NULL pointer to writable cgai_abi_config storage; no allocation is returned.
- * @return CGAI_ABI_OK when the structure is filled, or CGAI_ABI_INVALID_ARGUMENT with a native diagnostic.
+ * @return CGAI_ABI_OK when the structure is filled, or CGAI_ABI_INVALID_ARGUMENT with a native
+ * diagnostic.
  */
 CGAI_ABI_EXPORT cgai_abi_status cgai_abi_default_config(cgai_abi_config *output);
 
@@ -149,11 +150,12 @@ CGAI_ABI_EXPORT cgai_abi_status cgai_abi_default_config(cgai_abi_config *output)
  *
  * A pointer-to-pointer lets this function place a newly allocated handle in the caller's variable.
  * After both input pointers are accepted, that variable is cleared before any validation can fail.
- * The ABI handle is the core model pointer viewed through an opaque type; no second model is copied.
- * The caller must eventually destroy a successful handle with cgai_abi_model_destroy().
+ * The ABI handle is the core model pointer viewed through an opaque type; no second model is
+ * copied. The caller must eventually destroy a successful handle with cgai_abi_model_destroy().
  *
  * @param config Non-NULL configuration initialized for this ABI's size and version.
- * @param output Non-NULL address of the caller's handle variable; receives NULL on subsequent failure.
+ * @param output Non-NULL address of the caller's handle variable; receives NULL on subsequent
+ * failure.
  * @return CGAI_ABI_OK, INVALID_ARGUMENT for missing pointers or reserved bits, VERSION_MISMATCH for
  * incompatible layout/version, or ERROR when core validation or allocation fails.
  */
@@ -198,7 +200,8 @@ CGAI_ABI_EXPORT void cgai_abi_model_destroy(cgai_abi_model *model);
  *
  * @param model Non-NULL mutable handle owned by the caller.
  * @param utf8_text Non-NULL NUL-terminated corpus; empty or whitespace-only text fails in the core.
- * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for missing pointers, or ERROR for a core failure.
+ * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for missing pointers, or ERROR for a core
+ * failure.
  */
 CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_train(cgai_abi_model *model, const char *utf8_text);
 
@@ -227,7 +230,8 @@ CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_get_metadata(const cgai_abi_model
  *
  * @param model Non-NULL model to serialize without mutation.
  * @param output Non-NULL writable empty descriptor receiving the artifact allocation.
- * @return CGAI_ABI_OK, INVALID_ARGUMENT for NULL inputs, or the allocation/encoding helper's error status.
+ * @return CGAI_ABI_OK, INVALID_ARGUMENT for NULL inputs, or the allocation/encoding helper's error
+ * status.
  */
 CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_export(const cgai_abi_model *model,
                                                       cgai_abi_buffer *output);
@@ -247,12 +251,12 @@ CGAI_ABI_EXPORT void cgai_abi_buffer_free(cgai_abi_buffer *buffer);
 /**
  * @brief Generate a continuation and return text allocated by the ABI.
  *
- * The handle is borrowed: generation reads the model without transferring or changing its ownership.
- * The output structure belongs to the caller, but its data allocation must be released with
- * cgai_abi_buffer_free(). Pass an empty buffer; this function does not free an earlier allocation.
- * A C string ends with a zero byte (NUL); output->size counts the text bytes before that terminator.
- * The 128-byte allowance per requested token is a capacity estimate, not a tokenizer limit.
- * Long tokens can exhaust that capacity and make the core generation call fail.
+ * The handle is borrowed: generation reads the model without transferring or changing its
+ * ownership. The output structure belongs to the caller, but its data allocation must be released
+ * with cgai_abi_buffer_free(). Pass an empty buffer; this function does not free an earlier
+ * allocation. A C string ends with a zero byte (NUL); output->size counts the text bytes before
+ * that terminator. The 128-byte allowance per requested token is a capacity estimate, not a
+ * tokenizer limit. Long tokens can exhaust that capacity and make the core generation call fail.
  *
  * @param model Non-NULL trained model handle, kept alive throughout this call.
  * @param utf8_prompt Non-NULL NUL-terminated prompt; borrowed for this call.
@@ -260,8 +264,9 @@ CGAI_ABI_EXPORT void cgai_abi_buffer_free(cgai_abi_buffer *buffer);
  * @param temperature Sampling temperature; the core rejects negative or nonfinite values.
  * @param seed Random seed; zero tells the core to use the model's configured seed.
  * @param output Non-NULL writable buffer descriptor receiving the allocation and text length.
- * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for NULL inputs, OUT_OF_MEMORY on allocation failure,
- * or ERROR if core generation fails. After valid pointers are accepted, failure leaves an empty buffer.
+ * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for NULL inputs, OUT_OF_MEMORY on allocation
+ * failure, or ERROR if core generation fails. After valid pointers are accepted, failure leaves an
+ * empty buffer.
  */
 CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_generate(const cgai_abi_model *model,
                                                         const char *utf8_prompt,

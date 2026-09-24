@@ -22,9 +22,9 @@ cgai_token_id cgai_vocabulary_find(const cgai_model *model, const char *token);
  * @brief Return an existing token ID or append a newly owned vocabulary spelling.
  *
  * An ID is the spelling's insertion index and stays stable for the life of this model. A new
- * entry needs both a copied spelling and a wider count table. These are prepared before the occupied
- * vocabulary size is advanced; capacity may still grow on a later failure. This mutates the model
- * and requires exclusive access.
+ * entry needs both a copied spelling and a wider count table. These are prepared before the
+ * occupied vocabulary size is advanced; capacity may still grow on a later failure. This mutates
+ * the model and requires exclusive access.
  *
  * @param model Non-NULL mutable model with consistent vocabulary and count arrays.
  * @param token Non-NULL borrowed NUL-terminated spelling; copied only if it is new.

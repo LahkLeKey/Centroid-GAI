@@ -31,8 +31,10 @@ static const char persistence_schema[] =
  *
  * @return The compile-time CGAI_ABI_VERSION constant; no allocation or error state is involved.
  */
-uint32_t cgai_abi_version(void) { /* Step 1: Expose the declaration version used to build this library. */
- return CGAI_ABI_VERSION; }
+uint32_t
+cgai_abi_version(void) { /* Step 1: Expose the declaration version used to build this library. */
+    return CGAI_ABI_VERSION;
+}
 
 /**
  * @brief Return the native library's semantic version string.
@@ -43,8 +45,10 @@ uint32_t cgai_abi_version(void) { /* Step 1: Expose the declaration version used
  *
  * @return Borrowed NUL-terminated UTF-8 version text.
  */
-const char *cgai_abi_library_version(void) { /* Step 1: Return the static release label without creating a caller-owned buffer. */
- return "0.2.0"; }
+const char *cgai_abi_library_version(
+    void) { /* Step 1: Return the static release label without creating a caller-owned buffer. */
+    return "0.2.0";
+}
 
 /**
  * @brief Expose the static JSON Schema used to describe persistence metadata.
@@ -55,8 +59,10 @@ const char *cgai_abi_library_version(void) { /* Step 1: Return the static releas
  *
  * @return Borrowed immutable JSON text valid while this library remains loaded.
  */
-const char *cgai_abi_persistence_schema_json(void) { /* Step 1: Return the schema's static storage; callers must not free it. */
- return persistence_schema; }
+const char *cgai_abi_persistence_schema_json(
+    void) { /* Step 1: Return the schema's static storage; callers must not free it. */
+    return persistence_schema;
+}
 
 /**
  * @brief Read the current thread's core diagnostic through the ABI.
@@ -67,5 +73,7 @@ const char *cgai_abi_persistence_schema_json(void) { /* Step 1: Return the schem
  *
  * @return Borrowed NUL-terminated diagnostic text, or the no-error sentinel.
  */
-const char *cgai_abi_last_error(void) { /* Step 1: Forward to the shared diagnostic accessor without copying or clearing the message. */
- return cgai_last_error(); }
+const char *cgai_abi_last_error(void) { /* Step 1: Forward to the shared diagnostic accessor without
+                                           copying or clearing the message. */
+    return cgai_last_error();
+}

@@ -10,11 +10,12 @@
  *
  * A pointer-to-pointer lets this function place a newly allocated handle in the caller's variable.
  * After both input pointers are accepted, that variable is cleared before any validation can fail.
- * The ABI handle is the core model pointer viewed through an opaque type; no second model is copied.
- * The caller must eventually destroy a successful handle with cgai_abi_model_destroy().
+ * The ABI handle is the core model pointer viewed through an opaque type; no second model is
+ * copied. The caller must eventually destroy a successful handle with cgai_abi_model_destroy().
  *
  * @param config Non-NULL configuration initialized for this ABI's size and version.
- * @param output Non-NULL address of the caller's handle variable; receives NULL on subsequent failure.
+ * @param output Non-NULL address of the caller's handle variable; receives NULL on subsequent
+ * failure.
  * @return CGAI_ABI_OK, INVALID_ARGUMENT for missing pointers or reserved bits, VERSION_MISMATCH for
  * incompatible layout/version, or ERROR when core validation or allocation fails.
  */
@@ -72,7 +73,8 @@ void cgai_abi_model_destroy(cgai_abi_model *model) {
  *
  * @param model Non-NULL mutable handle owned by the caller.
  * @param utf8_text Non-NULL NUL-terminated corpus; empty or whitespace-only text fails in the core.
- * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for missing pointers, or ERROR for a core failure.
+ * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for missing pointers, or ERROR for a core
+ * failure.
  */
 cgai_abi_status cgai_abi_model_train(cgai_abi_model *model, const char *utf8_text) {
     /* Step 1: Reject missing input pointers at the ABI boundary. */
@@ -80,7 +82,8 @@ cgai_abi_status cgai_abi_model_train(cgai_abi_model *model, const char *utf8_tex
         (void)cgai_fail("ABI model and training text are required");
         return CGAI_ABI_INVALID_ARGUMENT;
     }
-    /* Step 2: Borrow the core model for training and translate its status into the ABI status domain. */
+    /* Step 2: Borrow the core model for training and translate its status into the ABI status
+     * domain. */
     return cgai_model_train_text(cgai_abi_core_model(model), utf8_text) == CGAI_STATUS_OK
                ? CGAI_ABI_OK
                : CGAI_ABI_ERROR;

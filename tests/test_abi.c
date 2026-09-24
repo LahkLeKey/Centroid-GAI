@@ -43,7 +43,8 @@ static void test_metadata(cgai_abi_model *model) {
     /* Step 1: Request a snapshot into local stack storage. */
     cgai_abi_model_metadata metadata;
     CHECK(cgai_abi_model_get_metadata(model, &metadata) == CGAI_ABI_OK);
-    /* Step 2: Compare format, configuration, and learned-state fields with the fixture expectations. */
+    /* Step 2: Compare format, configuration, and learned-state fields with the fixture
+     * expectations. */
     CHECK(metadata.format_version == 1U);
     CHECK(metadata.dimensions == 12U);
     CHECK(metadata.examples_seen > 0U);

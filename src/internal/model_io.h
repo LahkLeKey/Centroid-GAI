@@ -28,9 +28,9 @@ cgai_status cgai_model_encode(const cgai_model *model, uint8_t *output, size_t o
  * @brief Decode a complete trusted artifact into a new owned model.
  *
  * Input bytes remain borrowed; every string and numeric array in the returned model has separate
- * storage. The decoder validates fixed fields before allocation, reconstructs the body, and destroys
- * a partial model on any later failure. Native byte order and numeric representations require
- * compatible producing/consuming builds.
+ * storage. The decoder validates fixed fields before allocation, reconstructs the body, and
+ * destroys a partial model on any later failure. Native byte order and numeric representations
+ * require compatible producing/consuming builds.
  *
  * @param data Non-NULL readable artifact bytes, borrowed until this call returns.
  * @param size Complete byte length of the supplied artifact.

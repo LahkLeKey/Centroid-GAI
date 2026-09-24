@@ -14,9 +14,9 @@
  * The execution helper borrows the final settings and owns its separate buffers.
  */
 typedef struct cli_generation_options {
-    size_t max_tokens; /**< Token cap used to choose estimated output capacity. */
+    size_t max_tokens;  /**< Token cap used to choose estimated output capacity. */
     double temperature; /**< Nonnegative parsed value; core also requires finiteness. */
-    uint64_t seed; /**< Sampling seed; zero uses the model's configured seed. */
+    uint64_t seed;      /**< Sampling seed; zero uses the model's configured seed. */
 } cli_generation_options;
 
 /**
@@ -69,7 +69,8 @@ static int parse_seed(const char *text, uint64_t *seed) {
  * @return Nonzero if both the CLI cap and allocation arithmetic bound hold, otherwise zero.
  */
 static int valid_generation_size(size_t max_tokens) {
-    /* Step 1: Require both the configured request cap and a representable estimated byte capacity. */
+    /* Step 1: Require both the configured request cap and a representable estimated byte capacity.
+     */
     return max_tokens <= CGAI_MAX_GENERATION_TOKENS &&
            max_tokens <= (SIZE_MAX - 1U) / CGAI_OUTPUT_BYTES_PER_TOKEN;
 }

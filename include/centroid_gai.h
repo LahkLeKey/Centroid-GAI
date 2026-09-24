@@ -100,7 +100,8 @@ void cgai_model_destroy(cgai_model *model);
  *
  * @param model Mutable live model, or NULL to receive an argument error.
  * @param text Borrowed NUL-terminated corpus; must contain at least one token.
- * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR; cgai_last_error() supplies a diagnostic.
+ * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR; cgai_last_error() supplies a
+ * diagnostic.
  */
 cgai_status cgai_model_train_text(cgai_model *model, const char *text);
 
@@ -119,7 +120,8 @@ cgai_status cgai_model_train_text(cgai_model *model, const char *text);
  * @param seed Sampling seed; zero selects the model's configured seed.
  * @param output Writable caller-owned buffer for continuation bytes and NUL.
  * @param output_size Total capacity of output in bytes.
- * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR with cgai_last_error() describing failure.
+ * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR with cgai_last_error()
+ * describing failure.
  */
 cgai_status cgai_model_generate(const cgai_model *model, const char *prompt, size_t max_tokens,
                                 double temperature, uint64_t seed, char *output,
@@ -156,7 +158,8 @@ cgai_model *cgai_model_load(const char *path);
  *
  * This includes BOS, EOS, and UNKNOWN as well as ordinary learned tokens. The count is copied
  * from the model and exposes no internal array. Keep a non-NULL model alive and exclude concurrent
- * mutation while reading; returning zero for NULL is a convenience, not a validation of other pointers.
+ * mutation while reading; returning zero for NULL is a convenience, not a validation of other
+ * pointers.
  *
  * @param model Borrowed model pointer, or NULL.
  * @return Vocabulary entry count, or zero for NULL.

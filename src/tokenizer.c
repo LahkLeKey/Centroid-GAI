@@ -17,7 +17,8 @@
  * The list structure itself remains caller-owned. Zeroing its fields after cleanup allows reuse
  * and repeated destruction of that same list, including a partially filled list.
  *
- * @param tokens Non-NULL initialized or zero-initialized list whose allocations belong to this caller.
+ * @param tokens Non-NULL initialized or zero-initialized list whose allocations belong to this
+ * caller.
  */
 void cgai_token_list_destroy(cgai_token_list *tokens) {
     /* Step 1: Release every string recorded in the occupied part of the pointer array. */
@@ -41,7 +42,8 @@ void cgai_token_list_destroy(cgai_token_list *tokens) {
  * a temporary pointer preserves the old allocation when growth fails.
  *
  * @param tokens Non-NULL mutable list with count no greater than its current capacity.
- * @return CGAI_STATUS_OK if a slot exists, otherwise CGAI_STATUS_ERROR with existing storage retained.
+ * @return CGAI_STATUS_OK if a slot exists, otherwise CGAI_STATUS_ERROR with existing storage
+ * retained.
  */
 static cgai_status ensure_token_capacity(cgai_token_list *tokens) {
     /* Reuse existing capacity whenever possible. */
@@ -127,7 +129,8 @@ static const char *next_token_span(const char *cursor, const char **start, size_
     /* Step 2: Report an empty span when no non-whitespace byte remains. */
     if (*cursor == '\0') {
         /* Signal end-of-input with an empty span. */
-        /* Step 3: Remember the start, then choose word scanning or one-byte punctuation scanning. */
+        /* Step 3: Remember the start, then choose word scanning or one-byte punctuation scanning.
+         */
         *start = cursor;
         *length = 0U;
         return cursor;
@@ -187,7 +190,8 @@ static cgai_status token_list_push(cgai_token_list *tokens, const char *start, s
  *
  * @param text Non-NULL NUL-terminated source string, borrowed for this call.
  * @param tokens Non-NULL initialized list receiving owned strings.
- * @return CGAI_STATUS_OK after scanning, otherwise CGAI_STATUS_ERROR with an empty destination list.
+ * @return CGAI_STATUS_OK after scanning, otherwise CGAI_STATUS_ERROR with an empty destination
+ * list.
  */
 cgai_status cgai_tokenize(const char *text, cgai_token_list *tokens) {
     /* Step 1: Start a read-only cursor at the beginning of the source string. */

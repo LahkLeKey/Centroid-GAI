@@ -25,7 +25,8 @@ int cgai_node_import(napi_env env, napi_value value, cgai_abi_model **model) {
         napi_throw_type_error(env, NULL, "expected a model Buffer");
         return 0;
     }
-    /* Step 2: Decode the readable byte span into independent model storage and translate native failure. */
+    /* Step 2: Decode the readable byte span into independent model storage and translate native
+     * failure. */
     if (cgai_abi_model_import((const uint8_t *)data, size, model) != CGAI_ABI_OK) {
         (void)cgai_node_native_error(env);
         return 0;

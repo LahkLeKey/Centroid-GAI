@@ -18,14 +18,16 @@
  * @param model Borrowed mutable fixture already containing reserved tokens and the example entry.
  */
 static void test_vocabulary_growth(cgai_model *model) {
-    /* Step 1: Construct and insert forty unique spellings using the same temporary character buffer. */
+    /* Step 1: Construct and insert forty unique spellings using the same temporary character
+     * buffer. */
     for (size_t i = 0; i < 40U; ++i) {
         char token[32];
         (void)snprintf(token, sizeof(token), "token-%zu", i);
         TEST_CHECK(cgai_token_id_is_valid(cgai_vocabulary_add(model, token)),
                    "vocabulary growth failed");
     }
-    /* Step 2: Confirm the occupied vocabulary count reflects growth beyond the original capacity. */
+    /* Step 2: Confirm the occupied vocabulary count reflects growth beyond the original capacity.
+     */
     TEST_CHECK(model->vocabulary_size >= 44U, "vocabulary did not grow past initial capacity");
 }
 
@@ -33,8 +35,8 @@ static void test_vocabulary_growth(cgai_model *model) {
  * @brief Check reserved IDs, lookup failure, deduplication, and ownership during growth.
  *
  * A freshly created model contains the three control spellings. Adding the same ordinary spelling
- * twice must return one stable ID, and its stored bytes must survive independently of input storage.
- * The growth helper then exercises reallocation and count-table expansion.
+ * twice must return one stable ID, and its stored bytes must survive independently of input
+ * storage. The growth helper then exercises reallocation and count-table expansion.
  *
  * @return Zero after all vocabulary invariants are checked.
  */
@@ -47,7 +49,8 @@ int test_vocabulary(void) {
                "BOS identifier is unstable");
     TEST_CHECK(cgai_vocabulary_find(model, "missing").value == SIZE_MAX, "missing token was found");
 
-    /* Step 2: Insert the same spelling twice and compare identifiers, stored bytes, and count storage. */
+    /* Step 2: Insert the same spelling twice and compare identifiers, stored bytes, and count
+     * storage. */
     const cgai_token_id first = cgai_vocabulary_add(model, "example");
     const cgai_token_id second = cgai_vocabulary_add(model, "example");
     TEST_CHECK(cgai_token_id_is_valid(first), "new token was rejected");

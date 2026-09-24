@@ -10,8 +10,8 @@
  * @brief Create a temporary model, train it, and return a serialized JavaScript Buffer.
  *
  * Both text and config are borrowed. The temporary model belongs to this function and is destroyed
- * whether training or export fails. JavaScript receives copied artifact bytes, not the model pointer,
- * so no native model lifetime extends past this synchronous callback.
+ * whether training or export fails. JavaScript receives copied artifact bytes, not the model
+ * pointer, so no native model lifetime extends past this synchronous callback.
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param text Borrowed NUL-terminated training text.
@@ -28,7 +28,8 @@ static napi_value train_text(napi_env env, const char *text, const cgai_abi_conf
     }
     /* Step 2: Export learned state into a JavaScript-owned Buffer. */
     napi_value result = cgai_node_export(env, model);
-    /* Step 3: Release the temporary model after export, regardless of the returned Buffer result. */
+    /* Step 3: Release the temporary model after export, regardless of the returned Buffer result.
+     */
     cgai_abi_model_destroy(model);
     return result;
 }
@@ -69,9 +70,9 @@ static napi_value train_arguments(napi_env env, size_t argc, const napi_value *a
 /**
  * @brief Implement the JavaScript trainModel(text, config?) callback.
  *
- * napi_get_cb_info reads at most the capacity supplied in argc and updates it to the available count.
- * The callback checks the required text argument before indexing argv. Configuration defaults,
- * string ownership, and model lifetime are handled by the focused helper chain.
+ * napi_get_cb_info reads at most the capacity supplied in argc and updates it to the available
+ * count. The callback checks the required text argument before indexing argv. Configuration
+ * defaults, string ownership, and model lifetime are handled by the focused helper chain.
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param info Opaque callback metadata supplied by Node for this invocation.

@@ -11,7 +11,8 @@
  * differences; taking a square root is unnecessary because it would preserve the ordering.
  * Strictly smaller distances replace the winner, so ties keep the lowest earlier index.
  *
- * @param model Non-NULL borrowed model with at least one initialized centroid and consistent arrays.
+ * @param model Non-NULL borrowed model with at least one initialized centroid and consistent
+ * arrays.
  * @param embedding Borrowed vector containing config.dimensions finite float components.
  * @return Typed index of the nearest initialized centroid. No allocation or model mutation occurs.
  */

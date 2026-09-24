@@ -21,11 +21,11 @@
  * own input context. The workspace never owns the model or original corpus text.
  */
 typedef struct training_workspace {
-    cgai_token_list tokens; /**< Owned normalized corpus spellings. */
+    cgai_token_list tokens;  /**< Owned normalized corpus spellings. */
     cgai_token_id *sequence; /**< Owned target IDs, ending with one additional EOS target. */
-    cgai_token_id *history; /**< Owned BOS prefix followed by already-observed target IDs. */
-    float *embedding; /**< Owned current dimension-sized context average. */
-    float *scratch; /**< Owned dimension-sized temporary token vector. */
+    cgai_token_id *history;  /**< Owned BOS prefix followed by already-observed target IDs. */
+    float *embedding;        /**< Owned current dimension-sized context average. */
+    float *scratch;          /**< Owned dimension-sized temporary token vector. */
 } training_workspace;
 
 /**
@@ -39,7 +39,8 @@ typedef struct training_workspace {
  */
 static void training_workspace_destroy(training_workspace *workspace) {
     /* Release arrays in reverse conceptual order; free(NULL) remains safe for partial setup. */
-    /* Step 1: Free the independently allocated history, sequence, and vector buffers; free accepts NULL. */
+    /* Step 1: Free the independently allocated history, sequence, and vector buffers; free accepts
+     * NULL. */
     free(workspace->history);
     free(workspace->sequence);
     free(workspace->embedding);
@@ -52,9 +53,9 @@ static void training_workspace_destroy(training_workspace *workspace) {
  * @brief Allocate token-ID and vector buffers for a training corpus.
  *
  * Sequence stores corpus targets plus one EOS target. History has additional leading slots for
- * BOS context and grows as targets are observed. Embedding and scratch each hold one dimension-sized
- * float vector. No contents are filled yet. Partial allocations remain workspace-owned on failure
- * and must be released by the caller's cleanup path.
+ * BOS context and grows as targets are observed. Embedding and scratch each hold one
+ * dimension-sized float vector. No contents are filled yet. Partial allocations remain
+ * workspace-owned on failure and must be released by the caller's cleanup path.
  *
  * @param model Non-NULL model with constructor-validated dimensions and context size.
  * @param workspace Mutable workspace whose token list has already been populated.
@@ -90,7 +91,8 @@ static cgai_status training_workspace_allocate(const cgai_model *model,
  *
  * @param model Non-NULL mutable model receiving any previously unseen spellings.
  * @param workspace Prepared workspace with tokens.count + 1 writable sequence slots.
- * @return CGAI_STATUS_OK after filling the sequence, otherwise CGAI_STATUS_ERROR without rolling back vocabulary growth.
+ * @return CGAI_STATUS_OK after filling the sequence, otherwise CGAI_STATUS_ERROR without rolling
+ * back vocabulary growth.
  */
 static cgai_status resolve_training_sequence(cgai_model *model, training_workspace *workspace) {
     /* Step 1: Resolve each corpus spelling through insertion-or-lookup. */
@@ -111,9 +113,10 @@ static cgai_status resolve_training_sequence(cgai_model *model, training_workspa
 /**
  * @brief Fill the left edge of training history with BOS identifiers.
  *
- * Before the first word, no real previous tokens exist. Repeating the reserved beginning-of-sequence
- * identifier fills the context window so the first transition still has a defined context vector.
- * The returned count tells later code which prefix of the allocated history is initialized.
+ * Before the first word, no real previous tokens exist. Repeating the reserved
+ * beginning-of-sequence identifier fills the context window so the first transition still has a
+ * defined context vector. The returned count tells later code which prefix of the allocated history
+ * is initialized.
  *
  * @param model Non-NULL model supplying the positive context-window length.
  * @param workspace Prepared workspace with enough history slots for that window.
@@ -125,7 +128,8 @@ static size_t seed_training_history(const cgai_model *model, training_workspace 
         /* BOS fills missing left context before the first corpus token. */
         workspace->history[i] = cgai_token_id_from_size(CGAI_TOKEN_BOS);
     }
-    /* Step 2: Publish how many history entries the generation-independent training loop may read. */
+    /* Step 2: Publish how many history entries the generation-independent training loop may read.
+     */
     return model->config.context_window;
 }
 
@@ -149,7 +153,8 @@ static void train_one_transition(cgai_model *model, training_workspace *workspac
     cgai_context_embedding(model, workspace->history, *history_count, workspace->embedding,
                            workspace->scratch);
     cgai_centroid_id cluster;
-    /* Step 2: Use a fresh centroid when capacity remains; otherwise find the closest learned centroid. */
+    /* Step 2: Use a fresh centroid when capacity remains; otherwise find the closest learned
+     * centroid. */
     if (model->initialized_centroids < model->config.centroid_count) {
         /* Early examples seed unused centroids directly from observed contexts. */
         cluster = cgai_centroid_id_from_size(model->initialized_centroids++);
@@ -159,7 +164,8 @@ static void train_one_transition(cgai_model *model, training_workspace *workspac
         /* Once full, assign the context to the nearest existing centroid. */
         cluster = cgai_nearest_centroid(model, workspace->embedding);
     }
-    /* Step 3: Increment this centroid's observation count and compute its one-over-count learning rate. */
+    /* Step 3: Increment this centroid's observation count and compute its one-over-count learning
+     * rate. */
     const uint64_t new_size = ++model->cluster_sizes[cluster.value];
     /* Online k-means uses 1/n so each observation contributes equally over time. */
     const float rate = 1.0F / (float)new_size;
@@ -188,7 +194,8 @@ static void train_one_transition(cgai_model *model, training_workspace *workspac
  * @param model Model to mutate; NULL is rejected.
  * @param text Borrowed NUL-terminated corpus; NULL is rejected.
  * @param workspace Non-NULL zero-initialized workspace receiving temporary ownership.
- * @return CGAI_STATUS_OK only when training can start; otherwise CGAI_STATUS_ERROR with cleanup left to the caller.
+ * @return CGAI_STATUS_OK only when training can start; otherwise CGAI_STATUS_ERROR with cleanup
+ * left to the caller.
  */
 static cgai_status prepare_training_workspace(cgai_model *model, const char *text,
                                               training_workspace *workspace) {
@@ -222,7 +229,8 @@ static cgai_status prepare_training_workspace(cgai_model *model, const char *tex
  *
  * @param model Mutable live model, or NULL to receive an argument error.
  * @param text Borrowed NUL-terminated corpus; must contain at least one token.
- * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR; cgai_last_error() supplies a diagnostic.
+ * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR; cgai_last_error() supplies a
+ * diagnostic.
  */
 cgai_status cgai_model_train_text(cgai_model *model, const char *text) {
     /* Step 1: Clear the old diagnostic and zero-initialize ownership for safe partial cleanup. */

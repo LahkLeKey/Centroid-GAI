@@ -17,12 +17,14 @@
  * to the caller.
  *
  * @param path Non-NULL borrowed NUL-terminated filesystem path.
- * @param size Non-NULL output assigned the file length only after successful measurement and rewind.
+ * @param size Non-NULL output assigned the file length only after successful measurement and
+ * rewind.
  * @return Owned open FILE pointer, or NULL if opening, seeking, or representability checks fail.
  */
 static FILE *open_for_read(const char *path, size_t *size) {
     /* Open in binary mode so model artifacts are not newline-translated. */
-    /* Step 1: Open in binary mode and seek to the end, closing a partially opened stream on failure. */
+    /* Step 1: Open in binary mode and seek to the end, closing a partially opened stream on
+     * failure. */
     FILE *file = fopen(path, "rb");
     if (file == NULL || fseek(file, 0L, SEEK_END) != 0) {
         if (file != NULL) {
@@ -47,12 +49,14 @@ static FILE *open_for_read(const char *path, size_t *size) {
  *
  * The allocation has one extra byte beyond the binary payload. That byte permits corpus callers
  * to treat the result as a C string, but it is not included in the file's reported length. A short
- * read fails rather than returning partial data. This helper borrows the stream and never closes it.
+ * read fails rather than returning partial data. This helper borrows the stream and never closes
+ * it.
  *
  * @param file Non-NULL readable stream positioned at the desired payload start.
  * @param file_size Exact payload bytes expected from the measured file.
  * @param data Non-NULL output receiving allocation ownership only on success.
- * @return CGAI_STATUS_OK with an owned buffer, otherwise CGAI_STATUS_ERROR without publishing partial storage.
+ * @return CGAI_STATUS_OK with an owned buffer, otherwise CGAI_STATUS_ERROR without publishing
+ * partial storage.
  */
 static cgai_status read_buffer(FILE *file, size_t file_size, uint8_t **data) {
     /* Add a sentinel byte so the same helper can serve text and binary callers. */
@@ -82,9 +86,9 @@ static cgai_status read_buffer(FILE *file, size_t file_size, uint8_t **data) {
 /**
  * @brief Read a seekable file into caller-owned memory and report its payload length.
  *
- * After argument validation, both outputs are initialized for safe failure cleanup. Stream ownership
- * is local and ends whether the read succeeds or fails. The returned byte allocation contains an
- * extra NUL after size payload bytes; callers release that allocation with free().
+ * After argument validation, both outputs are initialized for safe failure cleanup. Stream
+ * ownership is local and ends whether the read succeeds or fails. The returned byte allocation
+ * contains an extra NUL after size payload bytes; callers release that allocation with free().
  *
  * @param path Non-NULL borrowed NUL-terminated path.
  * @param data Non-NULL address of an empty caller-owned byte pointer.
@@ -129,7 +133,8 @@ cgai_status cgai_file_read_all(const char *path, uint8_t **data, size_t *size) {
  * @param path Non-NULL borrowed NUL-terminated destination path.
  * @param data Readable payload bytes; NULL is allowed only when size is zero.
  * @param size Number of payload bytes to write.
- * @return CGAI_STATUS_OK only if the requested bytes and close both succeed, otherwise CGAI_STATUS_ERROR.
+ * @return CGAI_STATUS_OK only if the requested bytes and close both succeed, otherwise
+ * CGAI_STATUS_ERROR.
  */
 cgai_status cgai_file_write_all(const char *path, const uint8_t *data, size_t size) {
     /* Permit a NULL data pointer only for an explicitly empty file. */

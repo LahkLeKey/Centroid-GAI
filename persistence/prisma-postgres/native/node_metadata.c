@@ -50,8 +50,9 @@ static int set_bigint(napi_env env, napi_value object, const char *name, uint64_
  * @brief Convert borrowed ABI metadata into a JavaScript-owned object.
  *
  * Dimensions and format version use Number because their uint32_t values are exact there; learned
- * counters use BigInt to retain all 64 bits. A property failure stops construction and returns NULL.
- * Any partially built object is managed by Node's handle/garbage-collection system, not free().
+ * counters use BigInt to retain all 64 bits. A property failure stops construction and returns
+ * NULL. Any partially built object is managed by Node's handle/garbage-collection system, not
+ * free().
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param metadata Non-NULL borrowed scalar snapshot from the ABI.
@@ -61,7 +62,8 @@ static napi_value metadata_object(napi_env env, const cgai_abi_model_metadata *m
     /* Step 1: Create the destination object before assigning any properties. */
     napi_value result;
     NAPI_CALL(env, napi_create_object(env, &result));
-    /* Step 2: Fill fixed-width dimensions/version and lossless counters, stopping at the first failed assignment. */
+    /* Step 2: Fill fixed-width dimensions/version and lossless counters, stopping at the first
+     * failed assignment. */
     if (!set_uint32(env, result, "formatVersion", metadata->format_version) ||
         !set_uint32(env, result, "dimensions", metadata->dimensions) ||
         !set_uint32(env, result, "centroidCount", metadata->centroid_count) ||
@@ -79,7 +81,8 @@ static napi_value metadata_object(napi_env env, const cgai_abi_model_metadata *m
  *
  * The imported model is temporary and always destroyed before converting the scalar snapshot to
  * JavaScript. That is safe because metadata contains only copied integers. The TypeScript wrapper
- * adds libraryVersion separately; this callback returns the six fields supplied by the model snapshot.
+ * adds libraryVersion separately; this callback returns the six fields supplied by the model
+ * snapshot.
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param info Opaque callback metadata supplied by Node for this invocation.
@@ -100,7 +103,8 @@ napi_value cgai_node_inspect(napi_env env, napi_callback_info info) {
     if (!cgai_node_import(env, argv[0], &model)) {
         return NULL;
     }
-    /* Step 4: Copy metadata and destroy the imported model before constructing the JavaScript result. */
+    /* Step 4: Copy metadata and destroy the imported model before constructing the JavaScript
+     * result. */
     cgai_abi_model_metadata metadata;
     const cgai_abi_status status = cgai_abi_model_get_metadata(model, &metadata);
     cgai_abi_model_destroy(model);

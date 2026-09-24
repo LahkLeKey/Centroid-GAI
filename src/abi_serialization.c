@@ -83,7 +83,8 @@ cgai_abi_status cgai_abi_model_import(const uint8_t *data, size_t size, cgai_abi
  *
  * @param model Non-NULL model to serialize without mutation.
  * @param output Non-NULL writable empty descriptor receiving the artifact allocation.
- * @return CGAI_ABI_OK, INVALID_ARGUMENT for NULL inputs, or the allocation/encoding helper's error status.
+ * @return CGAI_ABI_OK, INVALID_ARGUMENT for NULL inputs, or the allocation/encoding helper's error
+ * status.
  */
 cgai_abi_status cgai_abi_model_export(const cgai_abi_model *model, cgai_abi_buffer *output) {
     /* Step 1: Start a fresh error-reporting context for this export. */

@@ -20,8 +20,10 @@ static CGAI_THREAD_LOCAL char cgai_error_message[256];
  * status previously returned to the caller.
  *
  */
-void cgai_error_clear(void) { /* Step 1: Place a string terminator at the beginning to mark the diagnostic empty. */
- cgai_error_message[0] = '\0'; }
+void cgai_error_clear(
+    void) { /* Step 1: Place a string terminator at the beginning to mark the diagnostic empty. */
+    cgai_error_message[0] = '\0';
+}
 
 /**
  * @brief Copy a diagnostic into bounded storage belonging to the current thread.
@@ -47,6 +49,7 @@ void cgai_error_set(const char *message) {
  * @return Borrowed NUL-terminated message or no-error sentinel; never free this pointer.
  */
 const char *cgai_last_error(void) {
-    /* Step 1: Choose the stored message only if its first byte is not the empty-string terminator. */
+    /* Step 1: Choose the stored message only if its first byte is not the empty-string terminator.
+     */
     return cgai_error_message[0] != '\0' ? cgai_error_message : "no error";
 }

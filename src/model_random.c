@@ -12,9 +12,10 @@ static const unsigned CGAI_MIX_SHIFT_C = 31U;
 /**
  * @brief Scramble a 64-bit input with the splitmix64 avalanche transform.
  *
- * XOR combines differing bits, right shifts bring high bits into lower positions, and multiplication
- * spreads changes across the word. Unsigned uint64_t overflow deliberately wraps modulo 2^64.
- * This is deterministic numerical mixing for model reproducibility, not a cryptographic primitive.
+ * XOR combines differing bits, right shifts bring high bits into lower positions, and
+ * multiplication spreads changes across the word. Unsigned uint64_t overflow deliberately wraps
+ * modulo 2^64. This is deterministic numerical mixing for model reproducibility, not a
+ * cryptographic primitive.
  *
  * @param value Input word, passed by value so the caller's storage is unchanged.
  * @return Mixed 64-bit word; equal inputs always produce equal outputs.

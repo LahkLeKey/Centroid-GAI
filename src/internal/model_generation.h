@@ -14,9 +14,10 @@
  */
 typedef struct generation_workspace {
     cgai_token_list prompt_tokens; /**< Owned normalized prompt spellings and pointer list. */
-    cgai_token_id *history; /**< Owned IDs for initial context plus all possible generated tokens. */
+    cgai_token_id
+        *history;     /**< Owned IDs for initial context plus all possible generated tokens. */
     float *embedding; /**< Owned dimension-sized vector for the current averaged context. */
-    float *scratch; /**< Owned dimension-sized vector reused for each token's embedding. */
+    float *scratch;   /**< Owned dimension-sized vector reused for each token's embedding. */
 } generation_workspace;
 
 /**
@@ -40,8 +41,10 @@ void cgai_generation_workspace_destroy(generation_workspace *workspace);
  * @param model Non-NULL validated model, borrowed without mutation.
  * @param prompt Non-NULL borrowed NUL-terminated prompt.
  * @param max_tokens Maximum generated IDs to reserve in addition to initial context.
- * @param workspace Non-NULL zero-initialized workspace receiving ownership, even on partial failure.
- * @return CGAI_STATUS_OK when storage is ready, otherwise CGAI_STATUS_ERROR; always destroy the workspace.
+ * @param workspace Non-NULL zero-initialized workspace receiving ownership, even on partial
+ * failure.
+ * @return CGAI_STATUS_OK when storage is ready, otherwise CGAI_STATUS_ERROR; always destroy the
+ * workspace.
  */
 cgai_status cgai_generation_prepare(const cgai_model *model, const char *prompt, size_t max_tokens,
                                     generation_workspace *workspace);
@@ -53,7 +56,8 @@ cgai_status cgai_generation_prepare(const cgai_model *model, const char *prompt,
  * window. The post-increment expression writes at the old count, then advances the count.
  *
  * @param model Non-NULL borrowed model with reserved vocabulary entries.
- * @param workspace Prepared workspace containing prompt tokens and sufficient writable history slots.
+ * @param workspace Prepared workspace containing prompt tokens and sufficient writable history
+ * slots.
  * @param history_count Non-NULL output receiving the number of initialized history IDs.
  */
 void cgai_generation_prepare_history(const cgai_model *model, generation_workspace *workspace,

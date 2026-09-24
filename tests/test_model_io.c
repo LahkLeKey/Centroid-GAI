@@ -19,7 +19,8 @@
  * @param encoded_size Complete artifact length, greater than zero.
  */
 static void test_decode_round_trip(const cgai_model *model, uint8_t *encoded, size_t encoded_size) {
-    /* Step 1: Decode independent model state and compare its vocabulary and learned-transition counters. */
+    /* Step 1: Decode independent model state and compare its vocabulary and learned-transition
+     * counters. */
     cgai_model *decoded = cgai_model_decode(encoded, encoded_size);
     TEST_CHECK(decoded != NULL, cgai_last_error());
     TEST_CHECK(cgai_model_vocabulary_size(decoded) == cgai_model_vocabulary_size(model),

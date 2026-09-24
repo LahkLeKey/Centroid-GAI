@@ -64,8 +64,11 @@ embedding application creates a model, calls `cgai_model_train_text`, then uses
 Implementation boundaries and strong internal identifier types are described in
 [`docs/architecture.md`](docs/architecture.md). New APIs follow the project's
 [`documentation standard`](docs/documentation-standard.md). To build strict HTML
-API documentation, configure with `-DCGAI_BUILD_DOCS=ON` and build the `docs`
-target (Doxygen is required).
+API and implementation documentation, configure with `-DCGAI_BUILD_DOCS=ON` and
+build the `docs` target (Doxygen is required). The
+[C reading guide](docs/c-reading-guide.md) explains pointers, ownership, status
+codes, and the training/generation call paths for readers new to C. Function
+contracts and numbered walkthrough comments are included in the generated pages.
 
 Durable model storage uses the isolated
 [`Prisma 8 PostgreSQL adapter`](persistence/prisma-postgres/README.md). It stores

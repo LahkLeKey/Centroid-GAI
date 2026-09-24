@@ -109,7 +109,8 @@ static int optional_seed(napi_env env, napi_value object, uint64_t *output) {
  * @return One if all supplied properties convert, otherwise zero after requesting a TypeError.
  */
 int cgai_node_config(napi_env env, napi_value value, cgai_abi_config *config) {
-    /* Step 1: Apply dimensions, centroid count, context window, and optional lossless seed in order. */
+    /* Step 1: Apply dimensions, centroid count, context window, and optional lossless seed in
+     * order. */
     if (optional_uint32(env, value, "dimensions", &config->dimensions) &&
         optional_uint32(env, value, "centroidCount", &config->centroid_count) &&
         optional_uint32(env, value, "contextWindow", &config->context_window) &&

@@ -15,16 +15,17 @@
  */
 typedef struct generation_options {
     uint32_t max_tokens; /**< Converted token count, bounded by the Node argument parser. */
-    double temperature; /**< Parsed double; final finite/nonnegative validation belongs to core. */
-    uint64_t seed; /**< Losslessly converted BigInt, or zero when omitted. */
+    double temperature;  /**< Parsed double; final finite/nonnegative validation belongs to core. */
+    uint64_t seed;       /**< Losslessly converted BigInt, or zero when omitted. */
 } generation_options;
 
 /**
  * @brief Read numeric generation options from positional JavaScript arguments.
  *
  * The caller has already established at least four arguments. A fifth seed must be a BigInt that
- * fits uint64_t without loss. max_tokens is extracted with Node's uint32 conversion and then capped.
- * The core later rejects negative/nonfinite temperature. Options can be partially filled on failure.
+ * fits uint64_t without loss. max_tokens is extracted with Node's uint32 conversion and then
+ * capped. The core later rejects negative/nonfinite temperature. Options can be partially filled on
+ * failure.
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param argc Argument count, at least four and at most the callback's five-slot capacity.
@@ -36,7 +37,8 @@ static int generation_arguments(napi_env env, size_t argc, const napi_value *arg
                                 generation_options *options) {
     /* Step 1: Prepare the seed-conversion flag before evaluating optional BigInt input. */
     bool lossless = true;
-    /* Step 2: Read the token limit and temperature, validate any seed, and enforce the binding's token cap. */
+    /* Step 2: Read the token limit and temperature, validate any seed, and enforce the binding's
+     * token cap. */
     if (napi_get_value_uint32(env, argv[2], &options->max_tokens) != napi_ok ||
         napi_get_value_double(env, argv[3], &options->temperature) != napi_ok ||
         (argc >= 5U &&
@@ -102,7 +104,8 @@ static napi_value generate_artifact(napi_env env, const napi_value *argv,
     /* Step 2: Copy the prompt and generate only if the copy succeeded. */
     char *prompt = cgai_node_utf8_argument(env, argv[1]);
     napi_value result = prompt != NULL ? generate_text(env, model, prompt, options) : NULL;
-    /* Step 3: Release the prompt and imported model before returning the independently managed result. */
+    /* Step 3: Release the prompt and imported model before returning the independently managed
+     * result. */
     free(prompt);
     cgai_abi_model_destroy(model);
     return result;

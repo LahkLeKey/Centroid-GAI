@@ -43,8 +43,8 @@ static void test_persistence(cgai_model *model, const char *first) {
  * @brief Verify a second corpus adds learned transitions to existing model state.
  *
  * Capturing the counter before training distinguishes accumulating state from replacing the model.
- * The fixture is intentionally mutated and kept alive for subsequent scenarios. An assertion failure
- * terminates this test executable before it uses an invalid result.
+ * The fixture is intentionally mutated and kept alive for subsequent scenarios. An assertion
+ * failure terminates this test executable before it uses an invalid result.
  *
  * @param model Borrowed mutable trained fixture.
  */
@@ -59,16 +59,17 @@ static void test_incremental_training(cgai_model *model) {
 /**
  * @brief Reject zero and unrepresentably large dimension requests.
  *
- * Each constructor failure is expected to return NULL rather than an owned object requiring cleanup.
- * The second scenario starts from defaults again, so it isolates the oversized-dimension case from
- * the preceding zero value.
+ * Each constructor failure is expected to return NULL rather than an owned object requiring
+ * cleanup. The second scenario starts from defaults again, so it isolates the oversized-dimension
+ * case from the preceding zero value.
  *
  * @return Zero after both invalid configurations are rejected.
  */
 static int test_invalid_configuration(void) {
     /* Step 1: Start with defaults and change dimensions to the invalid zero value. */
-    cgai_config /* Step 2: Reset the fixture and test the largest size_t value as a dimension request. */
-config = cgai_default_config();
+    cgai_config /* Step 2: Reset the fixture and test the largest size_t value as a dimension
+                   request. */
+                    config = cgai_default_config();
     config.dimensions = 0U;
     CHECK(cgai_model_create(&config) == NULL);
     config = cgai_default_config();
@@ -120,7 +121,8 @@ static int test_argument_validation(void) {
 static void test_generation_capacity(const cgai_model *model) {
     /* Step 1: Provide a small real output buffer while testing impossible history capacities. */
     char output[16];
-    /* Step 2: Exercise addition overflow and then multiplication overflow with a smaller huge count. */
+    /* Step 2: Exercise addition overflow and then multiplication overflow with a smaller huge
+     * count. */
     CHECK(cgai_model_generate(model, "the red", SIZE_MAX, 0.0, 0U, output, sizeof(output)) ==
           CGAI_STATUS_ERROR);
     CHECK(strstr(cgai_last_error(), "history is too large") != NULL);
@@ -135,9 +137,9 @@ static void test_generation_capacity(const cgai_model *model) {
 /**
  * @brief Create the owned fixture shared by the public-API integration scenarios.
  *
- * The small fixed configuration makes the test quick and repeatable. Training text contains repeated
- * contexts and several ordinary spellings, so both vocabulary and learned-example checks have useful
- * nonzero expectations. The caller is responsible for destroying the returned model.
+ * The small fixed configuration makes the test quick and repeatable. Training text contains
+ * repeated contexts and several ordinary spellings, so both vocabulary and learned-example checks
+ * have useful nonzero expectations. The caller is responsible for destroying the returned model.
  *
  * @return Owned trained model after prerequisite assertions succeed.
  */

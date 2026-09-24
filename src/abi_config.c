@@ -14,7 +14,8 @@
  * is set to zero because nonzero values are rejected by model creation.
  *
  * @param output Non-NULL pointer to writable cgai_abi_config storage; no allocation is returned.
- * @return CGAI_ABI_OK when the structure is filled, or CGAI_ABI_INVALID_ARGUMENT with a native diagnostic.
+ * @return CGAI_ABI_OK when the structure is filled, or CGAI_ABI_INVALID_ARGUMENT with a native
+ * diagnostic.
  */
 cgai_abi_status cgai_abi_default_config(cgai_abi_config *output) {
     /* Step 1: Reject a missing destination before dereferencing it. */
@@ -24,7 +25,8 @@ cgai_abi_status cgai_abi_default_config(cgai_abi_config *output) {
     }
     /* Step 2: Ask the core for defaults so the ABI does not maintain a second set of values. */
     const cgai_config config = cgai_default_config();
-    /* Step 3: Add structure size and ABI version, narrow bounded defaults, and clear reserved bits. */
+    /* Step 3: Add structure size and ABI version, narrow bounded defaults, and clear reserved bits.
+     */
     const cgai_abi_config result = {(uint32_t)sizeof(cgai_abi_config),
                                     CGAI_ABI_VERSION,
                                     (uint32_t)config.dimensions,

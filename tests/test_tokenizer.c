@@ -10,7 +10,8 @@
  *
  * The token list is destroyed and reset between scenarios, demonstrating ownership as well as
  * scanner behavior. The escaped byte sequence encodes an accented UTF-8 spelling explicitly.
- * Assertions compare copied token strings, so failures identify the exact boundary or spelling rule.
+ * Assertions compare copied token strings, so failures identify the exact boundary or spelling
+ * rule.
  *
  * @return Zero after all tokenization scenarios pass.
  */

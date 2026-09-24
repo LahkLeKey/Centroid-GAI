@@ -88,6 +88,7 @@ int cgai_cli_train(int argc, char **argv) {
     if (!parse_training_args(argc, argv, &config)) {
         return 2;
     }
-    /* Step 2: Execute corpus loading, training, saving, and cleanup with the accepted configuration. */
+    /* Step 2: Execute corpus loading, training, saving, and cleanup with the accepted
+     * configuration. */
     return run_training(argv[2], argv[3], &config);
 }

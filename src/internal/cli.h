@@ -12,7 +12,8 @@
  *
  * @param argc Process argument count, including the executable name.
  * @param argv Borrowed process argument vector containing argc NUL-terminated strings.
- * @return Zero for success/help, two for command syntax errors, or a handler's runtime-failure status.
+ * @return Zero for success/help, two for command syntax errors, or a handler's runtime-failure
+ * status.
  */
 int cgai_cli_run(int argc, char **argv);
 

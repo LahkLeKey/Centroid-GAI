@@ -16,9 +16,9 @@
  * cursor; each append also checks its own remaining capacity.
  */
 typedef struct byte_writer {
-    uint8_t *data; /**< Borrowed writable destination memory. */
+    uint8_t *data;   /**< Borrowed writable destination memory. */
     size_t capacity; /**< Total available destination bytes. */
-    size_t offset; /**< Initialized byte count and position of the next write. */
+    size_t offset;   /**< Initialized byte count and position of the next write. */
 } byte_writer;
 
 /**
@@ -57,7 +57,8 @@ static int writer_append(byte_writer *writer, const void *data, size_t size) {
  * @return One if both magic and metadata fit, or zero after a bounded write fails.
  */
 static int write_header(byte_writer *writer, const cgai_model *model) {
-    /* Step 1: Convert native counters and dimensions into the format's fixed-width field sequence. */
+    /* Step 1: Convert native counters and dimensions into the format's fixed-width field sequence.
+     */
     const uint64_t header[] = {
         (uint64_t)model->config.dimensions,     (uint64_t)model->config.centroid_count,
         (uint64_t)model->config.context_window, model->config.seed,
@@ -84,7 +85,8 @@ static int write_vocabulary(byte_writer *writer, const cgai_model *model) {
     for (size_t i = 0; i < model->vocabulary_size; ++i) {
         /* Step 2: Measure spelling bytes without their in-memory terminator. */
         const uint64_t length = (uint64_t)strlen(model->vocabulary[i]);
-        /* Step 3: Append each length and spelling as a pair, stopping if either exceeds capacity. */
+        /* Step 3: Append each length and spelling as a pair, stopping if either exceeds capacity.
+         */
         if (!writer_append(writer, &length, sizeof(length)) ||
             !writer_append(writer, model->vocabulary[i], (size_t)length)) {
             return 0;
@@ -105,7 +107,8 @@ static int write_vocabulary(byte_writer *writer, const cgai_model *model) {
  * @return One if all three arrays fit, otherwise zero without attempting later arrays.
  */
 static int write_numeric_payload(byte_writer *writer, const cgai_model *model) {
-    /* Step 1: Write centroid float components, then observation counters, then the row-major token-count matrix. */
+    /* Step 1: Write centroid float components, then observation counters, then the row-major
+     * token-count matrix. */
     return writer_append(writer, model->centroids,
                          model->config.centroid_count * model->config.dimensions * sizeof(float)) &&
            writer_append(writer, model->cluster_sizes,
@@ -123,11 +126,13 @@ static int write_numeric_payload(byte_writer *writer, const cgai_model *model) {
  *
  * @param model Non-NULL stable model with consistent owned storage.
  * @param size Non-NULL output assigned only after the complete calculation succeeds.
- * @return CGAI_STATUS_OK with an exact size, otherwise CGAI_STATUS_ERROR with an overflow diagnostic.
+ * @return CGAI_STATUS_OK with an exact size, otherwise CGAI_STATUS_ERROR with an overflow
+ * diagnostic.
  */
 static cgai_status encoded_size(const cgai_model *model, size_t *size) {
     /* Size is computed before writing so the caller can query capacity safely. */
-    /* Step 1: Start with the fixed header and accumulate every vocabulary record using checked addition. */
+    /* Step 1: Start with the fixed header and accumulate every vocabulary record using checked
+     * addition. */
     size_t total = sizeof(CGAI_MODEL_MAGIC) + CGAI_MODEL_HEADER_FIELD_COUNT * sizeof(uint64_t);
     for (size_t i = 0; i < model->vocabulary_size; ++i) {
         if (!cgai_size_add(total, sizeof(uint64_t), &total) ||
@@ -194,7 +199,8 @@ cgai_status cgai_model_encode(const cgai_model *model, uint8_t *output, size_t o
     }
 
     /* The decoder depends on this exact order: header, strings, then numeric arrays. */
-    /* Step 5: Write header, vocabulary, and arrays through a bounded cursor, then confirm the final length. */
+    /* Step 5: Write header, vocabulary, and arrays through a bounded cursor, then confirm the final
+     * length. */
     byte_writer writer = {output, output_size, 0U};
     const int ok = write_header(&writer, model) && write_vocabulary(&writer, model) &&
                    write_numeric_payload(&writer, model);

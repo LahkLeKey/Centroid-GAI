@@ -32,10 +32,12 @@ cgai_config cgai_default_config(void) {
  *
  * Dimensions are components per vector, centroid_count is the number of vector rows, and
  * context_window is the number of recent tokens to consider. All must be positive. The division
- * check avoids multiplying first, because an overflowing allocation size could reserve too few bytes.
+ * check avoids multiplying first, because an overflowing allocation size could reserve too few
+ * bytes.
  *
  * @param config Non-NULL borrowed configuration to inspect.
- * @return CGAI_STATUS_OK for a usable shape, otherwise CGAI_STATUS_ERROR with a thread-local diagnostic.
+ * @return CGAI_STATUS_OK for a usable shape, otherwise CGAI_STATUS_ERROR with a thread-local
+ * diagnostic.
  */
 static cgai_status validate_config(const cgai_config *config) {
     /* Step 1: Reject zero capacities and values above the implementation's explicit limits. */
@@ -45,7 +47,8 @@ static cgai_status validate_config(const cgai_config *config) {
         config->context_window > CGAI_MAX_CONTEXT_WINDOW) {
         return cgai_fail("invalid model configuration");
     }
-    /* Step 2: Check the centroid-array byte product without overflowing an intermediate multiplication. */
+    /* Step 2: Check the centroid-array byte product without overflowing an intermediate
+     * multiplication. */
     if (config->dimensions > SIZE_MAX / config->centroid_count / sizeof(float)) {
         return cgai_fail("model dimensions are too large");
     }
@@ -87,7 +90,8 @@ static cgai_model *allocate_model(const cgai_config *config) {
  * should stop, and UNKNOWN represents prompt words not present in the learned vocabulary.
  *
  * @param model Non-NULL model with empty vocabulary; mutated by each successful insertion.
- * @return CGAI_STATUS_OK after all reserved entries exist, otherwise CGAI_STATUS_ERROR without rollback.
+ * @return CGAI_STATUS_OK after all reserved entries exist, otherwise CGAI_STATUS_ERROR without
+ * rollback.
  */
 static cgai_status install_special_tokens(cgai_model *model) {
     /* Step 1: List reserved spellings in the same order as their numeric identifiers. */
@@ -113,7 +117,8 @@ static cgai_status install_special_tokens(cgai_model *model) {
  * @return New caller-owned model, or NULL with a thread-local diagnostic on failure.
  */
 cgai_model *cgai_model_create(const cgai_config *requested) {
-    /* Step 1: Begin with a fresh diagnostic and choose a value copy of the requested/default configuration. */
+    /* Step 1: Begin with a fresh diagnostic and choose a value copy of the requested/default
+     * configuration. */
     cgai_error_clear();
     const cgai_config config = requested != NULL ? *requested : cgai_default_config();
     /* Step 2: Reject unsupported shapes before allocating model storage. */
@@ -124,7 +129,8 @@ cgai_model *cgai_model_create(const cgai_config *requested) {
     cgai_model *model = allocate_model(&config);
     if (model == NULL || model->centroids == NULL || model->cluster_sizes == NULL ||
         install_special_tokens(model) != CGAI_STATUS_OK) {
-        /* Step 4: On any construction failure, release partial storage and retain a useful diagnostic. */
+        /* Step 4: On any construction failure, release partial storage and retain a useful
+         * diagnostic. */
         cgai_model_destroy(model);
         if (strcmp(cgai_last_error(), "no error") == 0) {
             (void)cgai_fail("could not allocate model storage");
@@ -168,7 +174,8 @@ void cgai_model_destroy(cgai_model *model) {
  *
  * This includes BOS, EOS, and UNKNOWN as well as ordinary learned tokens. The count is copied
  * from the model and exposes no internal array. Keep a non-NULL model alive and exclude concurrent
- * mutation while reading; returning zero for NULL is a convenience, not a validation of other pointers.
+ * mutation while reading; returning zero for NULL is a convenience, not a validation of other
+ * pointers.
  *
  * @param model Borrowed model pointer, or NULL.
  * @return Vocabulary entry count, or zero for NULL.

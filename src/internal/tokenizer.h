@@ -27,7 +27,8 @@ typedef struct cgai_token_list {
  *
  * @param text Non-NULL NUL-terminated source string, borrowed for this call.
  * @param tokens Non-NULL initialized list receiving owned strings.
- * @return CGAI_STATUS_OK after scanning, otherwise CGAI_STATUS_ERROR with an empty destination list.
+ * @return CGAI_STATUS_OK after scanning, otherwise CGAI_STATUS_ERROR with an empty destination
+ * list.
  */
 cgai_status cgai_tokenize(const char *text, cgai_token_list *tokens);
 
@@ -38,7 +39,8 @@ cgai_status cgai_tokenize(const char *text, cgai_token_list *tokens);
  * The list structure itself remains caller-owned. Zeroing its fields after cleanup allows reuse
  * and repeated destruction of that same list, including a partially filled list.
  *
- * @param tokens Non-NULL initialized or zero-initialized list whose allocations belong to this caller.
+ * @param tokens Non-NULL initialized or zero-initialized list whose allocations belong to this
+ * caller.
  */
 void cgai_token_list_destroy(cgai_token_list *tokens);
 

@@ -8,7 +8,8 @@
  *
  * The token list is destroyed and reset between scenarios, demonstrating ownership as well as
  * scanner behavior. The escaped byte sequence encodes an accented UTF-8 spelling explicitly.
- * Assertions compare copied token strings, so failures identify the exact boundary or spelling rule.
+ * Assertions compare copied token strings, so failures identify the exact boundary or spelling
+ * rule.
  *
  * @return Zero after all tokenization scenarios pass.
  */
@@ -18,8 +19,8 @@ int test_tokenizer(void);
  * @brief Check reserved IDs, lookup failure, deduplication, and ownership during growth.
  *
  * A freshly created model contains the three control spellings. Adding the same ordinary spelling
- * twice must return one stable ID, and its stored bytes must survive independently of input storage.
- * The growth helper then exercises reallocation and count-table expansion.
+ * twice must return one stable ID, and its stored bytes must survive independently of input
+ * storage. The growth helper then exercises reallocation and count-table expansion.
  *
  * @return Zero after all vocabulary invariants are checked.
  */

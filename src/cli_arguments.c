@@ -23,7 +23,8 @@ int cgai_cli_parse_size(const char *text, size_t *value) {
     errno = 0;
     /* Step 2: Parse in base ten and retain the wider intermediate value for range checks. */
     const unsigned long long parsed = strtoull(text, &end, 10);
-    /* Step 3: Require successful conversion, complete consumption, a nonzero value, and size_t fit. */
+    /* Step 3: Require successful conversion, complete consumption, a nonzero value, and size_t fit.
+     */
     if (errno != 0 || end == text || *end != '\0' || parsed == 0U || parsed > SIZE_MAX) {
         return 0;
     }

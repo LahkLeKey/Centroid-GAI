@@ -24,10 +24,10 @@ static const char CGAI_ATTACHED_PUNCTUATION[] = ".,!?;:)]}";
  * and temporary workspace remain separate because their lifetimes differ.
  */
 typedef struct generation_request {
-    size_t max_tokens; /**< Upper bound on emitted tokens. */
+    size_t max_tokens;  /**< Upper bound on emitted tokens. */
     double temperature; /**< Finite nonnegative sampling setting; zero means greedy. */
-    uint64_t seed; /**< Caller seed, with zero selecting the configured model seed. */
-    char *output; /**< Borrowed writable continuation buffer. */
+    uint64_t seed;      /**< Caller seed, with zero selecting the configured model seed. */
+    char *output;       /**< Borrowed writable continuation buffer. */
     size_t output_size; /**< Destination bytes including room for the final NUL. */
 } generation_request;
 
@@ -36,7 +36,8 @@ typedef struct generation_request {
  *
  * NULL pointers, zero destination capacity, and negative/nonfinite temperatures are rejected before
  * output is touched. Once basic arguments are accepted, output is set to an empty C string. A model
- * must contain learned examples and at least one initialized centroid, including for a zero-token request.
+ * must contain learned examples and at least one initialized centroid, including for a zero-token
+ * request.
  *
  * @param model Borrowed model pointer to validate.
  * @param prompt Borrowed prompt pointer to validate.
@@ -91,7 +92,8 @@ static int is_attached_punctuation(const char *token) {
  * @param length Non-NULL current text length, excluding NUL; updated on success.
  * @param token Borrowed NUL-terminated spelling that does not overlap output.
  * @param first Nonzero if no earlier generated token has been appended.
- * @return CGAI_STATUS_OK after append, otherwise CGAI_STATUS_ERROR with the previous prefix preserved.
+ * @return CGAI_STATUS_OK after append, otherwise CGAI_STATUS_ERROR with the previous prefix
+ * preserved.
  */
 static cgai_status append_token(char *output, size_t output_size, size_t *length, const char *token,
                                 int first) {
@@ -99,7 +101,8 @@ static cgai_status append_token(char *output, size_t output_size, size_t *length
     /* Step 1: Decide whether this token needs a separating space. */
     const int needs_space = !first && !is_attached_punctuation(token);
     const size_t token_length = strlen(token);
-    /* Step 2: Include existing text, separator, token bytes, and the final NUL in the capacity check. */
+    /* Step 2: Include existing text, separator, token bytes, and the final NUL in the capacity
+     * check. */
     const size_t required = *length + (size_t)needs_space + token_length + 1U;
     if (required > output_size) {
         /* Refuse before writing so callers never receive a partial overflow. */
@@ -126,14 +129,17 @@ static cgai_status append_token(char *output, size_t output_size, size_t *length
  * and is not appended. On output-capacity failure, any previous continuation remains in the buffer.
  *
  * @param model Non-NULL trained model with stable vocabulary and counts.
- * @param workspace Prepared vectors and sufficient history slots, with its initial prefix already filled.
+ * @param workspace Prepared vectors and sufficient history slots, with its initial prefix already
+ * filled.
  * @param request Non-NULL borrowed generation settings and caller-owned output buffer descriptor.
- * @param history_count Non-NULL count of initialized IDs; advanced after each emitted non-EOS token.
+ * @param history_count Non-NULL count of initialized IDs; advanced after each emitted non-EOS
+ * token.
  * @return CGAI_STATUS_OK after reaching EOS or the token limit, otherwise CGAI_STATUS_ERROR.
  */
 static cgai_status generate_tokens(const cgai_model *model, generation_workspace *workspace,
                                    const generation_request *request, size_t *history_count) {
-    /* Step 1: Track continuation length separately from history length and choose the effective seed. */
+    /* Step 1: Track continuation length separately from history length and choose the effective
+     * seed. */
     size_t output_length = 0U;
     uint64_t random_state = request->seed != 0U ? request->seed : model->config.seed;
     /* Feed each selected token back into history so later choices see prior output. */
@@ -178,7 +184,8 @@ static cgai_status generate_tokens(const cgai_model *model, generation_workspace
  * @param seed Sampling seed; zero selects the model's configured seed.
  * @param output Writable caller-owned buffer for continuation bytes and NUL.
  * @param output_size Total capacity of output in bytes.
- * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR with cgai_last_error() describing failure.
+ * @return CGAI_STATUS_OK on completion, otherwise CGAI_STATUS_ERROR with cgai_last_error()
+ * describing failure.
  */
 cgai_status cgai_model_generate(const cgai_model *model, const char *prompt, size_t max_tokens,
                                 double temperature, uint64_t seed, char *output,
@@ -188,7 +195,8 @@ cgai_status cgai_model_generate(const cgai_model *model, const char *prompt, siz
     if (validate_generation(model, prompt, temperature, output, output_size) != CGAI_STATUS_OK) {
         return CGAI_STATUS_ERROR;
     }
-    /* Step 2: Package borrowed output/settings and zero-initialize the workspace ownership fields. */
+    /* Step 2: Package borrowed output/settings and zero-initialize the workspace ownership fields.
+     */
     const generation_request request = {max_tokens, temperature, seed, output, output_size};
     generation_workspace workspace = {0};
     /* Step 3: Prepare prompt tokens and buffers, releasing partial workspace on failure. */

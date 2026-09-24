@@ -8,9 +8,9 @@
 /**
  * @brief Implement the JavaScript trainModel(text, config?) callback.
  *
- * napi_get_cb_info reads at most the capacity supplied in argc and updates it to the available count.
- * The callback checks the required text argument before indexing argv. Configuration defaults,
- * string ownership, and model lifetime are handled by the focused helper chain.
+ * napi_get_cb_info reads at most the capacity supplied in argc and updates it to the available
+ * count. The callback checks the required text argument before indexing argv. Configuration
+ * defaults, string ownership, and model lifetime are handled by the focused helper chain.
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param info Opaque callback metadata supplied by Node for this invocation.
@@ -22,7 +22,8 @@ napi_value cgai_node_train(napi_env env, napi_callback_info info);
  *
  * The imported model is temporary and always destroyed before converting the scalar snapshot to
  * JavaScript. That is safe because metadata contains only copied integers. The TypeScript wrapper
- * adds libraryVersion separately; this callback returns the six fields supplied by the model snapshot.
+ * adds libraryVersion separately; this callback returns the six fields supplied by the model
+ * snapshot.
  *
  * @param env Node-API environment for the current callback; borrowed, never freed here.
  * @param info Opaque callback metadata supplied by Node for this invocation.

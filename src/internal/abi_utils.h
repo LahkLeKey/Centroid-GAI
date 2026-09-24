@@ -17,8 +17,11 @@
  * @param model Borrowed ABI handle originating from this library, or NULL.
  * @return Aliased core pointer with the same lifetime and ownership, or NULL.
  */
-static inline cgai_model *cgai_abi_core_model(cgai_abi_model *model) { /* Step 1: Restore the internal pointer type without changing the address. */
- return (cgai_model *)model; }
+static inline cgai_model *cgai_abi_core_model(
+    cgai_abi_model
+        *model) { /* Step 1: Restore the internal pointer type without changing the address. */
+    return (cgai_model *)model;
+}
 
 /**
  * @brief View an opaque ABI handle as a read-only core model pointer.

@@ -44,7 +44,8 @@ static char *duplicate_string(const char *value) {
  * reallocation may invalidate a previously borrowed pointer to the array itself.
  *
  * @param model Non-NULL mutable model with a consistent vocabulary descriptor.
- * @return CGAI_STATUS_OK if a slot exists, otherwise CGAI_STATUS_ERROR; existing entries remain owned.
+ * @return CGAI_STATUS_OK if a slot exists, otherwise CGAI_STATUS_ERROR; existing entries remain
+ * owned.
  */
 static cgai_status ensure_vocabulary_capacity(cgai_model *model) {
     /* Existing slots are stable and do not need reallocation. */
@@ -107,7 +108,8 @@ cgai_token_id cgai_vocabulary_find(const cgai_model *model, const char *token) {
  * @param model Non-NULL mutable model owning the previous count table.
  * @param old_size Previous number of token columns per centroid.
  * @param new_size New column count, at least old_size and positive for a valid model.
- * @return CGAI_STATUS_OK after replacing the table, or CGAI_STATUS_ERROR with the old table retained.
+ * @return CGAI_STATUS_OK after replacing the table, or CGAI_STATUS_ERROR with the old table
+ * retained.
  */
 static cgai_status resize_counts(cgai_model *model, size_t old_size, size_t new_size) {
     /* Allocate a new rectangular table because each centroid row gains one column. */
@@ -141,9 +143,9 @@ static cgai_status resize_counts(cgai_model *model, size_t old_size, size_t new_
  * @brief Return an existing token ID or append a newly owned vocabulary spelling.
  *
  * An ID is the spelling's insertion index and stays stable for the life of this model. A new
- * entry needs both a copied spelling and a wider count table. These are prepared before the occupied
- * vocabulary size is advanced; capacity may still grow on a later failure. This mutates the model
- * and requires exclusive access.
+ * entry needs both a copied spelling and a wider count table. These are prepared before the
+ * occupied vocabulary size is advanced; capacity may still grow on a later failure. This mutates
+ * the model and requires exclusive access.
  *
  * @param model Non-NULL mutable model with consistent vocabulary and count arrays.
  * @param token Non-NULL borrowed NUL-terminated spelling; copied only if it is new.
@@ -166,14 +168,16 @@ cgai_token_id cgai_vocabulary_add(cgai_model *model, const char *token) {
         (void)cgai_fail("vocabulary is too large");
         return cgai_token_id_invalid();
     }
-    /* Step 3: Prepare an owned spelling and a replacement count matrix before publishing the entry. */
+    /* Step 3: Prepare an owned spelling and a replacement count matrix before publishing the entry.
+     */
     char *copy = duplicate_string(token);
     if (copy == NULL || resize_counts(model, model->vocabulary_size, new_size) != CGAI_STATUS_OK) {
         /* Neither the string nor the table is published when either allocation fails. */
         free(copy);
         return cgai_token_id_invalid();
     }
-    /* Step 4: Store the spelling, then return the old size as its ID while incrementing the count. */
+    /* Step 4: Store the spelling, then return the old size as its ID while incrementing the count.
+     */
     model->vocabulary[model->vocabulary_size] = copy;
     /* Publish the spelling only after all dependent storage exists. */
     return cgai_token_id_from_size(model->vocabulary_size++);

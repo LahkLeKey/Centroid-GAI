@@ -67,7 +67,8 @@ cgai_model *cgai_model_load(const char *path) {
     if (cgai_file_read_all(path, &data, &size) != CGAI_STATUS_OK) {
         return NULL;
     }
-    /* Step 4: Decode independent model storage, free the borrowed input copy, and return the result. */
+    /* Step 4: Decode independent model storage, free the borrowed input copy, and return the
+     * result. */
     cgai_model *model = cgai_model_decode(data, size);
     free(data);
     return model;

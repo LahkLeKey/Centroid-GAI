@@ -19,7 +19,8 @@
  * @return One with the exact sum stored, or zero for NULL output or overflow.
  */
 static inline int cgai_size_add(size_t left, size_t right, size_t *result) {
-    /* Step 1: Check output availability and whether the second addend fits in the remaining range. */
+    /* Step 1: Check output availability and whether the second addend fits in the remaining range.
+     */
     if (result == NULL || right > SIZE_MAX - left) {
         return 0;
     }

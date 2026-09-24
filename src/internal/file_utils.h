@@ -11,9 +11,9 @@
 /**
  * @brief Read a seekable file into caller-owned memory and report its payload length.
  *
- * After argument validation, both outputs are initialized for safe failure cleanup. Stream ownership
- * is local and ends whether the read succeeds or fails. The returned byte allocation contains an
- * extra NUL after size payload bytes; callers release that allocation with free().
+ * After argument validation, both outputs are initialized for safe failure cleanup. Stream
+ * ownership is local and ends whether the read succeeds or fails. The returned byte allocation
+ * contains an extra NUL after size payload bytes; callers release that allocation with free().
  *
  * @param path Non-NULL borrowed NUL-terminated path.
  * @param data Non-NULL address of an empty caller-owned byte pointer.
@@ -32,7 +32,8 @@ cgai_status cgai_file_read_all(const char *path, uint8_t **data, size_t *size);
  * @param path Non-NULL borrowed NUL-terminated destination path.
  * @param data Readable payload bytes; NULL is allowed only when size is zero.
  * @param size Number of payload bytes to write.
- * @return CGAI_STATUS_OK only if the requested bytes and close both succeed, otherwise CGAI_STATUS_ERROR.
+ * @return CGAI_STATUS_OK only if the requested bytes and close both succeed, otherwise
+ * CGAI_STATUS_ERROR.
  */
 cgai_status cgai_file_write_all(const char *path, const uint8_t *data, size_t size);
 

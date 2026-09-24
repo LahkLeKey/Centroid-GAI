@@ -19,8 +19,8 @@
  */
 typedef struct byte_reader {
     const uint8_t *data; /**< Borrowed readable artifact memory for this decode call. */
-    size_t size; /**< Complete input length in bytes. */
-    size_t offset; /**< Bytes already consumed; never intentionally exceeds size. */
+    size_t size;         /**< Complete input length in bytes. */
+    size_t offset;       /**< Bytes already consumed; never intentionally exceeds size. */
 } byte_reader;
 
 /**
@@ -60,7 +60,8 @@ static int reader_take(byte_reader *reader, void *output, size_t size) {
  * @return Nonzero for the checks performed here, otherwise zero.
  */
 static int valid_header(const char *magic, const uint64_t *header) {
-    /* Step 1: Require matching magic, positive bounded dimensions, and a representable vocabulary count. */
+    /* Step 1: Require matching magic, positive bounded dimensions, and a representable vocabulary
+     * count. */
     return memcmp(magic, CGAI_MODEL_MAGIC, sizeof(CGAI_MODEL_MAGIC)) == 0 &&
            header[CGAI_HEADER_DIMENSIONS] != 0U && header[CGAI_HEADER_CENTROID_COUNT] != 0U &&
            header[CGAI_HEADER_CONTEXT_WINDOW] != 0U &&
@@ -158,13 +159,15 @@ static int read_vocabulary(byte_reader *reader, cgai_model *model, uint64_t coun
         if (!reader_take(reader, &length, sizeof(length)) || length > CGAI_MAX_TOKEN_BYTES) {
             return 0;
         }
-        /* Step 3: Allocate temporary terminated-string storage and require all spelling bytes to be present. */
+        /* Step 3: Allocate temporary terminated-string storage and require all spelling bytes to be
+         * present. */
         char *token = (char *)malloc((size_t)length + 1U);
         if (token == NULL || !reader_take(reader, token, (size_t)length)) {
             free(token);
             return 0;
         }
-        /* Step 4: Add the terminator, insert an owned copy into the model, then free the temporary string. */
+        /* Step 4: Add the terminator, insert an owned copy into the model, then free the temporary
+         * string. */
         token[length] = '\0';
         const int added = cgai_token_id_is_valid(cgai_vocabulary_add(model, token));
         free(token);
@@ -178,9 +181,10 @@ static int read_vocabulary(byte_reader *reader, cgai_model *model, uint64_t coun
 /**
  * @brief Restore numeric arrays and reject extra trailing artifact bytes.
  *
- * The destination arrays were allocated from the accepted model configuration and rebuilt vocabulary.
- * Their expected byte lengths determine how much the reader consumes; serialized bytes do not contain
- * separate per-array offsets. No endian or floating-point representation conversion is performed.
+ * The destination arrays were allocated from the accepted model configuration and rebuilt
+ * vocabulary. Their expected byte lengths determine how much the reader consumes; serialized bytes
+ * do not contain separate per-array offsets. No endian or floating-point representation conversion
+ * is performed.
  *
  * @param reader Non-NULL cursor positioned after vocabulary records.
  * @param model Mutable model with numeric storage consistent with its dimensions and vocabulary.
@@ -188,7 +192,8 @@ static int read_vocabulary(byte_reader *reader, cgai_model *model, uint64_t coun
  */
 static int read_numeric_payload(byte_reader *reader, cgai_model *model) {
     /* reader_take prevents every copy from crossing the supplied artifact boundary. */
-    /* Step 1: Read centroid floats, cluster sizes, and token counts in encoder order, then require end-of-input. */
+    /* Step 1: Read centroid floats, cluster sizes, and token counts in encoder order, then require
+     * end-of-input. */
     return reader_take(reader, model->centroids,
                        model->config.centroid_count * model->config.dimensions * sizeof(float)) &&
            reader_take(reader, model->cluster_sizes,
@@ -208,7 +213,8 @@ static int read_numeric_payload(byte_reader *reader, cgai_model *model) {
  * @param reader Non-NULL cursor immediately following the validated header.
  * @param model Newly constructed mutable model owned by decoding.
  * @param header Borrowed fixed header already accepted by read_header().
- * @return One for a complete body, otherwise zero with a partially restored model still owned by the caller.
+ * @return One for a complete body, otherwise zero with a partially restored model still owned by
+ * the caller.
  */
 static int restore_model_body(byte_reader *reader, cgai_model *model, const uint64_t *header) {
     /* Step 1: Discard default token storage and rebuild the serialized token order. */
@@ -230,9 +236,9 @@ static int restore_model_body(byte_reader *reader, cgai_model *model, const uint
  * @brief Decode a complete trusted artifact into a new owned model.
  *
  * Input bytes remain borrowed; every string and numeric array in the returned model has separate
- * storage. The decoder validates fixed fields before allocation, reconstructs the body, and destroys
- * a partial model on any later failure. Native byte order and numeric representations require
- * compatible producing/consuming builds.
+ * storage. The decoder validates fixed fields before allocation, reconstructs the body, and
+ * destroys a partial model on any later failure. Native byte order and numeric representations
+ * require compatible producing/consuming builds.
  *
  * @param data Non-NULL readable artifact bytes, borrowed until this call returns.
  * @param size Complete byte length of the supplied artifact.
@@ -259,7 +265,8 @@ cgai_model *cgai_model_decode(const uint8_t *data, size_t size) {
         return NULL;
     }
     /* Rebuild vocabulary rows, metadata, and arrays in serialized order. */
-    /* Step 5: Restore all fields; destroy partial state if the artifact cannot be fully consumed. */
+    /* Step 5: Restore all fields; destroy partial state if the artifact cannot be fully consumed.
+     */
     if (!restore_model_body(&reader, model, header)) {
         cgai_model_destroy(model);
         (void)cgai_fail("model data is truncated or invalid");

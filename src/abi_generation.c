@@ -10,12 +10,12 @@
 /**
  * @brief Generate a continuation and return text allocated by the ABI.
  *
- * The handle is borrowed: generation reads the model without transferring or changing its ownership.
- * The output structure belongs to the caller, but its data allocation must be released with
- * cgai_abi_buffer_free(). Pass an empty buffer; this function does not free an earlier allocation.
- * A C string ends with a zero byte (NUL); output->size counts the text bytes before that terminator.
- * The 128-byte allowance per requested token is a capacity estimate, not a tokenizer limit.
- * Long tokens can exhaust that capacity and make the core generation call fail.
+ * The handle is borrowed: generation reads the model without transferring or changing its
+ * ownership. The output structure belongs to the caller, but its data allocation must be released
+ * with cgai_abi_buffer_free(). Pass an empty buffer; this function does not free an earlier
+ * allocation. A C string ends with a zero byte (NUL); output->size counts the text bytes before
+ * that terminator. The 128-byte allowance per requested token is a capacity estimate, not a
+ * tokenizer limit. Long tokens can exhaust that capacity and make the core generation call fail.
  *
  * @param model Non-NULL trained model handle, kept alive throughout this call.
  * @param utf8_prompt Non-NULL NUL-terminated prompt; borrowed for this call.
@@ -23,8 +23,9 @@
  * @param temperature Sampling temperature; the core rejects negative or nonfinite values.
  * @param seed Random seed; zero tells the core to use the model's configured seed.
  * @param output Non-NULL writable buffer descriptor receiving the allocation and text length.
- * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for NULL inputs, OUT_OF_MEMORY on allocation failure,
- * or ERROR if core generation fails. After valid pointers are accepted, failure leaves an empty buffer.
+ * @return CGAI_ABI_OK on success, INVALID_ARGUMENT for NULL inputs, OUT_OF_MEMORY on allocation
+ * failure, or ERROR if core generation fails. After valid pointers are accepted, failure leaves an
+ * empty buffer.
  */
 cgai_abi_status cgai_abi_model_generate(const cgai_abi_model *model, const char *utf8_prompt,
                                         uint32_t max_tokens, double temperature, uint64_t seed,
