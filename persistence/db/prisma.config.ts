@@ -10,10 +10,10 @@
  */
 import "dotenv/config";
 
-import {defineConfig as ormConfig} from "@prisma/orm-postgres/config";
-import {definePrismaConfig} from "prisma/config";
+import { defineConfig as ormConfig } from "@prisma/orm-postgres/config";
+import { definePrismaConfig } from "prisma/config";
 
-const connection = process.env["DATABASE_URL"];
+const connection = process.env.DATABASE_URL;
 
 // Step 1: Require an explicit connection string. The CLI has no safe default, and a missing
 // value should stop the command instead of silently targeting an unintended database.
@@ -24,10 +24,10 @@ if (!connection) {
 // Step 2: Point the ORM at the single contract source file and the migrations directory that
 // `prisma migration plan`/`db migrate` read from and write into.
 export default definePrismaConfig({
-    orm : ormConfig({
-        contract : "./src/prisma/contract.prisma",
-        db : {connection},
-        migrations : {dir : "./migrations"},
+    orm: ormConfig({
+        contract: "./src/prisma/contract.prisma",
+        db: { connection },
+        migrations: { dir: "./migrations" },
     }),
-    skills : {check : false},
+    skills: { check: false },
 });

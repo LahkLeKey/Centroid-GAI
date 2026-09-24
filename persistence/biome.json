@@ -1,0 +1,33 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+    "files": {
+        "includes": [
+            "api/**/*.ts",
+            "db/**/*.ts",
+            "e2e/**/*.ts",
+            "*.json",
+            "!db/src/prisma/contract.d.ts",
+            "!db/src/prisma/contract.json"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 100
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+            "jsxQuoteStyle": "double",
+            "semicolons": "always",
+            "trailingCommas": "all"
+        }
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "preset": "recommended"
+        }
+    }
+}

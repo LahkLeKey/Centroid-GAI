@@ -1,0 +1,4 @@
+the nearest centroid chooses a context.
+the context votes for the next token.
+generation follows the learned token distribution.
+deterministic seeds make experiments repeatable.

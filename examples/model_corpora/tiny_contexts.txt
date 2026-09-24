@@ -1,0 +1,3 @@
+centroid models learn from repeated examples.
+small context windows make model behavior easy to inspect.
+training examples become next-token votes.

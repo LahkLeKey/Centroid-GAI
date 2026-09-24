@@ -1,28 +1,28 @@
 {
-  "name": "@centroid-gai/api",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": ">=24.11"
-  },
-  "scripts": {
-    "install": "node-gyp rebuild",
-    "native:build": "node-gyp rebuild",
-    "native:test": "node --test src/native.test.ts",
-    "api:test": "node --test src/api.test.ts",
-    "test": "bun run native:test",
-    "test:all": "bun run typecheck && bun run native:test && bun run api:test",
-    "typecheck": "tsc --noEmit",
-    "model": "node src/cli.ts",
-    "start": "node src/server.ts"
-  },
-  "dependencies": {
-    "@centroid-gai/db": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/node": "24.10.1",
-    "node-gyp": "11.4.2",
-    "typescript": "5.9.3"
-  }
+	"name": "@centroid-gai/api",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.11"
+	},
+	"scripts": {
+		"install": "node-gyp rebuild",
+		"native:build": "node-gyp rebuild",
+		"native:test": "node --test src/native.test.ts",
+		"api:test": "node --test src/api.test.ts",
+		"test": "bun run native:test",
+		"test:all": "bun run typecheck && bun run native:test && bun run api:test",
+		"typecheck": "tsc --noEmit",
+		"model": "node src/cli.ts",
+		"start": "node src/server.ts"
+	},
+	"dependencies": {
+		"@centroid-gai/db": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/node": "24.10.1",
+		"node-gyp": "11.4.2",
+		"typescript": "5.9.3"
+	}
 }

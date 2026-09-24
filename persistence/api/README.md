@@ -51,6 +51,44 @@ generation, artifact download, deletion, and malformed request handling.
 Contract changes, migrations, and `db:init`/`db:verify` are run from
 [`persistence/db`](../db/README.md), not from this package.
 
+## Compose E2E
+
+Run the complete local deployment from the `persistence/` workspace root:
+
+```sh
+bun run test:e2e
+```
+
+The runner builds and starts `postgres`, `database-init`, and `api`, waits for
+`GET /health`, then executes this package's API tests against
+`http://127.0.0.1:3000`. The tests train a real native model through HTTP,
+verify its PostgreSQL metadata, generate text from the stored artifact,
+download the `.cgai` bytes, and delete the test model. Containers are removed
+afterward; the named `postgres-data` volume is retained for local inspection.
+
+## Seed example models
+
+After a fresh checkout, install and build the persistence workspace, then start
+Compose and seed the committed corpora:
+
+```sh
+cd persistence
+bun install
+bun run --cwd api native:build
+cd ..
+docker compose up -d
+cd persistence
+bun run seed:models
+```
+
+The seed command trains these stable names through the same HTTP route used by
+the application: `tiny-contexts`, `generation-patterns`, and
+`persistence-workflow`. It is safe to run repeatedly after code, corpus, or
+database changes because each request replaces the named artifact. The corpus
+sources live in [`examples/model_corpora`](../../examples/model_corpora/);
+generated local files under `examples/models/` are ignored and are never needed
+to recreate the database state.
+
 ## Store and retrieve models
 
 Train a model with the C CLI, then persist it under a stable logical name:

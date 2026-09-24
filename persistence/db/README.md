@@ -49,3 +49,14 @@ import { db } from "@centroid-gai/db";
 Run `bun install` from `persistence/` (the workspace root) after cloning or
 after changing either package's dependencies, so the workspace link and both
 packages' `node_modules` stay consistent.
+
+The database package is exercised by the Compose E2E flow documented in
+[`persistence/api`](../api/README.md#compose-e2e). It is started as the
+`database-init` service, verifies or initializes the contract against the local
+PostgreSQL container, and then remains available to the API container for the
+real training/persistence requests.
+
+The reproducible example-model seed also uses this database boundary indirectly
+through the API. This keeps model initialization independent of Prisma CLI
+details: a fresh database only needs `database-init` to complete before
+`bun run seed:models` trains the committed corpora into PostgreSQL.

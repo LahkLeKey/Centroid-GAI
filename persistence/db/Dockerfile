@@ -15,7 +15,7 @@ WORKDIR /workspace/persistence
 COPY persistence/package.json persistence/bun.lock ./
 COPY persistence/db/package.json ./db/package.json
 COPY persistence/api/package.json ./api/package.json
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY persistence/db/ ./db/
 
@@ -34,6 +34,7 @@ FROM oven/bun:1 AS runtime
 ENV NODE_ENV=production
 WORKDIR /app/persistence/db
 
+COPY --from=build /workspace/persistence/node_modules/ /app/persistence/node_modules/
 COPY --from=build /workspace/persistence/db/ ./
 
 # The default command verifies the live schema and falls back to first-time initialization.

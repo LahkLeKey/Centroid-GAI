@@ -25,7 +25,7 @@ WORKDIR /workspace/persistence
 COPY persistence/package.json persistence/bun.lock ./
 COPY persistence/db/package.json ./db/package.json
 COPY persistence/api/package.json ./api/package.json
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Step 3: Regenerate the `db` package's generated contract types, then bring in the native addon
 # sources and the shared C library it wraps.
@@ -51,6 +51,7 @@ WORKDIR /app
 # Step 5: Carry both packages into the runtime image at the same relative layout so the
 # `@centroid-gai/db` workspace symlink keeps resolving at container start. Only Node.js runs at
 # runtime; bun is not needed once the addon is built and dependencies are installed.
+COPY --from=build /workspace/persistence/node_modules/ /app/persistence/node_modules/
 COPY --from=build /workspace/persistence/db/ /app/persistence/db/
 COPY --from=build /workspace/persistence/api/ /app/persistence/api/
 

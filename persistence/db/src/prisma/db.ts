@@ -18,12 +18,12 @@ import "temporal-polyfill/full/global";
 
 import postgres from "@prisma/orm-postgres/runtime";
 
-import type {Contract} from "./contract.d.ts";
+import type { Contract } from "./contract.d.ts";
 // Step 3: Import the generated contract JSON as a value; it is the runtime description of the
 // schema that the generated `Contract` type only describes at compile time.
-import contractJson from "./contract.json" with {type : "json"};
+import contractJson from "./contract.json" with { type: "json" };
 
-const url = process.env["DATABASE_URL"];
+const url = process.env.DATABASE_URL;
 
 // Step 4: Fail fast during module load rather than surfacing a confusing error from the first
 // query, since every consumer of this module needs a live connection string.
@@ -33,5 +33,10 @@ if (!url) {
 
 /**
  * Process-wide PostgreSQL client bound to the generated contract; import, do not re-instantiate.
+ *
+ * The pool is intentionally created at module load so every API request shares one contract-aware
+ * connection manager. Consumers must call `close()` during process shutdown and must not create a
+ * second client from the generated JSON, because separate pools make local Compose behavior and
+ * graceful shutdown nondeterministic.
  */
-export const db = postgres<Contract>({contractJson, url});
+export const db = postgres<Contract>({ contractJson, url });

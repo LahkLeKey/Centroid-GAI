@@ -7,9 +7,9 @@
  * calls into it. Keeping this file small means `model-repository.ts` and `server.ts` never touch
  * `node:module`/`require` or raw `Buffer` reinterpretation themselves.
  */
-import {createRequire} from "node:module";
+import { createRequire } from "node:module";
 
-/** Configuration accepted by the native C model constructor. */
+/** Configuration accepted by the native C model constructor; omitted fields use C defaults. */
 export interface NativeModelConfig {
     readonly dimensions?: number;
     readonly centroidCount?: number;
@@ -17,7 +17,13 @@ export interface NativeModelConfig {
     readonly seed?: bigint;
 }
 
-/** Metadata returned by the native ABI and persisted through Prisma. */
+/**
+ * Metadata returned by the native ABI and persisted through Prisma.
+ *
+ * Numeric counts are bigint values at the JavaScript boundary because the C ABI exposes uint64
+ * counters without lossy conversion. The HTTP serializer later renders those values as decimal
+ * strings, while the database contract preserves them as PostgreSQL bigint values.
+ */
 export interface ModelMetadata {
     readonly formatVersion: number;
     readonly libraryVersion: string;
@@ -40,7 +46,7 @@ interface NativeBinding {
         maxTokens: number,
         temperature: number,
         seed: bigint,
-        ): string;
+    ): string;
 }
 
 // Step 1: Load the compiled `.node` addon once at module load. `createRequire` is needed because
@@ -58,12 +64,26 @@ if (binding.abiVersion() !== 2) {
 /** JSON Schema for the persisted artifact, exported by C and re-served at `/native/schema`. */
 export const nativePersistenceSchema: unknown = JSON.parse(binding.persistenceSchema());
 
-/** Trains in native C and returns a database-ready binary artifact. */
+/**
+ * Trains in native C and returns a database-ready binary artifact.
+ *
+ * @param text Borrowed non-empty training corpus text; C reads it before this call returns.
+ * @param config Optional borrowed configuration. Omitted fields retain the native defaults.
+ * @returns A newly allocated Node Buffer containing one complete `.cgai` artifact.
+ * @throws A native binding error when the corpus or configuration is rejected.
+ */
 export function trainNativeModel(text: string, config?: NativeModelConfig): Buffer {
     return config === undefined ? binding.trainModel(text) : binding.trainModel(text, config);
 }
 
-/** Validates a native artifact and extracts authoritative C metadata. */
+/**
+ * Validates a native artifact and extracts authoritative C metadata.
+ *
+ * @param payload Borrowed artifact bytes. The view may be a Buffer or a subrange of another
+ * Uint8Array; its byte offset and byte length are preserved when crossing into C.
+ * @returns Metadata decoded from the artifact header and the loaded native library version.
+ * @throws A native binding error when magic, version, bounds, or payload structure is invalid.
+ */
 export function inspectNativeModel(payload: Uint8Array): ModelMetadata {
     // `payload` may already be a `Buffer` (from an HTTP body) or a plain `Uint8Array` (from a
     // Prisma `Bytes` column); wrap it without copying so the addon sees the exact same bytes
@@ -72,17 +92,27 @@ export function inspectNativeModel(payload: Uint8Array): ModelMetadata {
     const native = binding.inspectModel(
         Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength),
     );
-    return {...native, libraryVersion : binding.libraryVersion()};
+    return { ...native, libraryVersion: binding.libraryVersion() };
 }
 
-/** Runs generation in native C directly against a database artifact. */
+/**
+ * Runs generation in native C directly against a database artifact.
+ *
+ * @param payload Borrowed, previously validated `.cgai` bytes.
+ * @param prompt Borrowed prompt text passed to the native generation workspace.
+ * @param maxTokens Maximum number of generated tokens; defaults to 40.
+ * @param temperature Sampling temperature; zero selects deterministic greedy generation.
+ * @param seed Deterministic sampling seed; zero is the default seed.
+ * @returns Generated UTF-8 text owned by the returned JavaScript string.
+ * @throws A native binding error when the artifact or generation arguments are invalid.
+ */
 export function generateNativeModel(
     payload: Uint8Array,
     prompt: string,
     maxTokens = 40,
     temperature = 0.8,
     seed = 0n,
-    ): string {
+): string {
     return binding.generateModel(
         Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength),
         prompt,

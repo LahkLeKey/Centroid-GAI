@@ -1,0 +1,4 @@
+train a model from a text corpus.
+inspect metadata before persistence.
+store one complete artifact in postgres.
+load the artifact and generate text.

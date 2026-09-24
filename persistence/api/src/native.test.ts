@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import test from "node:test";
-import {createRequire} from "node:module";
 
 import {
     generateNativeModel,
@@ -11,10 +11,10 @@ import {
 
 test("native C ABI trains, inspects, and generates", () => {
     const model = trainNativeModel("native postgres models persist. native models generate.", {
-        dimensions : 12,
-        centroidCount : 4,
-        contextWindow : 2,
-        seed : 42n,
+        dimensions: 12,
+        centroidCount: 4,
+        contextWindow: 2,
+        seed: 42n,
     });
     const metadata = inspectNativeModel(model);
 
@@ -50,8 +50,8 @@ test("native callbacks reject invalid arguments and remain usable after failures
     const model = trainNativeModel("native failures preserve model ownership.");
     assert.throws(() => binding.trainModel(), /training text/i);
     assert.throws(() => binding.trainModel(123), /UTF-8 string/i);
-    assert.throws(() => binding.trainModel("text", {seed: -1n}), /configuration/i);
-    assert.throws(() => binding.trainModel("text", {dimensions: "bad"}), /configuration/i);
+    assert.throws(() => binding.trainModel("text", { seed: -1n }), /configuration/i);
+    assert.throws(() => binding.trainModel("text", { dimensions: "bad" }), /configuration/i);
     assert.throws(() => binding.inspectModel(), /model Buffer/i);
     assert.throws(() => binding.inspectModel("bad"), /model Buffer/i);
     assert.throws(() => binding.generateModel(model), /requires/i);
