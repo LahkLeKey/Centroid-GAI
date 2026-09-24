@@ -19,6 +19,28 @@ jobs:
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
 
+  native-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Clang tools
+        run: |
+          sudo apt-get update && sudo apt-get install --yes clang-tidy
+          python -m pip install clang-format==21.1.0
+      - name: Build Node addon and download matching headers
+        working-directory: persistence/prisma-postgres
+        run: npm ci
+      - name: Test Node addon
+        working-directory: persistence/prisma-postgres
+        run: npm run native:test
+      - name: Configure native checks
+        run: cmake -S . -B build-lint
+      - name: Lint all C sources and check formatting
+        run: cmake --build build-lint --target cgai_lint cgai_format_check
+
   documentation:
     runs-on: ubuntu-latest
     steps:

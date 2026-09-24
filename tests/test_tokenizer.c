@@ -5,7 +5,17 @@
 
 #include <string.h>
 
+/**
+ * @brief Check spelling normalization, punctuation, UTF-8 bytes, and empty input.
+ *
+ * The token list is destroyed and reset between scenarios, demonstrating ownership as well as
+ * scanner behavior. The escaped byte sequence encodes an accented UTF-8 spelling explicitly.
+ * Assertions compare copied token strings, so failures identify the exact boundary or spelling rule.
+ *
+ * @return Zero after all tokenization scenarios pass.
+ */
 int test_tokenizer(void) {
+    /* Step 1: Zero-initialize the owning list before the word/apostrophe/punctuation case. */
     cgai_token_list tokens = {0};
     TEST_CHECK(cgai_tokenize("The red fox, can't sleep!", &tokens) == CGAI_STATUS_OK,
                "tokenization failed");
@@ -16,6 +26,7 @@ int test_tokenizer(void) {
     TEST_CHECK(strcmp(tokens.items[6], "!") == 0, "final punctuation token was lost");
     cgai_token_list_destroy(&tokens);
 
+    /* Step 2: Reuse the reset list to check UTF-8 bytes and separately emitted punctuation. */
     TEST_CHECK(cgai_tokenize("Caf\303\251--OK", &tokens) == CGAI_STATUS_OK,
                "UTF-8 tokenization failed");
     TEST_CHECK(tokens.count == 4U, "UTF-8 or repeated punctuation was grouped incorrectly");
@@ -24,6 +35,7 @@ int test_tokenizer(void) {
                "repeated punctuation was not tokenized separately");
     cgai_token_list_destroy(&tokens);
 
+    /* Step 3: Confirm whitespace alone produces an empty list that can still be destroyed. */
     TEST_CHECK(cgai_tokenize(" \t\n", &tokens) == CGAI_STATUS_OK, "whitespace tokenization failed");
     TEST_CHECK(tokens.count == 0U, "whitespace created tokens");
     cgai_token_list_destroy(&tokens);

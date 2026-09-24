@@ -4,6 +4,11 @@ This adapter stores complete Centroid-GAI model artifacts in PostgreSQL through
 Prisma ORM 8. The C library stays independent of the TypeScript runtime and
 database driver; its versioned binary artifact is the boundary between them.
 
+The application-facing REST domains and versioned endpoint contract are defined
+in [`docs/api-contract.md`](../../docs/api-contract.md). Callers should use the
+TypeScript REST service rather than accessing Prisma, PostgreSQL, or the native
+C ABI directly.
+
 Prisma ORM 8 is currently a release candidate. Package versions are pinned so
 an upstream release cannot silently change the contract or query API.
 

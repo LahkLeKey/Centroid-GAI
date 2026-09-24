@@ -22,14 +22,50 @@ static const char persistence_schema[] =
     "\"examplesSeen\":{\"type\":\"integer\",\"minimum\":0},"
     "\"checksumSha256\":{\"type\":\"string\",\"pattern\":\"^[0-9a-f]{64}$\"}}}";
 
-/** Returns the ABI declaration version implemented by this library. */
-uint32_t cgai_abi_version(void) { return CGAI_ABI_VERSION; }
+/**
+ * @brief Return the ABI declaration version for foreign-runtime compatibility checks.
+ *
+ * The ABI version identifies the layout and calling contract of this header. It is separate from
+ * the library's semantic version and from the serialized model format version. A binding can call
+ * this before using configuration structures compiled against a particular ABI.
+ *
+ * @return The compile-time CGAI_ABI_VERSION constant; no allocation or error state is involved.
+ */
+uint32_t cgai_abi_version(void) { /* Step 1: Expose the declaration version used to build this library. */
+ return CGAI_ABI_VERSION; }
 
-/** Returns the native library semantic version. */
-const char *cgai_abi_library_version(void) { return "0.2.0"; }
+/**
+ * @brief Return the native library's semantic version string.
+ *
+ * The returned pointer refers to a string literal stored for the lifetime of the loaded library.
+ * Foreign callers may copy it when storing metadata, but must never modify or free that pointer.
+ * This describes the library release, not the artifact's binary layout.
+ *
+ * @return Borrowed NUL-terminated UTF-8 version text.
+ */
+const char *cgai_abi_library_version(void) { /* Step 1: Return the static release label without creating a caller-owned buffer. */
+ return "0.2.0"; }
 
-/** Returns the static persistence metadata schema JSON. */
-const char *cgai_abi_persistence_schema_json(void) { return persistence_schema; }
+/**
+ * @brief Expose the static JSON Schema used to describe persistence metadata.
+ *
+ * The concatenated C string above becomes one NUL-terminated JSON document at compilation.
+ * Returning it performs no parsing, database access, or schema migration. Prisma and PostgreSQL
+ * remain responsibilities of the TypeScript adapter, which can copy and parse this description.
+ *
+ * @return Borrowed immutable JSON text valid while this library remains loaded.
+ */
+const char *cgai_abi_persistence_schema_json(void) { /* Step 1: Return the schema's static storage; callers must not free it. */
+ return persistence_schema; }
 
-/** Returns the shared native error for FFI callers. */
-const char *cgai_abi_last_error(void) { return cgai_last_error(); }
+/**
+ * @brief Read the current thread's core diagnostic through the ABI.
+ *
+ * The ABI and core share one thread-local diagnostic buffer. The returned pointer is borrowed
+ * and can be overwritten by a later operation on the same thread. Copy the message if it must
+ * survive another call. Status codes, not the presence of an old message, determine success.
+ *
+ * @return Borrowed NUL-terminated diagnostic text, or the no-error sentinel.
+ */
+const char *cgai_abi_last_error(void) { /* Step 1: Forward to the shared diagnostic accessor without copying or clearing the message. */
+ return cgai_last_error(); }

@@ -18,15 +18,23 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-The native C readability gate uses the installed `clang-tidy` binary and
-enforces a 20-statement function budget:
+All targets require ISO C11 with compiler extensions disabled. The lint gate
+uses `clang-tidy` to check every owned C source: core, ABI, CLI, tests, and the
+Node addon. It treats compiler, analyzer, and readability warnings as errors
+and enforces a 20-statement function budget:
 
 ```sh
 cmake --build build --target cgai_lint
+cmake --build build --target cgai_format_check
 ```
 
-The lint target is intentionally strict. A nonzero result identifies native
-functions that still need to be decomposed into smaller, documented helpers.
+Install `clang-tidy` and `clang-format` (21.1.0 in CI) before configuring. Addon lint also needs
+Node headers, normally downloaded by `npm run native:build` in
+`persistence/prisma-postgres`. CMake discovers headers for the running Node version
+in the node-gyp cache; otherwise configure with
+`-DCGAI_NODE_INCLUDE_DIR=/path/to/include/node`. The full lint target fails if
+those headers are missing. `cgai_lint_core` and `cgai_lint_addon` are available
+for checking either layer independently, including when tests are not built.
 
 ## Try it
 

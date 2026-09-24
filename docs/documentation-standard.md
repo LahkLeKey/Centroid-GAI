@@ -41,3 +41,22 @@ cmake --build build-docs --target docs
 Doxygen warnings are errors, so undocumented additions fail the documentation
 build.
 
+## C11 and native checks
+
+Build every native target as ISO C11. Keep related ownership and algorithms in
+focused implementation files and expose only the private declarations needed by
+other modules. Document buffer ownership, partial initialization, and cleanup at
+these boundaries. Keep exported API signatures and artifact encoding stable when
+moving implementations.
+
+Run `cgai_lint` and `cgai_format_check` from the configured CMake build. Lint
+covers all owned `.c` files, including tests and the Node addon, and checks private
+headers through their callers. Functions allow at most 20 statements, eight
+branches, and seven parameters; the line budget allows explanatory comments.
+The analyzer's optional Annex K replacement check is disabled because those
+`*_s` functions are not available across the supported platforms.
+
+Test assertions evaluate their condition once and terminate the test executable
+on failure, including inside fixture helpers. Keep scenario setup, assertions,
+and cleanup together in focused tests; never hide production diagnostics with
+test-only lint exclusions.

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {createRequire} from "node:module";
 
 import {
     generateNativeModel,
@@ -41,4 +42,23 @@ test("native inspection rejects invalid model bytes", () => {
         () => inspectNativeModel(Buffer.from("not a Centroid-GAI model")),
         /invalid|unsupported|model/i,
     );
+});
+
+test("native callbacks reject invalid arguments and remain usable after failures", () => {
+    const require = createRequire(import.meta.url);
+    const binding = require("../build/Release/centroid_gai_native.node");
+    const model = trainNativeModel("native failures preserve model ownership.");
+    assert.throws(() => binding.trainModel(), /training text/i);
+    assert.throws(() => binding.trainModel(123), /UTF-8 string/i);
+    assert.throws(() => binding.trainModel("text", {seed: -1n}), /configuration/i);
+    assert.throws(() => binding.trainModel("text", {dimensions: "bad"}), /configuration/i);
+    assert.throws(() => binding.inspectModel(), /model Buffer/i);
+    assert.throws(() => binding.inspectModel("bad"), /model Buffer/i);
+    assert.throws(() => binding.generateModel(model), /requires/i);
+    assert.throws(() => binding.generateModel(model, 123, 8, 0), /UTF-8 string/i);
+    assert.throws(() => binding.generateModel(model, "native", 1000001, 0), /arguments/i);
+    assert.throws(() => binding.generateModel(model, "native", 8, 0, -1n), /arguments/i);
+    assert.throws(() => binding.generateModel(model, "native", 8, NaN), /arguments/i);
+    assert.equal(binding.generateModel(model, "native", 0, 0), "");
+    assert.equal(typeof binding.generateModel(model, "native", 8, 0), "string");
 });
