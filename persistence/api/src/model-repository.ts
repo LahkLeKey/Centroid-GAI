@@ -1,7 +1,17 @@
+/**
+ * @file model-repository.ts
+ * @brief Persists and retrieves complete `.cgai` model artifacts through `@centroid-gai/db`.
+ *
+ * This module is the only place in `persistence/api` that talks to the database. It hides the
+ * generated Prisma contract shape (`db.orm.public.ModelArtifact`) behind small, intention-named
+ * functions so `server.ts` and `cli.ts` never depend on the ORM query API directly.
+ */
+// The shared PostgreSQL client and generated contract types live in the sibling `db` package;
+// see persistence/db/README.md for why they are not duplicated here.
+import {db} from "@centroid-gai/db";
 import {createHash, randomUUID} from "node:crypto";
 
 import type {ModelMetadata} from "./native.ts";
-import {db} from "./prisma/db.ts";
 
 /** Complete input required to atomically persist a model artifact. */
 export interface SaveModelArtifact {
@@ -10,12 +20,15 @@ export interface SaveModelArtifact {
     readonly metadata: ModelMetadata;
 }
 
+/** Returns the lowercase hex SHA-256 digest stored as the artifact's integrity checksum. */
 function checksum(payload: Uint8Array): string {
     return createHash("sha256").update(payload).digest("hex");
 }
 
 /** Inserts or replaces a named model and returns its persisted row. */
 export async function saveModelArtifact(input: SaveModelArtifact) {
+    // Step 1: Build the mutable column values once so `create` and `update` cannot drift apart;
+    // both branches of the upsert must persist an identical row shape for the same input.
     const values = {
         formatVersion : input.metadata.formatVersion,
         libraryVersion : input.metadata.libraryVersion,
@@ -29,6 +42,10 @@ export async function saveModelArtifact(input: SaveModelArtifact) {
         updatedAt : new Date().toISOString(),
     };
 
+    // Step 2: Upsert on the unique `name` column. A new row gets a fresh id and identity; an
+    // existing row keeps its id and `createdAt` while every other column is replaced atomically,
+    // so a `put` of an existing name can never leave centroids and metadata partially updated
+    // relative to each other.
     return db.orm.public.ModelArtifact.upsert({
         create : {id : randomUUID(), name : input.name, ...values},
         update : values,

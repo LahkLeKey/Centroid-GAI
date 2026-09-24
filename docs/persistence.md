@@ -1,8 +1,10 @@
 # Persistence architecture
 
 PostgreSQL is the durable model store. Prisma ORM 8 owns the database contract,
-migrations, and queries in `persistence/prisma-postgres/`; the C library does
-not link a Node.js or PostgreSQL client.
+migrations, and queries in `persistence/db/`; the HTTP/CLI application boundary
+lives in `persistence/api/`, which depends on `persistence/db/` and is the only
+way callers reach it. The C library does not link a Node.js or PostgreSQL
+client.
 
 The integration boundary is a versioned `.cgai` artifact:
 

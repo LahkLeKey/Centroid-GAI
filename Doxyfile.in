@@ -5,7 +5,7 @@ OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT_DIR@
 INPUT                  = "@DOXYGEN_INPUT_DIR@" \
                          "@CMAKE_CURRENT_SOURCE_DIR@/src" \
                          "@CMAKE_CURRENT_SOURCE_DIR@/tests" \
-                         "@CMAKE_CURRENT_SOURCE_DIR@/persistence/prisma-postgres/native" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/persistence/api/native" \
                          "@CMAKE_CURRENT_SOURCE_DIR@/docs/c-reading-guide.md"
 FILE_PATTERNS          = *.h *.c
 RECURSIVE              = YES

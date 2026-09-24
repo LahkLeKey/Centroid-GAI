@@ -1,3 +1,13 @@
+/**
+ * @file server.ts
+ * @brief HTTP entry point for `@centroid-gai/api`: a small hand-rolled router over `node:http`.
+ *
+ * Deliberately dependency-free (no framework) because the whole surface is nine routes over two
+ * resources (models, native schema/health). `model-repository.ts` owns persistence and
+ * `native.ts` owns the C bridge; this file only parses requests, calls one of those two modules,
+ * and serializes responses. See docs/api-contract.md for the versioned endpoint contract this
+ * router implements.
+ */
 import {createServer, type IncomingMessage, type ServerResponse} from "node:http";
 
 import {

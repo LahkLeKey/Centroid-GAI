@@ -1,3 +1,12 @@
+/**
+ * @file native.ts
+ * @brief Thin, typed wrapper over the compiled `centroid_gai_native` Node-API addon.
+ *
+ * The addon (built from `native/*.c` plus the shared C sources under `src/abi*.c`) is the only
+ * bridge between this package and the C library; every export here just narrows and forwards
+ * calls into it. Keeping this file small means `model-repository.ts` and `server.ts` never touch
+ * `node:module`/`require` or raw `Buffer` reinterpretation themselves.
+ */
 import {createRequire} from "node:module";
 
 /** Configuration accepted by the native C model constructor. */
@@ -34,13 +43,19 @@ interface NativeBinding {
         ): string;
 }
 
+// Step 1: Load the compiled `.node` addon once at module load. `createRequire` is needed because
+// this package is ESM (`"type": "module"`) and native addons are still loaded through CommonJS
+// `require`.
 const require = createRequire(import.meta.url);
 const binding = require("../build/Release/centroid_gai_native.node") as NativeBinding;
 
+// Step 2: Pin the expected ABI version so a mismatched native rebuild fails loudly at startup
+// instead of producing subtly wrong bytes at request time.
 if (binding.abiVersion() !== 2) {
     throw new Error(`unsupported Centroid-GAI native ABI ${binding.abiVersion()}`);
 }
 
+/** JSON Schema for the persisted artifact, exported by C and re-served at `/native/schema`. */
 export const nativePersistenceSchema: unknown = JSON.parse(binding.persistenceSchema());
 
 /** Trains in native C and returns a database-ready binary artifact. */
@@ -50,6 +65,10 @@ export function trainNativeModel(text: string, config?: NativeModelConfig): Buff
 
 /** Validates a native artifact and extracts authoritative C metadata. */
 export function inspectNativeModel(payload: Uint8Array): ModelMetadata {
+    // `payload` may already be a `Buffer` (from an HTTP body) or a plain `Uint8Array` (from a
+    // Prisma `Bytes` column); wrap it without copying so the addon sees the exact same bytes
+    // C validated on write, then let C re-derive metadata rather than trusting caller-supplied
+    // values.
     const native = binding.inspectModel(
         Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength),
     );

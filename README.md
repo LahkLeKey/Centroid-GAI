@@ -29,8 +29,8 @@ cmake --build build --target cgai_format_check
 ```
 
 Install `clang-tidy` and `clang-format` (21.1.0 in CI) before configuring. Addon lint also needs
-Node headers, normally downloaded by `npm run native:build` in
-`persistence/prisma-postgres`. CMake discovers headers for the running Node version
+Node headers, normally downloaded by `bun run native:build` in
+`persistence/api`. CMake discovers headers for the running Node version
 in the node-gyp cache; otherwise configure with
 `-DCGAI_NODE_INCLUDE_DIR=/path/to/include/node`. The full lint target fails if
 those headers are missing. `cgai_lint_core` and `cgai_lint_addon` are available
@@ -71,7 +71,7 @@ codes, and the training/generation call paths for readers new to C. Function
 contracts and numbered walkthrough comments are included in the generated pages.
 
 Durable model storage uses the isolated
-[`Prisma 8 PostgreSQL adapter`](persistence/prisma-postgres/README.md). It stores
+[`Prisma 8 PostgreSQL adapter`](persistence/api/README.md). It stores
 complete model artifacts in PostgreSQL with queryable compatibility metadata and
 a SHA-256 checksum; see the [persistence architecture](docs/persistence.md).
 
@@ -86,7 +86,8 @@ order, checksums, resource limits, and compatibility guarantees.
 - `tests/` — deterministic API and persistence tests
 - `examples/` — a tiny demonstration corpus
 - `docs/` — architecture and documentation standards
-- `persistence/prisma-postgres/` — Prisma ORM 8 contract and PostgreSQL repository
+- `persistence/api/` — HTTP/CLI application boundary: native C bridge and REST service
+- `persistence/db/` — Prisma ORM 8 contract, migrations, and PostgreSQL client
 - `.github/workflows/` — cross-platform build and test checks
 
 ## Current scope

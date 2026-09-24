@@ -34,6 +34,6 @@ artifact downloads use `application/vnd.centroid-gai.model` and an SHA-256 ETag.
 
 ```sh
 docker compose up -d
-cd persistence/prisma-postgres
-CGAI_API_URL=http://localhost:3000 npm run test:all
+cd persistence/api
+CGAI_API_URL=http://localhost:3000 bun run test:all
 ```

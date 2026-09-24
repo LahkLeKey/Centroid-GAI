@@ -1,7 +1,7 @@
 # Annex K is optional in C11 and unavailable on several supported platforms.
 Checks: '-*,clang-analyzer-*,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,bugprone-sizeof-expression,bugprone-suspicious-memset-usage,readability-function-size'
 WarningsAsErrors: '*'
-HeaderFilterRegex: '(^|[/\\])(src|include|tests|persistence[/\\]prisma-postgres[/\\]native)[/\\].*\.(c|h)$'
+HeaderFilterRegex: '(^|[/\\])(src|include|tests|persistence[/\\]api[/\\]native)[/\\].*\.(c|h)$'
 FormatStyle: file
 CheckOptions:
   # Keep the line check permissive because detailed comments are part of the

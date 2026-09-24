@@ -1,5 +1,9 @@
 // use prisma-8
 
+// One row per named model: the complete `.cgai` artifact plus queryable metadata mirrored from
+// the native header, so callers can list/inspect models without downloading the payload. See
+// docs/persistence.md for why this stays a single-table artifact store instead of normalized
+// centroid/vocabulary tables.
 model ModelArtifact {
   id             Uuid              @id
   name           String            @unique

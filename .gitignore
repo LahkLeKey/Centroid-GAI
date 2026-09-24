@@ -10,4 +10,5 @@
 .env
 node_modules/
 *.tsbuildinfo
+persistence/*/build/
 

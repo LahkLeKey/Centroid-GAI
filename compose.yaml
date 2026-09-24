@@ -20,13 +20,13 @@ services:
   database-init:
     build:
       context: .
-      dockerfile: persistence/prisma-postgres/Dockerfile
+      dockerfile: persistence/db/Dockerfile
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-centroid_gai}:${POSTGRES_PASSWORD:-centroid_gai_dev}@postgres:5432/${POSTGRES_DB:-centroid_gai}
     command:
       - /bin/sh
       - -c
-      - npm run db:verify || npm run db:init
+      - bun run db:verify || bun run db:init
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: persistence/prisma-postgres/Dockerfile
+      dockerfile: persistence/api/Dockerfile
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-centroid_gai}:${POSTGRES_PASSWORD:-centroid_gai_dev}@postgres:5432/${POSTGRES_DB:-centroid_gai}
       PORT: 3000

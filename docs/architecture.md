@@ -33,7 +33,7 @@ stay in `internal/model_generation.h`; command handlers stay in
 `internal/cli_commands.h`. These boundaries keep temporary storage and command
 details out of the installed API.
 
-The Node bridge under `persistence/prisma-postgres/native/` uses `addon.c` only
+The Node bridge under `persistence/api/native/` uses `addon.c` only
 for registration and version/schema queries. Training, generation, and metadata
 callbacks live in their respective `node_*.c` files. `node_artifact.c` owns the
 Buffer/model conversion boundary, `node_arguments.c` copies strings and reads

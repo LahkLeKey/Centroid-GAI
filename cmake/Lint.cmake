@@ -4,13 +4,13 @@ find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format)
 file(GLOB_RECURSE CGAI_CORE_LINT_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/*.c" "${PROJECT_SOURCE_DIR}/tests/*.c")
 file(GLOB_RECURSE CGAI_NODE_LINT_SOURCES CONFIGURE_DEPENDS
-    "${PROJECT_SOURCE_DIR}/persistence/prisma-postgres/native/*.c")
+    "${PROJECT_SOURCE_DIR}/persistence/api/native/*.c")
 file(GLOB_RECURSE CGAI_FORMAT_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/*.c" "${PROJECT_SOURCE_DIR}/src/*.h"
     "${PROJECT_SOURCE_DIR}/tests/*.c" "${PROJECT_SOURCE_DIR}/tests/*.h"
     "${PROJECT_SOURCE_DIR}/include/*.h"
-    "${PROJECT_SOURCE_DIR}/persistence/prisma-postgres/native/*.c"
-    "${PROJECT_SOURCE_DIR}/persistence/prisma-postgres/native/*.h")
+    "${PROJECT_SOURCE_DIR}/persistence/api/native/*.c"
+    "${PROJECT_SOURCE_DIR}/persistence/api/native/*.h")
 
 # node-gyp keeps downloaded headers under the running Node version.
 find_program(CGAI_NODE_EXECUTABLE NAMES node)

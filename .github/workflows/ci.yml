@@ -23,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -31,11 +34,14 @@ jobs:
           sudo apt-get update && sudo apt-get install --yes clang-tidy
           python -m pip install clang-format==21.1.0
       - name: Build Node addon and download matching headers
-        working-directory: persistence/prisma-postgres
-        run: npm ci
+        working-directory: persistence
+        run: bun install --frozen-lockfile
+      - name: Build native addon
+        working-directory: persistence/api
+        run: bun run native:build
       - name: Test Node addon
-        working-directory: persistence/prisma-postgres
-        run: npm run native:test
+        working-directory: persistence/api
+        run: bun run native:test
       - name: Configure native checks
         run: cmake -S . -B build-lint
       - name: Lint all C sources and check formatting
