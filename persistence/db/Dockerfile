@@ -37,7 +37,6 @@ WORKDIR /app/persistence/db
 COPY --from=build /workspace/persistence/node_modules/ /app/persistence/node_modules/
 COPY --from=build /workspace/persistence/db/ ./
 
-# The default command verifies the live schema and falls back to first-time initialization.
-# Compose's `database-init` service uses this default; `db:migrate`/`migration:plan` are run
-# manually by an operator, not on every container start.
+# Standalone default only verifies. Compose overrides this to apply the committed
+# migration graph before verification, supporting both fresh and existing databases.
 CMD ["bun", "run", "db:verify"]

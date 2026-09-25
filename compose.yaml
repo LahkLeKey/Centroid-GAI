@@ -26,7 +26,7 @@ services:
     command:
       - /bin/sh
       - -c
-      - bun run db:verify || bun run db:init
+      - bun run db:migrate && bun run db:verify
     depends_on:
       postgres:
         condition: service_healthy
@@ -55,4 +55,3 @@ services:
 
 volumes:
   postgres-data:
-

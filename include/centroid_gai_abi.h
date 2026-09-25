@@ -64,6 +64,25 @@ typedef struct cgai_abi_buffer {
     size_t size;   /**< Artifact bytes or generated text bytes; text's trailing NUL is excluded. */
 } cgai_abi_buffer;
 
+/** Additive ABI v2 operations; existing structure layouts are unchanged.
+ * Inspection sections: 0 summary, 1 vocabulary, 2 active centroids, 3 centroid
+ * detail. Offset/limit page vocabulary, centroids, or nonzero detail tokens.
+ * Limit must be 1..100. Detail includes the full vector (at most 4096 floats).
+ * JSON counters are decimal strings. Free output with cgai_abi_buffer_free().
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_inspect_json(const cgai_abi_model *model,
+                                                            uint32_t section, uint64_t offset,
+                                                            uint32_t limit, uint32_t centroid_id,
+                                                            cgai_abi_buffer *output);
+
+/** Borrow 1..32 source handles and return an independently owned merged handle.
+ * See cgai_model_merge for compatibility, ordering, and approximation semantics.
+ * Output is cleared before work and sources remain unchanged on every path.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_merge(const cgai_abi_model *const *sources,
+                                                     uint32_t count, uint32_t target_centroids,
+                                                     cgai_abi_model **output);
+
 /** ABI-stable model configuration. Initialize with cgai_abi_default_config(). */
 typedef struct cgai_abi_config {
     uint32_t struct_size;    /**< Must equal sizeof(cgai_abi_config). */

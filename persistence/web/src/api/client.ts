@@ -1,4 +1,6 @@
 /** Thin fetch wrapper over the Centroid-GAI `/api/v1` REST contract. */
+import type { ArtifactContents, ContentsSection, MergeRequest } from '../../../shared/artifacts';
+export type { ArtifactContents, ArtifactSummary, ArtifactPage, TokenEntry, CentroidEntry, CentroidDetail, CompositionRecipe, MergeRequest } from '../../../shared/artifacts';
 
 export interface NativeModelConfig {
     dimensions?: number;
@@ -118,6 +120,17 @@ export function uploadModelArtifact(name: string, payload: ArrayBuffer): Promise
 
 export function downloadModelArtifactUrl(name: string): string {
     return `${API_BASE}/models/${encodeURIComponent(name)}`;
+}
+
+export function getArtifactContents<S extends ContentsSection>(name: string, checksum: string, section: S, offset = 0, centroid = 0, signal?: AbortSignal): Promise<ArtifactContents<S>> {
+    const query = new URLSearchParams({ section, offset: String(offset), limit: '25', centroid: String(centroid), checksum });
+    return request(`/models/${encodeURIComponent(name)}/contents?${query}`, { signal });
+}
+
+export function mergeModels(name: string, input: MergeRequest): Promise<SaveModelResult> {
+    return request(`/models/${encodeURIComponent(name)}/merge`, {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input),
+    });
 }
 
 export {ApiError};

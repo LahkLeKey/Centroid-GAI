@@ -13,6 +13,7 @@ import {db} from "@centroid-gai/db";
 import {createHash, randomUUID} from "node:crypto";
 
 import type {ModelMetadata} from "./native.ts";
+import type { CompositionRecipe } from '../../shared/artifacts.ts';
 
 /** Complete input required to atomically persist a model artifact. */
 export interface SaveModelArtifact {
@@ -52,6 +53,7 @@ export async function saveModelArtifact(input: SaveModelArtifact) {
         examplesSeen : input.metadata.examplesSeen,
         checksumSha256 : checksum(input.payload),
         payload : input.payload,
+        compositionJson: null,
         updatedAt : new Date().toISOString(),
     };
 
@@ -63,6 +65,22 @@ export async function saveModelArtifact(input: SaveModelArtifact) {
         create : {id : randomUUID(), name : input.name, ...values},
         update : values,
         conflictOn : {name : input.name},
+    });
+}
+
+/** Insert only: unique-name enforcement makes concurrent destination creation safe. */
+export async function createComposedArtifact(input: SaveModelArtifact, composition: CompositionRecipe) {
+    return db.orm.public.ModelArtifact.create({
+        id: randomUUID(), name: input.name,
+        formatVersion: input.metadata.formatVersion,
+        libraryVersion: input.metadata.libraryVersion,
+        dimensions: input.metadata.dimensions,
+        centroidCount: input.metadata.centroidCount,
+        contextWindow: input.metadata.contextWindow,
+        vocabularySize: input.metadata.vocabularySize,
+        examplesSeen: input.metadata.examplesSeen,
+        checksumSha256: checksum(input.payload), payload: input.payload,
+        updatedAt: new Date().toISOString(), compositionJson: JSON.stringify(composition),
     });
 }
 
@@ -80,16 +98,36 @@ export async function loadModelArtifact(name: string) {
     return db.orm.public.ModelArtifact.where({name}).first();
 }
 
+/** Publish a refresh only if the destination still has the recipe and bytes we read. */
+export async function refreshComposedArtifact(
+    previous: NonNullable<Awaited<ReturnType<typeof loadModelArtifact>>>,
+    input: SaveModelArtifact,
+    composition: CompositionRecipe,
+) {
+    return db.orm.public.ModelArtifact.where({
+        id: previous.id, checksumSha256: previous.checksumSha256,
+        compositionJson: previous.compositionJson,
+    }).update({
+        ...input.metadata, checksumSha256: checksum(input.payload), payload: input.payload,
+        updatedAt: new Date().toISOString(), compositionJson: JSON.stringify(composition),
+    });
+}
+
 /**
  * Returns persisted artifacts for the model catalog endpoint.
  *
- * The complete payload column is included by the ORM query and is intentionally projected away
- * by the HTTP metadata mapper. Callers that need the bytes should load one named artifact.
+ * Select metadata only so a large catalog does not fetch every binary payload or recipe.
+ * Callers that need bytes should load one named artifact.
  *
  * @returns All model rows in the order supplied by the database query.
  * @throws Any database or connection error raised by the shared Prisma client.
  */
-export async function listModelArtifacts() { return db.orm.public.ModelArtifact.all(); }
+export async function listModelArtifacts() {
+    return db.orm.public.ModelArtifact.select(
+        'id', 'name', 'formatVersion', 'libraryVersion', 'dimensions', 'centroidCount',
+        'contextWindow', 'vocabularySize', 'examplesSeen', 'checksumSha256', 'createdAt', 'updatedAt',
+    ).all();
+}
 
 /**
  * Deletes a named artifact, returning whether a row was removed.

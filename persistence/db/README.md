@@ -36,6 +36,12 @@ bun run db:migrate
 `db:init` is for an empty database only; use the migration flow above for an
 existing one.
 
+Committed migrations now include the initial artifact schema and the additive
+`compositionJson` column for immutable superset recipes. `docker compose up -d`
+runs the migration graph and verifies the schema through `database-init`; it
+works from an empty database or the prior initialized artifact contract. Existing
+model payloads remain unchanged. `compositionJson` is null for ordinary models.
+
 ## Consuming this package from `persistence/api`
 
 `persistence/api` depends on this package as a bun workspace dependency

@@ -5,7 +5,7 @@
 #include "internal/constants.h"
 #include "internal/error.h"
 #include "internal/model_format.h"
-#include "internal/vocabulary.h"
+#include "internal/model_validation.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -69,7 +69,9 @@ static int valid_header(const char *magic, const uint64_t *header) {
            header[CGAI_HEADER_CENTROID_COUNT] <= CGAI_MAX_CENTROID_COUNT &&
            header[CGAI_HEADER_CONTEXT_WINDOW] <= CGAI_MAX_CONTEXT_WINDOW &&
            header[CGAI_HEADER_VOCABULARY_SIZE] >= CGAI_SPECIAL_TOKEN_COUNT &&
-           header[CGAI_HEADER_VOCABULARY_SIZE] <= SIZE_MAX;
+           header[CGAI_HEADER_VOCABULARY_SIZE] <= SIZE_MAX &&
+           header[CGAI_HEADER_EXAMPLES_SEEN] <= SIZE_MAX &&
+           header[CGAI_HEADER_INITIALIZED_CENTROIDS] <= header[CGAI_HEADER_CENTROID_COUNT];
 }
 
 /**
@@ -137,45 +139,70 @@ static void clear_constructor_vocabulary(cgai_model *model) {
     model->vocabulary_capacity = 0U;
 }
 
-/**
- * @brief Reconstruct owned vocabulary strings from length-prefixed records.
- *
- * Each record has a uint64_t length and raw spelling bytes without NUL. Temporary token storage
- * adds that terminator before vocabulary insertion copies the spelling into model ownership.
- * This helper releases its temporary string on every iteration. A failure leaves partial model
- * state for the outer decoder to destroy.
- *
- * @param reader Non-NULL cursor positioned at the first vocabulary record.
- * @param model Mutable model whose constructor vocabulary has been cleared.
- * @param count Number of serialized vocabulary records requested by the header.
- * @return One after every record is read and inserted, otherwise zero.
- */
-static int read_vocabulary(byte_reader *reader, cgai_model *model, uint64_t count) {
-    /* Rebuilding through vocabulary_add also recreates correctly sized count rows. */
-    /* Step 1: Process records in the order that defines their vocabulary identifiers. */
-    for (uint64_t i = 0; i < count; ++i) {
-        /* Step 2: Read the next spelling's length and enforce the per-token format limit. */
-        uint64_t length = 0U;
-        if (!reader_take(reader, &length, sizeof(length)) || length > CGAI_MAX_TOKEN_BYTES) {
-            return 0;
-        }
-        /* Step 3: Allocate temporary terminated-string storage and require all spelling bytes to be
-         * present. */
-        char *token = (char *)malloc((size_t)length + 1U);
-        if (token == NULL || !reader_take(reader, token, (size_t)length)) {
-            free(token);
-            return 0;
-        }
-        /* Step 4: Add the terminator, insert an owned copy into the model, then free the temporary
-         * string. */
-        token[length] = '\0';
-        const int added = cgai_token_id_is_valid(cgai_vocabulary_add(model, token));
+/** @brief Compare borrowed spellings without changing serialized token IDs. */
+static int compare_tokens(const void *left, const void *right) {
+    return strcmp(*(const char *const *)left, *(const char *const *)right);
+}
+
+/** @brief Read one owned, terminated spelling; publish only complete strings. */
+static char *read_token(byte_reader *reader) {
+    uint64_t length = 0U;
+    if (!reader_take(reader, &length, sizeof(length)) || length == 0U ||
+        length > CGAI_MAX_TOKEN_BYTES)
+        return NULL;
+    char *token = (char *)malloc((size_t)length + 1U);
+    if (!token || !reader_take(reader, token, (size_t)length) ||
+        memchr(token, '\0', (size_t)length)) {
         free(token);
-        if (!added) {
-            return 0;
+        return NULL;
+    }
+    token[length] = '\0';
+    return token;
+}
+
+/** @brief Reject duplicate spellings using a temporary sorted pointer array. */
+static int unique_vocabulary(const cgai_model *model) {
+    char **sorted = (char **)malloc(model->vocabulary_size * sizeof(char *));
+    if (!sorted)
+        return 0;
+    memcpy(sorted, model->vocabulary, model->vocabulary_size * sizeof(char *));
+    qsort(sorted, model->vocabulary_size, sizeof(char *), compare_tokens);
+    int unique = 1;
+    for (size_t i = 1U; i < model->vocabulary_size; ++i)
+        if (!strcmp(sorted[i - 1U], sorted[i])) {
+            unique = 0;
+            break;
         }
+    free(sorted);
+    return unique;
+}
+
+static int read_spellings(byte_reader *reader, cgai_model *model, uint64_t count) {
+    for (uint64_t i = 0; i < count; ++i) {
+        char *token = read_token(reader);
+        if (!token)
+            return 0;
+        model->vocabulary[model->vocabulary_size++] = token;
     }
     return 1;
+}
+
+/** @brief Allocate vocabulary and count storage once, retaining serialized token order. */
+static int read_vocabulary(byte_reader *reader, cgai_model *model, uint64_t count) {
+    if (count > SIZE_MAX / sizeof(char *))
+        return 0;
+    model->vocabulary = (char **)calloc((size_t)count, sizeof(char *));
+    if (!model->vocabulary)
+        return 0;
+    model->vocabulary_capacity = (size_t)count;
+    if (!read_spellings(reader, model, count))
+        return 0;
+    if (!unique_vocabulary(model) ||
+        count > SIZE_MAX / sizeof(uint64_t) / model->config.centroid_count)
+        return 0;
+    model->token_counts =
+        (uint64_t *)calloc(model->config.centroid_count * (size_t)count, sizeof(uint64_t));
+    return model->token_counts != NULL;
 }
 
 /**
@@ -232,6 +259,17 @@ static int restore_model_body(byte_reader *reader, cgai_model *model, const uint
     return read_numeric_payload(reader, model);
 }
 
+/** @brief Bound minimum payload size before allocating from serialized dimensions. */
+static int payload_fits(const byte_reader *reader, const uint64_t *header) {
+    const uint64_t rows = header[CGAI_HEADER_CENTROID_COUNT];
+    const uint64_t remaining = (uint64_t)(reader->size - reader->offset);
+    const uint64_t fixed =
+        rows * (header[CGAI_HEADER_DIMENSIONS] * sizeof(float) + sizeof(uint64_t));
+    const uint64_t per_token = rows * sizeof(uint64_t) + sizeof(uint64_t) + 1U;
+    return fixed <= remaining &&
+           header[CGAI_HEADER_VOCABULARY_SIZE] <= (remaining - fixed) / per_token;
+}
+
 /**
  * @brief Decode a complete trusted artifact into a new owned model.
  *
@@ -255,8 +293,8 @@ cgai_model *cgai_model_decode(const uint8_t *data, size_t size) {
     uint64_t header[CGAI_MODEL_HEADER_FIELD_COUNT];
     /* Validate the fixed header before allocating any variable model storage. */
     /* Step 3: Validate the fixed header before allocating a variable-sized model. */
-    if (!read_header(&reader, header)) {
-        (void)cgai_fail("invalid or unsupported model data");
+    if (!read_header(&reader, header) || !payload_fits(&reader, header)) {
+        (void)cgai_fail("invalid model header or declared payload size");
         return NULL;
     }
     /* Step 4: Create the model's base storage from the accepted configuration. */
@@ -267,7 +305,8 @@ cgai_model *cgai_model_decode(const uint8_t *data, size_t size) {
     /* Rebuild vocabulary rows, metadata, and arrays in serialized order. */
     /* Step 5: Restore all fields; destroy partial state if the artifact cannot be fully consumed.
      */
-    if (!restore_model_body(&reader, model, header)) {
+    if (!restore_model_body(&reader, model, header) ||
+        cgai_model_validate_statistics(model) != CGAI_STATUS_OK) {
         cgai_model_destroy(model);
         (void)cgai_fail("model data is truncated or invalid");
         return NULL;

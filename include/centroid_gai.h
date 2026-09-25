@@ -106,6 +106,19 @@ void cgai_model_destroy(cgai_model *model);
 cgai_status cgai_model_train_text(cgai_model *model, const char *text);
 
 /**
+ * Create an independently owned union of 1..32 trained models in source order.
+ * Sources are borrowed and never mutated. Dimensions, context window, and seed
+ * must match. Zero target preserves every active centroid; a positive target
+ * (at most the active-row sum) performs approximate, order-dependent weighted
+ * nearest-centroid consolidation. Vocabulary and target counts are unioned by
+ * spelling. Counts are additive; overlapping training data is not deduplicated.
+ * Resource limits and counter overflow fail with NULL and cgai_last_error().
+ * Destroy a successful result with cgai_model_destroy().
+ */
+cgai_model *cgai_model_merge(const cgai_model *const *sources, size_t count,
+                             size_t target_centroids);
+
+/**
  * @brief Generate a continuation into caller-owned storage without changing the model.
  *
  * Only the continuation is written; callers display the original prompt separately if desired.

@@ -31,6 +31,7 @@ RUN bun install --frozen-lockfile --ignore-scripts
 # sources and the shared C library it wraps.
 COPY persistence/db/ ./db/
 COPY persistence/api/ ./api/
+COPY persistence/shared/ ./shared/
 COPY include/ /workspace/include/
 COPY src/ /workspace/src/
 
@@ -54,9 +55,9 @@ WORKDIR /app
 COPY --from=build /workspace/persistence/node_modules/ /app/persistence/node_modules/
 COPY --from=build /workspace/persistence/db/ /app/persistence/db/
 COPY --from=build /workspace/persistence/api/ /app/persistence/api/
+COPY --from=build /workspace/persistence/shared/ /app/persistence/shared/
 
 WORKDIR /app/persistence/api
 
 EXPOSE 3000
 CMD ["node", "src/server.ts"]
-

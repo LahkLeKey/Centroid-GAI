@@ -4,6 +4,9 @@
       "target_name": "centroid_gai_native",
       "sources": [
         "native/addon.c",
+        "native/node_composition.c",
+        "../../src/model_composition.c",
+        "../../src/abi_inspection.c",
         "../../src/abi.c",
         "../../src/abi_config.c",
         "../../src/abi_model.c",

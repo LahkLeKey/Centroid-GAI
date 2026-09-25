@@ -8,6 +8,7 @@
  * `node:module`/`require` or raw `Buffer` reinterpretation themselves.
  */
 import { createRequire } from "node:module";
+import type { ContentsBySection, ContentsSection } from '../../shared/artifacts.ts';
 
 /** Configuration accepted by the native C model constructor; omitted fields use C defaults. */
 export interface NativeModelConfig {
@@ -35,6 +36,8 @@ export interface ModelMetadata {
 }
 
 interface NativeBinding {
+    inspectContents(payload: Buffer, section: number, offset: number, limit: number, centroid: number): string;
+    mergeModels(payloads: Buffer[], targetCentroids: number): Buffer;
     abiVersion(): number;
     libraryVersion(): string;
     persistenceSchema(): string;
@@ -74,6 +77,15 @@ export const nativePersistenceSchema: unknown = JSON.parse(binding.persistenceSc
  */
 export function trainNativeModel(text: string, config?: NativeModelConfig): Buffer {
     return config === undefined ? binding.trainModel(text) : binding.trainModel(text, config);
+}
+
+const contentsSections = { summary: 0, vocabulary: 1, centroids: 2, centroid: 3 } as const;
+export function inspectNativeContents<S extends ContentsSection>(payload: Uint8Array, section: S, offset = 0, limit = 25, centroid = 0): ContentsBySection[S] {
+    return JSON.parse(binding.inspectContents(Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength), contentsSections[section], offset, limit, centroid)) as ContentsBySection[S];
+}
+
+export function mergeNativeModels(payloads: Uint8Array[], targetCentroids = 0): Buffer {
+    return binding.mergeModels(payloads.map((payload) => Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength)), targetCentroids);
 }
 
 /**

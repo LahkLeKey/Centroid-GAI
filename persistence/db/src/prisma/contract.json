@@ -29,6 +29,13 @@
                   "kind": "scalar"
                 }
               },
+              "compositionJson": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "contextWindow": {
                 "nullable": false,
                 "type": {
@@ -116,6 +123,9 @@
                 "checksumSha256": {
                   "column": "checksumSha256"
                 },
+                "compositionJson": {
+                  "column": "compositionJson"
+                },
                 "contextWindow": {
                   "column": "contextWindow"
                 },
@@ -174,6 +184,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "compositionJson": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "contextWindow": {
                   "codecId": "pg/int4@1",
@@ -269,7 +284,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "41715d3222bc02b3e0efe52e4c24c9d3f4b3b00add860c91e6640164421f9c5b"
+    "storageHash": "62ac50525fbaaab1bd1d00c278adbee7a99382172e57a7da5f8d4e4a62b6daef"
   },
   "capabilities": {
     "postgres": {

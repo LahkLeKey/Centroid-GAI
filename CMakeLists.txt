@@ -35,6 +35,7 @@ add_library(centroid_gai
     src/model_random.c
     src/model_sampling.c
     src/model_training.c
+    src/model_composition.c
     src/tokenizer.c
     src/vocabulary.c
 )
@@ -57,6 +58,7 @@ add_library(centroid_gai_abi SHARED
     src/abi_generation.c
     src/abi_metadata.c
     src/abi_serialization.c
+    src/abi_inspection.c
 )
 add_library(centroid_gai::abi ALIAS centroid_gai_abi)
 target_compile_features(centroid_gai_abi PUBLIC c_std_11)
@@ -150,6 +152,7 @@ if(CGAI_BUILD_TESTS)
         tests/test_vocabulary.c
         tests/test_model_math.c
         tests/test_model_io.c
+        tests/test_composition.c
         tests/test_sampling.c
         tests/test_file_utils.c
         tests/test_utils.c

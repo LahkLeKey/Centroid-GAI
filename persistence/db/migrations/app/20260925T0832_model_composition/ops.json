@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.model_artifact.compositionJson",
+    "label": "Add column \"compositionJson\" to \"model_artifact\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "compositionJson",
+        "table": "model_artifact"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"compositionJson\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "model_artifact",
+          "compositionJson"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"compositionJson\"",
+        "sql": "ALTER TABLE \"public\".\"model_artifact\" ADD COLUMN \"compositionJson\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"compositionJson\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "model_artifact",
+          "compositionJson"
+        ]
+      }
+    ]
+  }
+]

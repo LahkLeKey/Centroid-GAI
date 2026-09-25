@@ -3,6 +3,8 @@
 #ifndef CGAI_TEST_INTERNAL_H
 #define CGAI_TEST_INTERNAL_H
 
+int test_composition(void);
+
 /**
  * @brief Check spelling normalization, punctuation, UTF-8 bytes, and empty input.
  *

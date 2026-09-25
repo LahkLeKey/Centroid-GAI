@@ -8,7 +8,8 @@
  */
 import { readFile, writeFile } from "node:fs/promises";
 
-import { closeModelRepository, loadModelArtifact, saveModelArtifact } from "./model-repository.ts";
+import { closeModelRepository, saveModelArtifact } from "./model-repository.ts";
+import { loadCurrentModelArtifact as loadModelArtifact } from './composed-models.ts';
 import { generateNativeModel, inspectNativeModel, trainNativeModel } from "./native.ts";
 
 function usage(): never {

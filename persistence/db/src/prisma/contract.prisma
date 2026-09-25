@@ -16,6 +16,7 @@ model ModelArtifact {
   examplesSeen   BigInt
   checksumSha256 String
   payload        Bytes
+  compositionJson String?
   createdAt      TimestamptzString @default(now())
   updatedAt      TimestamptzString @default(now())
 

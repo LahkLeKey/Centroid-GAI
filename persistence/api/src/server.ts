@@ -9,12 +9,13 @@
  * router implements.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { artifactRoute } from './artifact-routes.ts';
+import { loadCurrentModelArtifact as loadModelArtifact } from './composed-models.ts';
 
 import {
     closeModelRepository,
     deleteModelArtifact,
     listModelArtifacts,
-    loadModelArtifact,
     saveModelArtifact,
 } from "./model-repository.ts";
 import {
@@ -180,6 +181,7 @@ async function route(request: IncomingMessage, response: ServerResponse): Promis
     }
 
     const name = segments[1];
+    if (await artifactRoute(request, response, url, segments, sendJson, readJson)) return;
     if (segments.length === 2 && method === "PUT") {
         // Step 4: Validate uploaded bytes in C, then persist C-derived metadata with the payload.
         const payload = await readBody(request);

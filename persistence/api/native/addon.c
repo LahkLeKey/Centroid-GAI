@@ -82,6 +82,8 @@ NAPI_MODULE_INIT() {
         {"persistenceSchema", NULL, persistence_schema, NULL, NULL, NULL, napi_default, NULL},
         {"trainModel", NULL, cgai_node_train, NULL, NULL, NULL, napi_default, NULL},
         {"inspectModel", NULL, cgai_node_inspect, NULL, NULL, NULL, napi_default, NULL},
+        {"inspectContents", NULL, cgai_node_contents, NULL, NULL, NULL, napi_default, NULL},
+        {"mergeModels", NULL, cgai_node_merge, NULL, NULL, NULL, napi_default, NULL},
         {"generateModel", NULL, cgai_node_generate, NULL, NULL, NULL, napi_default, NULL},
     };
     /* Step 2: Register the complete table using its element count, not its byte size. */

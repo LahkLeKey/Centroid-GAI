@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ModelMetadata } from '../api/client';
+import type { ModelLabels } from '../modelLabels';
 
 interface SidebarProps {
     models: ModelMetadata[];
@@ -9,6 +10,8 @@ interface SidebarProps {
     onDelete: (name: string) => void;
     onRefresh: () => void;
     onNewModel: () => void;
+    labels: ModelLabels;
+    onEditLabels: (name: string) => void;
 }
 
 export function Sidebar({
@@ -19,19 +22,30 @@ export function Sidebar({
     onDelete,
     onRefresh,
     onNewModel,
+    labels,
+    onEditLabels,
 }: SidebarProps) {
     const [query, setQuery] = useState('');
+    const [labelFilter, setLabelFilter] = useState('');
+    const labelCounts = new Map<string, number>();
+    for (const model of models) {
+        for (const label of labels[model.id] ?? []) labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+    }
+    const labeledCount = models.filter((model) => labels[model.id]?.length).length;
+    const coverage = models.length ? Math.round(labeledCount / models.length * 100) : 0;
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
-        if (!q) return models;
-        return models.filter((model) => model.name.toLowerCase().includes(q));
-    }, [models, query]);
-
-    const maxVocab = Math.max(1, ...models.map((model) => Number(model.vocabularySize)));
+        return models.filter((model) => {
+            const modelLabels = labels[model.id] ?? [];
+            const matchesQuery = !q || model.name.toLowerCase().includes(q) || modelLabels.some((label) => label.includes(q));
+            const matchesLabel = !labelFilter || (labelFilter === '__unlabeled' ? !modelLabels.length : modelLabels.includes(labelFilter.slice(6)));
+            return matchesQuery && matchesLabel;
+        });
+    }, [models, query, labels, labelFilter]);
 
     return (
-        <aside className="flex h-full w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-950/60">
+        <aside className="flex max-h-[42dvh] w-full shrink-0 flex-col border-b border-slate-800 bg-slate-950/60 md:h-full md:max-h-none md:w-72 md:border-r md:border-b-0">
             <div className="flex items-center justify-between px-4 pt-4">
                 <h2 className="text-xs font-semibold tracking-wide text-slate-400 uppercase">Models</h2>
                 <button
@@ -48,14 +62,31 @@ export function Sidebar({
                 <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search models…"
+                    placeholder="Search models or labels…"
                     aria-label="Search models"
                     data-testid="model-search"
                     className="w-full rounded-md border border-slate-800 bg-slate-900 px-3 py-1.5 text-sm text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
                 />
+                <label className="mt-3 block text-xs text-slate-400">
+                    Filter by label
+                    <select value={labelFilter} onChange={(event) => setLabelFilter(event.target.value)} className="field mt-1">
+                        <option value="">All models ({models.length})</option>
+                        <option value="__unlabeled">Unlabeled ({models.length - labeledCount})</option>
+                        {[...labelCounts].sort(([a], [b]) => a.localeCompare(b)).map(([label, count]) => <option key={label} value={`label:${label}`}>{label} ({count})</option>)}
+                        {labelFilter.startsWith('label:') && !labelCounts.has(labelFilter.slice(6)) && <option value={labelFilter}>{labelFilter.slice(6)} (0)</option>}
+                    </select>
+                </label>
+                <div className="mt-3 hidden md:block">
+                    <div className="mb-1 flex justify-between text-[11px] text-slate-400"><span>Label coverage</span><span>{labeledCount} / {models.length} models</span></div>
+                    <div role="meter" aria-label="Label coverage" aria-valuemin={0} aria-valuemax={100} aria-valuenow={coverage} aria-valuetext={`${labeledCount} of ${models.length} models labeled`} className="h-1.5 overflow-hidden rounded-full bg-slate-800">
+                        <div className="h-full rounded-full bg-indigo-400" style={{ width: `${coverage}%` }} />
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-500">Labels are local to this browser.</p>
+                </div>
+                {(query || labelFilter) && <button type="button" onClick={() => { setQuery(''); setLabelFilter(''); }} className="mt-2 text-xs text-indigo-300">Clear filters · {filtered.length} shown</button>}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-2 pb-2">
+            <div className="min-h-12 flex-1 overflow-y-auto px-2 pb-2">
                 {loading ? (
                     <p className="px-2 py-6 text-center text-xs text-slate-500">Loading…</p>
                 ) : filtered.length === 0 ? (
@@ -66,8 +97,7 @@ export function Sidebar({
                     <ul className="space-y-1">
                         {filtered.map((model) => {
                             const active = selectedName === model.name;
-                            const vocab = Number(model.vocabularySize);
-                            const pct = Math.min(100, Math.round((vocab / maxVocab) * 100));
+                            const vocab = BigInt(model.vocabularySize);
                             return (
                                 <li key={model.id} data-testid="model-row" data-model-name={model.name}>
                                     <div
@@ -76,23 +106,21 @@ export function Sidebar({
                                             : 'border-transparent hover:border-slate-800 hover:bg-slate-900'
                                             }`}
                                     >
-                                        <button type="button" onClick={() => onSelect(model.name)} className="block w-full text-left">
-                                            <p className="truncate text-sm font-medium text-slate-100">{model.name}</p>
+                                        <button type="button" aria-pressed={active} onClick={() => onSelect(model.name)} className="block w-full text-left">
+                                            <p className="truncate pr-5 text-sm font-medium text-slate-100">{model.name}</p>
                                             <p className="mt-0.5 truncate font-mono text-[11px] text-slate-500">
                                                 d{model.dimensions} · c{model.centroidCount} · vocab {vocab.toLocaleString()}
                                             </p>
-                                            <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-800">
-                                                <div
-                                                    className={`h-full rounded-full ${active ? 'bg-indigo-400' : 'bg-slate-600'}`}
-                                                    style={{ width: `${pct}%` }}
-                                                />
+                                            <div className="mt-2 flex flex-wrap gap-1">
+                                                {(labels[model.id] ?? []).map((label) => <span key={label} className="max-w-full truncate rounded bg-indigo-500/10 px-1.5 py-0.5 text-[10px] text-indigo-200">{label}</span>)}
                                             </div>
                                         </button>
+                                        {active && <button type="button" onClick={() => onEditLabels(model.name)} className="mt-1 text-[11px] text-indigo-300 hover:text-indigo-200">Edit labels</button>}
                                         <button
                                             type="button"
                                             onClick={() => onDelete(model.name)}
                                             title="Delete model"
-                                            className="absolute top-2 right-2 rounded p-1 text-slate-600 opacity-0 hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100"
+                                            className="absolute top-2 right-2 rounded p-1 text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                                         >
                                             <TrashIcon />
                                         </button>

@@ -69,7 +69,7 @@ static int test_invalid_configuration(void) {
     /* Step 1: Start with defaults and change dimensions to the invalid zero value. */
     cgai_config /* Step 2: Reset the fixture and test the largest size_t value as a dimension
                    request. */
-                    config = cgai_default_config();
+        config = cgai_default_config();
     config.dimensions = 0U;
     CHECK(cgai_model_create(&config) == NULL);
     config = cgai_default_config();

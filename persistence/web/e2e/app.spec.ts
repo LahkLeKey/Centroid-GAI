@@ -2,7 +2,7 @@ import {expect, test} from '@playwright/test';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {deleteViaApi, SAMPLE_TRAINING_TEXT, trainViaApi, uniqueName} from './helpers';
+import {deleteViaApi, SAMPLE_TRAINING_TEXT, trainViaApi, uniqueName} from './helpers.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TINY_CGAI_PATH = path.resolve(__dirname, '../../../build/tiny.cgai');
