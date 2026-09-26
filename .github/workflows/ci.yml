@@ -50,6 +50,16 @@ jobs:
       - name: Test Node addon
         working-directory: persistence/api
         run: bun run native:test
+      - name: Evaluate model baselines without network or database
+        working-directory: persistence/api
+        run: |
+          bun run baseline:test
+          bun run baseline
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-baselines
+          path: build/evaluation/baseline.json
+          if-no-files-found: error
       - name: Configure native checks
         run: cmake -S . -B build-lint
       - name: Lint all C sources and check formatting

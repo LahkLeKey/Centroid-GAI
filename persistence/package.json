@@ -15,6 +15,7 @@
         "test:native": "bun run --cwd api native:test",
         "test:e2e": "bun run e2e/compose-e2e.ts",
         "seed:models": "bun run e2e/seed-models.ts",
+        "baseline": "bun run --cwd api baseline",
         "web:dev": "bun run --cwd web dev",
         "web:build": "bun run --cwd web build",
         "web:test:e2e": "bun run --cwd web test:e2e"

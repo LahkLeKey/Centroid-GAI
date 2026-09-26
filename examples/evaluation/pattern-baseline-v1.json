@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "description": "Small diagnostic suite for the committed example corpora. Recall probes overlap training; challenge probes are authored separately but are not a representative held-out benchmark. Unknown probes have no correct next token.",
+  "sources": [
+    {"name": "tiny-contexts", "path": "examples/model_corpora/tiny_contexts.txt"},
+    {"name": "generation-patterns", "path": "examples/model_corpora/generation_patterns.txt"},
+    {"name": "persistence-workflow", "path": "examples/model_corpora/persistence_workflow.txt"}
+  ],
+  "probes": [
+    {"id": "tiny-recall-1", "domain": "tiny-contexts", "slice": "recall", "prompt": "centroid models learn from", "expected": "repeated"},
+    {"id": "tiny-recall-2", "domain": "tiny-contexts", "slice": "recall", "prompt": "small context windows", "expected": "make"},
+    {"id": "tiny-recall-3", "domain": "tiny-contexts", "slice": "recall", "prompt": "training examples become", "expected": "next"},
+    {"id": "tiny-challenge-1", "domain": "tiny-contexts", "slice": "challenge", "prompt": "these models learn", "expected": "from"},
+    {"id": "tiny-challenge-2", "domain": "tiny-contexts", "slice": "challenge", "prompt": "our context windows", "expected": "make"},
+    {"id": "tiny-challenge-3", "domain": "tiny-contexts", "slice": "challenge", "prompt": "new training examples", "expected": "become"},
+    {"id": "generation-recall-1", "domain": "generation-patterns", "slice": "recall", "prompt": "the nearest centroid chooses", "expected": "a"},
+    {"id": "generation-recall-2", "domain": "generation-patterns", "slice": "recall", "prompt": "the context votes for", "expected": "the"},
+    {"id": "generation-recall-3", "domain": "generation-patterns", "slice": "recall", "prompt": "deterministic seeds make", "expected": "experiments"},
+    {"id": "generation-challenge-1", "domain": "generation-patterns", "slice": "challenge", "prompt": "a nearest centroid", "expected": "chooses"},
+    {"id": "generation-challenge-2", "domain": "generation-patterns", "slice": "challenge", "prompt": "this context votes", "expected": "for"},
+    {"id": "generation-challenge-3", "domain": "generation-patterns", "slice": "challenge", "prompt": "our seeds make", "expected": "experiments"},
+    {"id": "persistence-recall-1", "domain": "persistence-workflow", "slice": "recall", "prompt": "train a model from", "expected": "a"},
+    {"id": "persistence-recall-2", "domain": "persistence-workflow", "slice": "recall", "prompt": "inspect metadata before", "expected": "persistence"},
+    {"id": "persistence-recall-3", "domain": "persistence-workflow", "slice": "recall", "prompt": "store one complete", "expected": "artifact"},
+    {"id": "persistence-challenge-1", "domain": "persistence-workflow", "slice": "challenge", "prompt": "inspect the metadata", "expected": "before"},
+    {"id": "persistence-challenge-2", "domain": "persistence-workflow", "slice": "challenge", "prompt": "persist one complete", "expected": "artifact"},
+    {"id": "persistence-challenge-3", "domain": "persistence-workflow", "slice": "challenge", "prompt": "retrieve the artifact", "expected": "and"},
+    {"id": "unknown-1", "domain": "unknown", "slice": "unknown", "prompt": "quasar nebula telescope"},
+    {"id": "unknown-2", "domain": "unknown", "slice": "unknown", "prompt": "orchid petal garden"},
+    {"id": "unknown-3", "domain": "unknown", "slice": "unknown", "prompt": "violin sonata concerto"}
+  ]
+}
