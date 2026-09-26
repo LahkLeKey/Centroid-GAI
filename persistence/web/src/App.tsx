@@ -11,9 +11,11 @@ import { Sidebar } from './components/Sidebar';
 import { ChatPlayground } from './components/ChatPlayground';
 import { ModelInspector, type InspectorView } from './components/ModelInspector';
 import { NewModelModal } from './components/NewModelModal';
+import { SupersetWorkspace } from './components/SupersetWorkspace';
+import { PatternMatcher } from './components/PatternMatcher';
 import { hasLabelDraft, useModelLabels, type LabelDraft } from './modelLabels';
 
-type Tab = 'chat' | 'inspector';
+type Tab = 'supersets' | 'patterns' | 'chat' | 'inspector';
 
 function App() {
   const [models, setModels] = useState<ModelMetadata[]>([]);
@@ -21,7 +23,9 @@ function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('chat');
+  const [tab, setTab] = useState<Tab>('supersets');
+  const [inspectorCentroid, setInspectorCentroid] = useState<number | undefined>();
+  const [patternQuery, setPatternQuery] = useState('');
   const [inspectorView, setInspectorView] = useState<InspectorView>('overview');
   const [modalOpen, setModalOpen] = useState(false);
   const { labels, saveLabels, storageError } = useModelLabels();
@@ -36,7 +40,7 @@ function App() {
       const data = await listModels();
       setModels(data);
       setSelectedName((current) =>
-        current && data.some((model) => model.name === current) ? current : (data[0]?.name ?? null),
+        current && data.some((model) => model.name === current) ? current : (data.find((model) => model.composition)?.name ?? data[0]?.name ?? null),
       );
     } catch (cause) {
       setError(cause instanceof ApiError ? cause.message : 'Unable to reach the persistence API.');
@@ -82,7 +86,7 @@ function App() {
           </div>
           <div>
             <h1 className="text-sm font-semibold text-slate-100">Centroid-GAI</h1>
-            <p className="text-[11px] text-slate-500">Persistence &amp; model playground</p>
+            <p className="text-[11px] text-slate-500">Supersets &amp; learned patterns</p>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs">
@@ -100,6 +104,8 @@ function App() {
           selectedName={selectedName}
           onSelect={(name) => {
             setSelectedName(name);
+            setInspectorCentroid(undefined);
+            setPatternQuery('');
           }}
           onDelete={handleDelete}
           onRefresh={refresh}
@@ -116,8 +122,8 @@ function App() {
           )}
           {storageError && <p role="alert" className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">{storageError}</p>}
 
-          <div className="mb-4 flex shrink-0 gap-1">
-            {(['chat', 'inspector'] as const).map((value) => (
+          <div className="mb-4 flex shrink-0 flex-wrap gap-1">
+            {(['supersets', 'patterns', 'inspector', 'chat'] as const).map((value) => (
               <button
                 key={value}
                 type="button"
@@ -126,7 +132,7 @@ function App() {
                 className={`rounded-md px-3 py-1.5 text-sm font-medium ${tab === value ? 'bg-slate-800 text-slate-100' : 'text-slate-500 hover:text-slate-300'
                   }`}
               >
-                {value === 'chat' ? 'Chat' : 'Inspector'}
+                {{ supersets: 'Supersets', patterns: 'Match patterns', inspector: 'Inspector', chat: 'Text generation' }[value]}
               </button>
             ))}
           </div>
@@ -140,10 +146,20 @@ function App() {
           )}
 
           <div className="min-h-0 flex-1">
-            {tab === 'chat' ? (
+            {tab === 'supersets' ? (
+              <SupersetWorkspace models={models} model={selectedModel} loading={loading} onSelect={setSelectedName}
+                onCreated={(name) => void refresh().then(() => setSelectedName(name))} onRefresh={refresh}
+                onNewModel={() => setModalOpen(true)} onMatch={() => { setPatternQuery(''); setTab('patterns'); }}
+                onExplore={(text) => { setPatternQuery(text); setTab('patterns'); }}
+                onInspect={() => { setInspectorCentroid(undefined); setInspectorView('contents'); setTab('inspector'); }}
+                onCompare={() => { setInspectorView('overview'); setTab('inspector'); }} onGenerate={() => setTab('chat')} />
+            ) : tab === 'patterns' ? (
+              <PatternMatcher key={`${selectedName}:${patternQuery}`} initialText={patternQuery} modelName={selectedName} onInspect={(centroid) => { setInspectorCentroid(centroid); setInspectorView('contents'); setTab('inspector'); }} />
+            ) : tab === 'chat' ? (
               <ChatPlayground key={selectedName} modelName={selectedName} />
             ) : (
               <ModelInspector model={selectedModel} cohort={models} onSelect={setSelectedName}
+                initialCentroid={inspectorCentroid}
                 onRefresh={refresh} onRun={() => setTab('chat')}
                 view={inspectorView} onViewChange={setInspectorView}
                 onCreated={(name) => void refresh().then(() => setSelectedName(name))}

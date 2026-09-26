@@ -5,6 +5,7 @@
 #include "centroid_gai.h"
 #include "internal/constants.h"
 
+/** Immutable JSON Schema exported for artifact metadata discovery. */
 static const char persistence_schema[] =
     "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\","
     "\"title\":\"Centroid-GAI ModelArtifact metadata\",\"type\":\"object\","

@@ -116,7 +116,7 @@ export async function refreshComposedArtifact(
 /**
  * Returns persisted artifacts for the model catalog endpoint.
  *
- * Select metadata only so a large catalog does not fetch every binary payload or recipe.
+ * Select metadata and recipes for superset discovery without fetching binary payloads.
  * Callers that need bytes should load one named artifact.
  *
  * @returns All model rows in the order supplied by the database query.
@@ -125,7 +125,7 @@ export async function refreshComposedArtifact(
 export async function listModelArtifacts() {
     return db.orm.public.ModelArtifact.select(
         'id', 'name', 'formatVersion', 'libraryVersion', 'dimensions', 'centroidCount',
-        'contextWindow', 'vocabularySize', 'examplesSeen', 'checksumSha256', 'createdAt', 'updatedAt',
+        'contextWindow', 'vocabularySize', 'examplesSeen', 'checksumSha256', 'createdAt', 'updatedAt', 'compositionJson',
     ).all();
 }
 

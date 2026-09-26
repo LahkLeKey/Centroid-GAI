@@ -25,12 +25,45 @@ The TypeScript service is the application boundary. Callers use HTTP/JSON or the
 | GET | `/api/v1/models/:name/metadata` | Persisted metadata |
 | POST | `/api/v1/models/:name/train` | Train and persist |
 | POST | `/api/v1/models/:name/generate` | Generate continuation |
+| POST | `/api/v1/models/:name/match` | Match learned contexts without generating text |
 | GET | `/api/v1/models/:name/contents` | Native artifact contents and composition recipe |
 | POST | `/api/v1/models/:name/merge` | Create a distinct merged or compacted model |
 
 The existing unversioned endpoints remain compatibility aliases. New callers
 should use `/api/v1` exclusively. JSON `uint64_t` values are decimal strings;
 artifact downloads use `application/vnd.centroid-gai.model` and an SHA-256 ETag.
+
+Catalog and metadata include `composition: null` for source models or
+`{ autoRebuild, sourceCount }` for supersets. The catalog describes the latest
+persisted build without downloading each artifact.
+
+## Pattern discovery and matching
+
+`contents?section=highlights&limit=25` returns `{ tokens: { total, offset: 0,
+limit, items } }` as its `data`. It aggregates ordinary target token counts across
+all active rows, excludes the three control tokens, and sorts by descending count
+then token ID. Highlights always start at zero. The UI uses these tokens as
+clickable starting points for exploration.
+
+Post `{ "text": "context to inspect", "limit": 5 }` to
+`/api/v1/models/:name/match`. Both source models and supersets support matching;
+live dependencies refresh first. It returns `{ name, checksumSha256, data }` with
+`inputTokens`, `unknownTokens` (within the used suffix), `context: [{ token, known }]`,
+and `matches: [{ centroidId, squaredDistance, observations, targets }]` in `data`.
+Targets is a page of up to 10 observed tokens with decimal-string counts.
+
+Matching uses the native tokenizer, unknown-token mapping, recency-weighted
+context embedding, and squared Euclidean distance. Only the configured context
+suffix contributes. Results sort by distance, then centroid ID, and exclude unused
+rows. This is read-only pattern inspection: distances are not semantic similarity
+or calibrated confidence, and aggregate centroids cannot retrieve original passages.
+
+Text must contain tokens and no NUL characters; over 16,384 UTF-8 bytes returns
+413. The result limit defaults to 5 and must be 1–10. Invalid inputs return 400,
+missing models 404. Models must be trained and their payload must fit 64 MiB.
+Matching is bounded to 100 million dimension comparisons. Failed live refreshes
+are reported instead of matching stale training. The checksum identifies exactly
+which artifact produced the result.
 
 ## Artifact contents
 

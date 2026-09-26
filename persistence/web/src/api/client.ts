@@ -1,5 +1,6 @@
 /** Thin fetch wrapper over the Centroid-GAI `/api/v1` REST contract. */
-import type { ArtifactContents, ContentsSection, MergeRequest } from '../../../shared/artifacts';
+import type { ArtifactContents, ContentsSection, MergeRequest, CompositionSummary, PatternMatchResult } from '../../../shared/artifacts';
+export type { PatternMatchResult } from '../../../shared/artifacts';
 export type { ArtifactContents, ArtifactSummary, ArtifactPage, TokenEntry, CentroidEntry, CentroidDetail, CompositionRecipe, MergeRequest } from '../../../shared/artifacts';
 
 export interface NativeModelConfig {
@@ -10,6 +11,7 @@ export interface NativeModelConfig {
 }
 
 export interface ModelMetadata {
+    composition?: CompositionSummary | null;
     id: string;
     name: string;
     formatVersion: number;
@@ -120,6 +122,13 @@ export function uploadModelArtifact(name: string, payload: ArrayBuffer): Promise
 
 export function downloadModelArtifactUrl(name: string): string {
     return `${API_BASE}/models/${encodeURIComponent(name)}`;
+}
+
+export function matchPatterns(name: string, text: string, limit = 5, signal?: AbortSignal): Promise<PatternMatchResult> {
+    return request(`/models/${encodeURIComponent(name)}/match`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ text, limit }), signal,
+    });
 }
 
 export function getArtifactContents<S extends ContentsSection>(name: string, checksum: string, section: S, offset = 0, centroid = 0, signal?: AbortSignal): Promise<ArtifactContents<S>> {

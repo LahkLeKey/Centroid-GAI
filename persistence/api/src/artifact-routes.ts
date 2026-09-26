@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { CompositionRecipe, ContentsSection, MergeRequest } from '../../shared/artifacts.ts';
 import { createComposedArtifact, loadModelArtifact } from './model-repository.ts';
 import { loadCurrentModelArtifact } from './composed-models.ts';
-import { inspectNativeContents, inspectNativeModel, mergeNativeModels } from './native.ts';
+import { inspectNativeContents, inspectNativeModel, mergeNativeModels, matchNativePatterns } from './native.ts';
 
 type Send = (response: ServerResponse, status: number, value: unknown) => void;
 type Read = <T>(request: IncomingMessage) => Promise<T>;
@@ -16,9 +16,22 @@ function integer(raw: unknown, name: string, min: number, max: number): number {
 export async function artifactRoute(request: IncomingMessage, response: ServerResponse, url: URL, segments: string[], send: Send, read: Read): Promise<boolean> {
     if (segments[0] !== 'models' || segments.length !== 3) return false;
     const name = segments[1]!;
+    if (request.method === 'POST' && segments[2] === 'match') {
+        const input = await read<{ text?: unknown; limit?: unknown } | null>(request);
+        if (typeof input?.text !== 'string' || !input.text.trim() || input.text.includes('\0'))
+            throw new TypeError('Matching text must be a non-empty string without NUL characters');
+        if (Buffer.byteLength(input.text, 'utf8') > 16384) throw new RangeError('Matching text exceeds 16384 UTF-8 bytes');
+        const limit = integer(input.limit ?? 5, 'limit', 1, 10);
+        const model = await loadCurrentModelArtifact(name);
+        if (!model) { send(response, 404, { error: 'model not found' }); return true; }
+        if (model.payload.byteLength > MAX_BYTES) throw new RangeError('Artifact exceeds the 64 MiB matching limit');
+        const data = matchNativePatterns(model.payload, input.text, limit);
+        send(response, 200, { name, checksumSha256: model.checksumSha256, data });
+        return true;
+    }
     if (request.method === 'GET' && segments[2] === 'contents') {
         const section = url.searchParams.get('section') ?? 'summary';
-        if (!['summary', 'vocabulary', 'centroids', 'centroid'].includes(section)) throw new TypeError('unknown contents section');
+        if (!['summary', 'vocabulary', 'centroids', 'centroid', 'highlights'].includes(section)) throw new TypeError('unknown contents section');
         const offset = integer(Number(url.searchParams.get('offset') ?? 0), 'offset', 0, 4294967295);
         const limit = integer(Number(url.searchParams.get('limit') ?? 25), 'limit', 1, 100);
         const centroid = integer(Number(url.searchParams.get('centroid') ?? 0), 'centroid', 0, 65535);

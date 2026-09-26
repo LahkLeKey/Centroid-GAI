@@ -10,6 +10,7 @@ import { ModelComposer } from './ModelComposer';
 export type InspectorView = 'overview' | 'contents' | 'compose';
 
 interface ModelInspectorProps {
+    initialCentroid?: number;
     model: ModelMetadata | null;
     cohort: ModelMetadata[];
     onSelect: (name: string) => void;
@@ -27,7 +28,7 @@ interface ModelInspectorProps {
     onViewChange: (view: InspectorView) => void;
 }
 
-export function ModelInspector({ model, cohort, onSelect, labels, labelSuggestions, onSaveLabels, onNextUnlabeled, allLabels, labelDraft, onLabelDraftChange, onCreated, onRefresh, onRun, view, onViewChange: setView }: ModelInspectorProps) {
+export function ModelInspector({ model, cohort, onSelect, labels, labelSuggestions, onSaveLabels, onNextUnlabeled, allLabels, labelDraft, onLabelDraftChange, onCreated, onRefresh, onRun, initialCentroid, view, onViewChange: setView }: ModelInspectorProps) {
     const [schema, setSchema] = useState<unknown>(null);
     const [schemaOpen, setSchemaOpen] = useState(false);
     const [schemaError, setSchemaError] = useState<string | null>(null);
@@ -62,7 +63,7 @@ export function ModelInspector({ model, cohort, onSelect, labels, labelSuggestio
                 <a href={downloadModelArtifactUrl(model.name)} download={`${model.name}.cgai`} className="text-xs text-indigo-300">Download .cgai</a>
             </div>
 
-            {view === 'contents' && <ArtifactExplorer key={`${model.id}:${model.checksumSha256}`} model={model} onRefresh={onRefresh} />}
+            {view === 'contents' && <ArtifactExplorer key={`${model.id}:${model.checksumSha256}`} model={model} onRefresh={onRefresh} initialCentroid={initialCentroid} />}
             {view === 'compose' && <ModelComposer models={cohort} model={model} onRefresh={onRefresh} onCreated={(name) => { onCreated(name); setView('contents'); }} />}
             {view === 'overview' && <>
 

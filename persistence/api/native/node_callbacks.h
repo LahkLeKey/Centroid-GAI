@@ -7,6 +7,7 @@
 
 napi_value cgai_node_contents(napi_env env, napi_callback_info info);
 napi_value cgai_node_merge(napi_env env, napi_callback_info info);
+napi_value cgai_node_match(napi_env env, napi_callback_info info);
 
 /**
  * @brief Implement the JavaScript trainModel(text, config?) callback.

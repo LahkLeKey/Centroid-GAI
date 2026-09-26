@@ -30,14 +30,24 @@ if(CLANG_TIDY_EXECUTABLE)
     set(CGAI_LINT_FLAGS -x c -std=c11 -Wall -Wextra -Wpedantic -Wconversion
         -DCGAI_ABI_BUILD -D_CRT_SECURE_NO_WARNINGS
         "-I${PROJECT_SOURCE_DIR}/include" "-I${PROJECT_SOURCE_DIR}/src")
+    # Isolate translation units: Clang 18's va_list analyzer can retain invalid
+    # state across files in a single clang-tidy invocation. Keep every check enabled.
+    set(CGAI_CORE_LINT_COMMANDS)
+    foreach(source IN LISTS CGAI_CORE_LINT_SOURCES)
+        list(APPEND CGAI_CORE_LINT_COMMANDS COMMAND "${CLANG_TIDY_EXECUTABLE}" "${source}" -- ${CGAI_LINT_FLAGS})
+    endforeach()
     add_custom_target(cgai_lint_core
-        COMMAND "${CLANG_TIDY_EXECUTABLE}" ${CGAI_CORE_LINT_SOURCES} -- ${CGAI_LINT_FLAGS}
+        ${CGAI_CORE_LINT_COMMANDS}
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" VERBATIM
         COMMENT "Linting all core, ABI, CLI, and test C sources as ISO C11")
     if(CGAI_NODE_INCLUDE_DIR)
+        set(CGAI_NODE_LINT_COMMANDS)
+        foreach(source IN LISTS CGAI_NODE_LINT_SOURCES)
+            list(APPEND CGAI_NODE_LINT_COMMANDS COMMAND "${CLANG_TIDY_EXECUTABLE}" "${source}" -- ${CGAI_LINT_FLAGS}
+                -DNAPI_VERSION=10 "-isystem${CGAI_NODE_INCLUDE_DIR}")
+        endforeach()
         add_custom_target(cgai_lint_addon
-            COMMAND "${CLANG_TIDY_EXECUTABLE}" ${CGAI_NODE_LINT_SOURCES} -- ${CGAI_LINT_FLAGS}
-                -DNAPI_VERSION=10 "-isystem${CGAI_NODE_INCLUDE_DIR}"
+            ${CGAI_NODE_LINT_COMMANDS}
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" VERBATIM
             COMMENT "Linting all Node-API C sources as ISO C11")
     else()

@@ -7,9 +7,43 @@ import {
     inspectNativeModel,
     inspectNativeContents,
     mergeNativeModels,
+    matchNativePatterns,
     nativePersistenceSchema,
     trainNativeModel,
 } from "./native.ts";
+
+test('pattern matching ranks actual contexts deterministically without changing the artifact', () => {
+    const model = trainNativeModel('alpha beta alpha beta', { dimensions: 32, centroidCount: 8, contextWindow: 1, seed: 42n });
+    const before = Buffer.from(model);
+    const result = matchNativePatterns(model, 'ignored alpha', 10);
+    assert.equal(result.inputTokens, 2);
+    assert.deepEqual(result.context, [{ token: 'alpha', known: true }]);
+    assert.equal(result.unknownTokens, 0); // Only the used suffix contributes.
+    assert.equal(result.matches.length, 5); // Unused reserved rows are excluded.
+    assert.deepEqual(result.matches.slice(0, 2).map((match) => match.centroidId), [1, 3]);
+    for (const match of result.matches.slice(0, 2)) {
+        assert.equal(match.squaredDistance, 0);
+        assert.equal(match.targets.items[0]?.token, 'beta');
+        assert.equal(match.observations, '1');
+    }
+    for (let i = 1; i < result.matches.length; i++) assert.ok(result.matches[i]!.squaredDistance >= result.matches[i - 1]!.squaredDistance);
+    assert.deepEqual(matchNativePatterns(model, 'alpha', 1).matches, result.matches.slice(0, 1));
+    assert.deepEqual(matchNativePatterns(model, 'ignored alpha', 10), result);
+    assert.deepEqual(model, before);
+    const padded = Buffer.concat([Buffer.from('prefix'), model, Buffer.from('suffix')]);
+    assert.deepEqual(matchNativePatterns(padded.subarray(6, 6 + model.length), 'ignored alpha', 10), result);
+    const unknown = matchNativePatterns(model, 'notinvocabulary');
+    assert.equal(unknown.unknownTokens, 1);
+    assert.deepEqual(unknown.context, [{ token: 'notinvocabulary', known: false }]);
+    assert.equal(unknown.matches.length, 5);
+    for (const text of ['', '   ', 'alpha\0beta', 'x'.repeat(16385)]) assert.throws(() => matchNativePatterns(model, text), /Matching text/);
+    for (const limit of [0, 11, -1, 1.5, NaN]) assert.throws(() => matchNativePatterns(model, 'alpha', limit));
+    const other = trainNativeModel('gamma delta', { dimensions: 32, centroidCount: 4, contextWindow: 1, seed: 42n });
+    const merged = mergeNativeModels([model, other]);
+    const match = matchNativePatterns(merged, 'gamma', 1).matches[0]!;
+    assert.equal(match.squaredDistance, 0);
+    assert.equal(match.targets.items[0]?.token, 'delta');
+});
 
 test('native contents are paged, lossless, and centroid distributions match observations', () => {
     const model = trainNativeModel('alpha beta alpha "quoted" \\ paths.', { dimensions: 8, centroidCount: 3, seed: 99n });
@@ -17,6 +51,10 @@ test('native contents are paged, lossless, and centroid distributions match obse
     assert.equal(summary.seed, '99');
     assert.equal(summary.initializedCentroids, 3);
     const vocabulary = inspectNativeContents(model, 'vocabulary', 0, 100);
+    const highlights = inspectNativeContents(model, 'highlights', 0, 3);
+    const expected = vocabulary.items.filter((item) => item.id >= 3).sort((a, b) => BigInt(a.count) === BigInt(b.count) ? a.id - b.id : BigInt(a.count) > BigInt(b.count) ? -1 : 1);
+    assert.deepEqual(highlights.tokens.items, expected.slice(0, 3));
+    assert.equal(highlights.tokens.total, expected.length);
     assert.equal(vocabulary.items.length, vocabulary.total);
     assert.equal(vocabulary.items.reduce((sum, item) => sum + BigInt(item.count), 0n), BigInt(summary.examplesSeen));
     const second = inspectNativeContents(model, 'vocabulary', 2, 2);

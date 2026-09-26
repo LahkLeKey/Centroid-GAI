@@ -66,18 +66,48 @@ typedef struct cgai_abi_buffer {
 
 /** Additive ABI v2 operations; existing structure layouts are unchanged.
  * Inspection sections: 0 summary, 1 vocabulary, 2 active centroids, 3 centroid
- * detail. Offset/limit page vocabulary, centroids, or nonzero detail tokens.
+ * detail, 4 frequent ordinary target tokens. Offset/limit page vocabulary,
+ * centroids, or nonzero detail tokens; highlights always start at offset zero.
  * Limit must be 1..100. Detail includes the full vector (at most 4096 floats).
  * JSON counters are decimal strings. Free output with cgai_abi_buffer_free().
+ * @param model Borrowed model handle.
+ * @param section Inspection section, 0 through 4.
+ * @param offset Starting page offset, ignored for summary and highlights.
+ * @param limit Maximum page length, 1 through 100.
+ * @param centroid_id Active centroid ID for detail inspection.
+ * @param output Empty descriptor receiving owned JSON bytes.
+ * @return CGAI_ABI_OK, INVALID_ARGUMENT, or OUT_OF_MEMORY.
  */
 CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_inspect_json(const cgai_abi_model *model,
                                                             uint32_t section, uint64_t offset,
                                                             uint32_t limit, uint32_t centroid_id,
                                                             cgai_abi_buffer *output);
 
+/** Match a text context to learned centroids without generating or mutating state.
+ * Uses the same tokenizer, unknown-token mapping, and context embedding as generation.
+ * Text must contain tokens and be at most 16384 UTF-8 bytes; limit is 1..10.
+ * JSON contains the used context, unknown count, and nearest centroids ordered by
+ * squared Euclidean distance (ties by centroid ID), with up to 10 observed targets.
+ * Distances are not semantic similarity or confidence scores. Free the output
+ * with cgai_abi_buffer_free(). Work is limited to 100 million dimension comparisons.
+ * @param model Borrowed trained model handle.
+ * @param utf8_text Borrowed NUL-terminated input text.
+ * @param limit Maximum nearest centroids, 1 through 10.
+ * @param output Empty descriptor receiving owned JSON bytes.
+ * @return CGAI_ABI_OK or an ABI argument, allocation, or processing error.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_match_json(const cgai_abi_model *model,
+                                                          const char *utf8_text, uint32_t limit,
+                                                          cgai_abi_buffer *output);
+
 /** Borrow 1..32 source handles and return an independently owned merged handle.
  * See cgai_model_merge for compatibility, ordering, and approximation semantics.
  * Output is cleared before work and sources remain unchanged on every path.
+ * @param sources Borrowed ordered source handles.
+ * @param count Number of handles, 1 through 32.
+ * @param target_centroids Zero preserves rows; otherwise requested compacted capacity.
+ * @param output Receives a newly owned merged model, or NULL on failure.
+ * @return CGAI_ABI_OK, INVALID_ARGUMENT, or ERROR with a native diagnostic.
  */
 CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_merge(const cgai_abi_model *const *sources,
                                                      uint32_t count, uint32_t target_centroids,

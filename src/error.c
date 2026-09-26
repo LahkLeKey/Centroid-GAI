@@ -5,11 +5,14 @@
 #include <stdio.h>
 
 #if defined(_MSC_VER)
+/** Compiler-specific thread-local storage qualifier. */
 #define CGAI_THREAD_LOCAL __declspec(thread)
 #else
+/** ISO C11 thread-local storage qualifier. */
 #define CGAI_THREAD_LOCAL _Thread_local
 #endif
 
+/** Owned diagnostic buffer for the calling thread. */
 static CGAI_THREAD_LOCAL char cgai_error_message[256];
 
 /**

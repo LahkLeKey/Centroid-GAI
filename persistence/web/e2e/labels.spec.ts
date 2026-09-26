@@ -8,6 +8,13 @@ const models = [
 test.beforeEach(async ({ page, context }) => {
     await context.route('**/api/v1/**', (route) => {
         const path = new URL(route.request().url()).pathname;
+        if (path.endsWith('/contents')) {
+            if (new URL(route.request().url()).searchParams.get('section') === 'highlights') return route.fulfill({ json: { data: { tokens: { total: 0, offset: 0, limit: 25, items: [] } } } });
+            const name = decodeURIComponent(path.split('/')[4]!);
+            const model = models.find((item) => item.name === name)!;
+            return route.fulfill({ json: { name, checksumSha256: model.checksumSha256, artifactBytes: 500, section: 'summary', composition: null,
+                data: { ...model, initializedCentroids: model.centroidCount, seed: '42', storage: { vectors: '192', tokenCounts: '100', clusterSizes: '32' } } } });
+        }
         return route.fulfill({ json: path.endsWith('/models') ? models : { status: 'ok', native: true, database: 'postgresql' } });
     });
     await page.goto('/');
@@ -19,7 +26,7 @@ test('preserves separate drafts while switching models and app tabs', async ({ p
     await page.getByRole('button', { name: 'beta: 200 tokens', exact: true }).click();
     await expect(page.getByLabel('Add labels', { exact: true })).toHaveValue('');
     await page.getByLabel('Add labels', { exact: true }).fill('beta-draft');
-    await page.getByRole('button', { name: 'Chat', exact: true }).click();
+    await page.getByRole('button', { name: 'Text generation', exact: true }).click();
     await page.getByRole('button', { name: 'Resume alpha', exact: true }).click();
     await expect(page.getByLabel('Add labels', { exact: true })).toHaveValue('alpha-draft');
     await page.getByRole('button', { name: 'Save labels', exact: true }).click();

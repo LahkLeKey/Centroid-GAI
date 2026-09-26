@@ -18,6 +18,7 @@ export interface ContentsBySection {
     vocabulary: ArtifactPage<TokenEntry>;
     centroids: ArtifactPage<CentroidEntry>;
     centroid: CentroidDetail;
+    highlights: { tokens: ArtifactPage<TokenEntry> };
 }
 export type ContentsSection = keyof ContentsBySection;
 export interface CompositionRecipe {
@@ -39,4 +40,17 @@ export interface MergeRequest {
     autoRebuild?: boolean;
     sources: { name: string; checksumSha256?: string }[];
     targetCentroids: number;
+}
+
+export interface CompositionSummary { autoRebuild: boolean; sourceCount: number }
+export interface PatternMatches {
+    inputTokens: number;
+    unknownTokens: number;
+    context: { token: string; known: boolean }[];
+    matches: { centroidId: number; squaredDistance: number; observations: string; targets: ArtifactPage<TokenEntry> }[];
+}
+export interface PatternMatchResult {
+    name: string;
+    checksumSha256: string;
+    data: PatternMatches;
 }

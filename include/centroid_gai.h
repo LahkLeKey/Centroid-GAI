@@ -73,10 +73,10 @@ cgai_config cgai_default_config(void);
  * tokens. Any partial allocation is destroyed on failure. A successful model has no learned
  * examples yet; train it before generation. The caller must eventually call cgai_model_destroy().
  *
- * @param config Borrowed configuration to copy, or NULL to choose defaults.
+ * @param requested Borrowed configuration to copy, or NULL to choose defaults.
  * @return New caller-owned model, or NULL with a thread-local diagnostic on failure.
  */
-cgai_model *cgai_model_create(const cgai_config *config);
+cgai_model *cgai_model_create(const cgai_config *requested);
 
 /**
  * @brief Release every allocation owned by a model.
@@ -114,6 +114,10 @@ cgai_status cgai_model_train_text(cgai_model *model, const char *text);
  * spelling. Counts are additive; overlapping training data is not deduplicated.
  * Resource limits and counter overflow fail with NULL and cgai_last_error().
  * Destroy a successful result with cgai_model_destroy().
+ * @param sources Borrowed ordered source models.
+ * @param count Number of sources, from 1 through 32.
+ * @param target_centroids Zero preserves all active rows; otherwise compacted capacity.
+ * @return Independently owned model, or NULL with a diagnostic.
  */
 cgai_model *cgai_model_merge(const cgai_model *const *sources, size_t count,
                              size_t target_centroids);

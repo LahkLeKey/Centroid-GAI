@@ -17,12 +17,15 @@
 
 /** Maximum supported embedding dimensions. */
 #define CGAI_MAX_DIMENSIONS ((size_t)4096U)
+/** Decimal dimension limit for schema string construction. */
 #define CGAI_MAX_DIMENSIONS_TEXT "4096"
 /** Maximum supported centroid count. */
 #define CGAI_MAX_CENTROID_COUNT ((size_t)65536U)
+/** Decimal centroid limit for schema string construction. */
 #define CGAI_MAX_CENTROID_COUNT_TEXT "65536"
 /** Maximum supported context window. */
 #define CGAI_MAX_CONTEXT_WINDOW ((size_t)65536U)
+/** Decimal context limit for schema string construction. */
 #define CGAI_MAX_CONTEXT_WINDOW_TEXT "65536"
 /** Maximum serialized token length in bytes. */
 #define CGAI_MAX_TOKEN_BYTES ((size_t)4096U)
@@ -34,7 +37,9 @@
 
 /** Names reserved for the initial vocabulary entries. */
 #define CGAI_TOKEN_BOS_TEXT "<bos>"
+/** Reserved end-of-sequence token spelling. */
 #define CGAI_TOKEN_EOS_TEXT "<eos>"
+/** Reserved unknown-vocabulary token spelling. */
 #define CGAI_TOKEN_UNKNOWN_TEXT "<unk>"
 /** Number of entries installed before user vocabulary is learned. */
 #define CGAI_SPECIAL_TOKEN_COUNT ((size_t)3U)

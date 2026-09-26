@@ -8,7 +8,7 @@
  * `node:module`/`require` or raw `Buffer` reinterpretation themselves.
  */
 import { createRequire } from "node:module";
-import type { ContentsBySection, ContentsSection } from '../../shared/artifacts.ts';
+import type { ContentsBySection, ContentsSection, PatternMatches } from '../../shared/artifacts.ts';
 
 /** Configuration accepted by the native C model constructor; omitted fields use C defaults. */
 export interface NativeModelConfig {
@@ -36,6 +36,7 @@ export interface ModelMetadata {
 }
 
 interface NativeBinding {
+    matchPatterns(payload: Buffer, text: string, limit: number): string;
     inspectContents(payload: Buffer, section: number, offset: number, limit: number, centroid: number): string;
     mergeModels(payloads: Buffer[], targetCentroids: number): Buffer;
     abiVersion(): number;
@@ -79,13 +80,19 @@ export function trainNativeModel(text: string, config?: NativeModelConfig): Buff
     return config === undefined ? binding.trainModel(text) : binding.trainModel(text, config);
 }
 
-const contentsSections = { summary: 0, vocabulary: 1, centroids: 2, centroid: 3 } as const;
+const contentsSections = { summary: 0, vocabulary: 1, centroids: 2, centroid: 3, highlights: 4 } as const;
 export function inspectNativeContents<S extends ContentsSection>(payload: Uint8Array, section: S, offset = 0, limit = 25, centroid = 0): ContentsBySection[S] {
     return JSON.parse(binding.inspectContents(Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength), contentsSections[section], offset, limit, centroid)) as ContentsBySection[S];
 }
 
 export function mergeNativeModels(payloads: Uint8Array[], targetCentroids = 0): Buffer {
     return binding.mergeModels(payloads.map((payload) => Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength)), targetCentroids);
+}
+
+export function matchNativePatterns(payload: Uint8Array, text: string, limit = 5): PatternMatches {
+    if (typeof text !== 'string' || !text.trim() || text.includes('\0') || Buffer.byteLength(text, 'utf8') > 16384)
+        throw new TypeError('Matching text must contain 1 to 16384 UTF-8 bytes and no NUL characters');
+    return JSON.parse(binding.matchPatterns(Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength), text, limit)) as PatternMatches;
 }
 
 /**

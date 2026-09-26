@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+/** Fail the test immediately when the supplied assertion is false. */
 #define CHECK(condition) TEST_CHECK(condition, cgai_last_error())
 
 /**

@@ -52,7 +52,7 @@ artifact checksum so a page can detect replacement during inspection.
 checksums, and a target count (zero means preserve). It validates all sources,
 creates a distinct destination, and never replaces an existing named model.
 The result and its source names/checksums/configuration recipe are stored together.
-New recipes default to `autoRebuild: true`. Generation, artifact inspection,
+New recipes default to `autoRebuild: true`. Matching, discovery, generation, artifact inspection,
 metadata reads, downloads, and CLI reads resolve the current sources first. If a
 source checksum changed, the result is rebuilt and persisted before returning it.
 Nested live supersets refresh in dependency order. Preserve mode follows the new
@@ -84,7 +84,21 @@ payloads and the resulting artifact at 64 MiB. Large-scale optimization should l
 move to cancellable background jobs, with held-out evaluation before choosing a
 configuration. No quality improvement is inferred from storage reduction alone.
 
-## Inspector workflow
+## Superset workspace
+
+The web app opens on **Supersets**, selecting an existing superset before an
+ordinary source. The main view offers frequent observed tokens as discovery
+chips: click one to match its learned context, then follow target tokens to explore
+further. No prompt is required. Composition opens only through **Compose a superset**,
+and advanced training settings are collapsed until needed.
+
+**Match patterns** supports custom contexts without generating text or training.
+It displays the used context suffix, unknown-token mappings, nearest centroids,
+and their observed target distributions, with links to centroid vector inspection.
+Distances describe the native hashed embedding space, not semantic similarity or
+classification confidence. Changing models clears previous matching results.
+
+## Composition workflow
 
 1. Open artifact contents and inspect storage, vocabulary, occupancy, vectors,
    and top target tokens using paged controls.

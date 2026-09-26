@@ -9,6 +9,12 @@ or the native C ABI directly.
 
 ## Features
 
+- Open directly into the **Supersets** workspace, with an existing superset selected
+  first. Composition settings open on demand, keeping the default view focused on discovery.
+- Click frequent learned token chips to explore nearest contexts without typing.
+  Follow observed target tokens to continue discovery.
+- Use **Match patterns** to inspect custom contexts, unknown-token mappings,
+  centroid distances, and target distributions without generating or training.
 - List, refresh, and delete persisted models.
 - Train a new model from pasted text and optional config overrides.
 - Upload a `.cgai` artifact directly, or download an existing one.
@@ -45,7 +51,7 @@ does not provide transactions for truly simultaneous writes across tabs.
 
 ## Setup
 
-To combine trained models, select one, open **Inspector → Compose superset**,
+To combine trained models, select one and choose **Compose a superset** in the default workspace,
 choose the other sources, and give the result a new name. Sources must share
 dimensions, context window, and embedding seed. Preserve keeps all active
 centroids; compact combines them using observation-weighted means.
@@ -55,6 +61,10 @@ artifact contents or running the super model refreshes changed sources, includin
 nested supersets. Missing or incompatible sources show an error until restored.
 Uncheck it to create a fixed snapshot. After creation, **Run model** opens the
 playground with the new model selected. Shared training history remains additive.
+
+Discovery and matching also refresh live supersets. Match distances measure the
+model's hashed context space, not semantic similarity or calibrated confidence.
+The model stores aggregate observations, not original training passages.
 
 ```sh
 cd persistence

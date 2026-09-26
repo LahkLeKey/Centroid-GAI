@@ -139,12 +139,22 @@ static void clear_constructor_vocabulary(cgai_model *model) {
     model->vocabulary_capacity = 0U;
 }
 
-/** @brief Compare borrowed spellings without changing serialized token IDs. */
+/**
+ * @brief Order vocabulary pointers lexicographically for duplicate detection.
+ * @param left Borrowed left comparison operand.
+ * @param right Borrowed right comparison operand.
+ * @return Negative, zero, or positive according to the requested ordering.
+ */
 static int compare_tokens(const void *left, const void *right) {
     return strcmp(*(const char *const *)left, *(const char *const *)right);
 }
 
-/** @brief Read one owned, terminated spelling; publish only complete strings. */
+/** @brief Read one owned, terminated spelling; publish only complete strings.
+ * @param reader
+ * Mutable bounded artifact reader.
+ * @return Newly allocated spelling, or NULL for invalid bytes
+ * or allocation failure.
+ */
 static char *read_token(byte_reader *reader) {
     uint64_t length = 0U;
     if (!reader_take(reader, &length, sizeof(length)) || length == 0U ||
@@ -160,7 +170,11 @@ static char *read_token(byte_reader *reader) {
     return token;
 }
 
-/** @brief Reject duplicate spellings using a temporary sorted pointer array. */
+/**
+ * @brief Reject duplicate vocabulary spellings without changing their stored IDs.
+ * @param model Borrowed model, kept alive for the operation.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int unique_vocabulary(const cgai_model *model) {
     char **sorted = (char **)malloc(model->vocabulary_size * sizeof(char *));
     if (!sorted)
@@ -177,6 +191,13 @@ static int unique_vocabulary(const cgai_model *model) {
     return unique;
 }
 
+/**
+ * @brief Decode the bounded sequence of owned vocabulary spellings.
+ * @param reader Mutable bounded reader over borrowed artifact bytes.
+ * @param model Borrowed model, kept alive for the operation.
+ * @param count Number of entries supplied to this operation.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int read_spellings(byte_reader *reader, cgai_model *model, uint64_t count) {
     for (uint64_t i = 0; i < count; ++i) {
         char *token = read_token(reader);
@@ -187,7 +208,13 @@ static int read_spellings(byte_reader *reader, cgai_model *model, uint64_t count
     return 1;
 }
 
-/** @brief Allocate vocabulary and count storage once, retaining serialized token order. */
+/**
+ * @brief Allocate vocabulary storage and validate all decoded spellings.
+ * @param reader Mutable bounded reader over borrowed artifact bytes.
+ * @param model Borrowed model, kept alive for the operation.
+ * @param count Number of entries supplied to this operation.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int read_vocabulary(byte_reader *reader, cgai_model *model, uint64_t count) {
     if (count > SIZE_MAX / sizeof(char *))
         return 0;
@@ -259,7 +286,12 @@ static int restore_model_body(byte_reader *reader, cgai_model *model, const uint
     return read_numeric_payload(reader, model);
 }
 
-/** @brief Bound minimum payload size before allocating from serialized dimensions. */
+/**
+ * @brief Verify numeric arrays fit in the remaining artifact before allocation.
+ * @param reader Mutable bounded reader over borrowed artifact bytes.
+ * @param header Borrowed decoded artifact header containing validated dimensions and counts.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int payload_fits(const byte_reader *reader, const uint64_t *header) {
     const uint64_t rows = header[CGAI_HEADER_CENTROID_COUNT];
     const uint64_t remaining = (uint64_t)(reader->size - reader->offset);

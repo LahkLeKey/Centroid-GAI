@@ -7,7 +7,7 @@
 # needs the real Node.js runtime (not just bun) because the compiled addon is a Node-API binary
 # built against Node headers; bun is used only as the package manager and script runner here.
 
-FROM oven/bun:1 AS bun
+FROM oven/bun:1.3.9 AS bun
 
 FROM node:24-bookworm-slim AS build
 
@@ -25,6 +25,7 @@ WORKDIR /workspace/persistence
 COPY persistence/package.json persistence/bun.lock ./
 COPY persistence/db/package.json ./db/package.json
 COPY persistence/api/package.json ./api/package.json
+COPY persistence/web/package.json ./web/package.json
 RUN bun install --frozen-lockfile --ignore-scripts
 
 # Step 3: Regenerate the `db` package's generated contract types, then bring in the native addon

@@ -23,6 +23,7 @@ test.describe('artifact inspector interactions', () => {
             const offset = Number(url.searchParams.get('offset') ?? 0);
             let data: unknown;
             if (section === 'summary') data = { dimensions: 4, centroidCount: model.centroidCount, initializedCentroids: model.centroidCount, contextWindow: 2, seed: name === 'gamma' ? '99' : '42', vocabularySize: '30', examplesSeen: '6', storage: { vectors: '32', tokenCounts: '480', clusterSizes: '16' } };
+            if (section === 'highlights') data = { tokens: { total: 1, offset: 0, limit: 25, items: [{ id: 3, token: 'shared', count: '6' }] } };
             if (section === 'centroids') data = { offset, limit: 25, total: model.centroidCount, items: Array.from({ length: model.centroidCount }, (_, id) => ({ id, observations: '3', norm: 0.5, distinctTargets: 2 })) };
             if (section === 'vocabulary') data = { offset, limit: 25, total: 30, items: Array.from({ length: Math.min(25, 30 - offset) }, (_, index) => ({ id: offset + index, token: `${name}-token-${offset + index}`, count: '2' })) };
             if (section === 'centroid') data = { id: Number(url.searchParams.get('centroid')), observations: '3', vector: [0.4, -0.2, 0.1, -0.5], tokens: { offset: 0, limit: 25, total: 2, items: [{ id: 4, token: 'shared', count: '2' }, { id: 5, token: 'other', count: '1' }] } };
@@ -139,6 +140,13 @@ test('creates a superset through the real C/API/database stack', async ({ page }
         await expect(page.getByText(/Live super model: changed sources/)).toBeVisible();
         await page.getByRole('button', { name: 'Vocabulary', exact: true }).click();
         await expect(page.getByRole('cell', { name: 'newword', exact: true })).toBeVisible();
+        await page.getByRole('button', { name: 'Supersets', exact: true }).click();
+        await expect(page.getByText(`Model: ${destination}`, { exact: true })).toBeVisible();
+        await page.getByRole('button', { name: /Match learned patterns/ }).click();
+        await page.getByLabel('Input context').fill('newword alpha');
+        await page.getByRole('button', { name: 'Find matches', exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'Matched context', exact: true })).toBeVisible();
+        await expect(page.getByRole('article')).toHaveCount(3);
     } finally {
         await deleteViaApi(destination); await deleteViaApi(a); await deleteViaApi(b);
     }

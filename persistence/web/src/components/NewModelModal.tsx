@@ -143,7 +143,7 @@ export function NewModelModal({ open, onClose, onCreated }: NewModelModalProps) 
                                 placeholder="Paste corpus text…"
                             />
                         </Field>
-                        <div className="grid grid-cols-3 gap-2">
+                        <details><summary className="cursor-pointer text-xs text-slate-400">Advanced training configuration</summary><div className="mt-3 grid grid-cols-3 gap-2">
                             <Field label="Dimensions">
                                 <input
                                     value={dimensions}
@@ -168,7 +168,7 @@ export function NewModelModal({ open, onClose, onCreated }: NewModelModalProps) 
                                     placeholder="default"
                                 />
                             </Field>
-                        </div>
+                        </div></details>
                         {error && <p className="text-xs text-rose-400">{error}</p>}
                         <button
                             type="submit"

@@ -20,11 +20,11 @@ function useContents<S extends ContentsSection>(model: ModelMetadata, section: S
     return { data: state?.key === key ? state.data : undefined, error: state?.key === key ? state.error : undefined, retry: () => setAttempt((value) => value + 1) };
 }
 
-export function ArtifactExplorer({ model, onRefresh }: { model: ModelMetadata; onRefresh: () => void }) {
+export function ArtifactExplorer({ model, onRefresh, initialCentroid }: { model: ModelMetadata; onRefresh: () => void; initialCentroid?: number }) {
     const summary = useContents(model, 'summary', 0, 0, onRefresh);
     const [section, setSection] = useState<'centroids' | 'vocabulary'>('centroids');
     const [offset, setOffset] = useState(0);
-    const [centroid, setCentroid] = useState<number | null>(null);
+    const [centroid, setCentroid] = useState<number | null>(initialCentroid ?? null);
     const result = useContents(model, section, offset, 0, onRefresh);
     const data = summary.data?.data;
     return <section aria-label="Artifact contents" className="space-y-4">

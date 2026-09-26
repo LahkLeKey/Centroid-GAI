@@ -11,6 +11,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { artifactRoute } from './artifact-routes.ts';
 import { loadCurrentModelArtifact as loadModelArtifact } from './composed-models.ts';
+import type { CompositionRecipe } from '../../shared/artifacts.ts';
 
 import {
     closeModelRepository,
@@ -112,7 +113,9 @@ function modelMetadata(model: {
     readonly checksumSha256: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    readonly compositionJson: string | null;
 }) {
+    const recipe = model.compositionJson ? JSON.parse(model.compositionJson) as CompositionRecipe : null;
     return {
         id: model.id,
         name: model.name,
@@ -126,6 +129,7 @@ function modelMetadata(model: {
         checksumSha256: model.checksumSha256,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
+        composition: recipe ? { autoRebuild: recipe.autoRebuild === true, sourceCount: recipe.sources.length } : null,
     };
 }
 

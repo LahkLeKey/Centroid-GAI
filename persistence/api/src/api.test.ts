@@ -34,12 +34,15 @@ test('live supersets refresh nested dependencies, preserve snapshots, and recove
 
         assert.equal((await train(a, 'newword alpha updated training has more examples and different contexts', 8, 4)).status, 201);
         // Concurrent readers must publish a complete refresh and converge on the same bytes.
-        const runs = await Promise.all(Array.from({ length: 4 }, () => post(nested, 'generate', { prompt: 'newword', maxTokens: 4, temperature: 0 })));
+        const runs = await Promise.all(Array.from({ length: 4 }, () => post(nested, 'match', { text: 'newword', limit: 1 })));
         for (const run of runs) assert.equal(run.status, 200, await run.clone().text());
         const refreshed = await contents(live);
         const refreshedNested = await contents(nested);
         assert.notEqual(refreshed.checksumSha256, initial.checksumSha256);
         assert.notEqual(refreshedNested.checksumSha256, initialNested.checksumSha256);
+        const match = await runs[0]!.json();
+        assert.equal(match.checksumSha256, refreshedNested.checksumSha256);
+        assert.equal(match.data.unknownTokens, 0);
         assert.equal(refreshed.data.initializedCentroids, 6);
         assert.equal(refreshedNested.data.initializedCentroids, 1);
         assert.equal(refreshedNested.data.examplesSeen, refreshed.data.examplesSeen);
@@ -68,6 +71,36 @@ test('live supersets refresh nested dependencies, preserve snapshots, and recove
         assert.equal((await contents(live)).composition, null);
     } finally {
         for (const name of names.reverse()) await request(`/api/v1/models/${name}`, { method: 'DELETE' });
+    }
+});
+
+test('API exposes superset discovery and read-only pattern matching with bounded inputs', { skip: !apiUrl }, async () => {
+    const source = `${modelName}-patterns`, superName = `${modelName}-pattern-super`;
+    const post = (name: string, action: string, body: unknown) => request(`/api/v1/models/${name}/${action}`, {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+    });
+    try {
+        assert.equal((await post(source, 'train', { text: 'alpha beta alpha beta', config: { dimensions: 32, contextWindow: 1, centroidCount: 8 } })).status, 201);
+        assert.equal((await post(superName, 'merge', { sources: [{ name: source }] })).status, 201);
+        const catalog = await (await request('/api/v1/models')).json();
+        assert.equal(catalog.find((item: { name: string }) => item.name === source).composition, null);
+        assert.deepEqual(catalog.find((item: { name: string }) => item.name === superName).composition, { autoRebuild: true, sourceCount: 1 });
+        const before = await (await request(`/api/v1/models/${superName}/metadata`)).json();
+        const response = await post(superName, 'match', { text: 'alpha', limit: 2 });
+        assert.equal(response.status, 200);
+        const matched = await response.json();
+        assert.equal(matched.name, superName);
+        assert.equal(matched.checksumSha256, before.checksumSha256);
+        assert.equal(matched.data.matches.length, 2);
+        assert.equal(matched.data.matches[0].squaredDistance, 0);
+        assert.equal(matched.data.matches[0].targets.items[0].token, 'beta');
+        assert.deepEqual(await (await request(`/api/v1/models/${superName}/metadata`)).json(), before);
+        for (const body of [null, {}, { text: 1 }, { text: ' ' }, { text: 'a\0b' }, { text: 'a', limit: 0 }, { text: 'a', limit: 11 }])
+            assert.equal((await post(superName, 'match', body)).status, 400);
+        assert.equal((await post(superName, 'match', { text: 'x'.repeat(16385) })).status, 413);
+        assert.equal((await post(`${modelName}-missing`, 'match', { text: 'alpha' })).status, 404);
+    } finally {
+        for (const name of [superName, source]) await request(`/api/v1/models/${name}`, { method: 'DELETE' });
     }
 });
 

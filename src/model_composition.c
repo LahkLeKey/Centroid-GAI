@@ -8,17 +8,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+/** Maximum total vocabulary entries across merge inputs. */
 #define MERGE_MAX_TOKENS ((size_t)200000U)
+/** Maximum output storage occupied by numeric model arrays. */
 #define MERGE_MAX_BYTES ((size_t)64U * 1024U * 1024U)
+/** Maximum estimated centroid dimension comparisons during compaction. */
 #define MERGE_MAX_DISTANCE_WORK UINT64_C(100000000)
 
+/** @brief Validated merge configuration and vocabulary workspace. */
 typedef struct merge_workspace {
-    cgai_config config;
-    size_t rows, tokens, examples, unique;
-    const char **spellings;
-    size_t *mapping;
+    cgai_config config;     /**< Output configuration. */
+    size_t rows;            /**< Total active source rows. */
+    size_t tokens;          /**< Total source vocabulary entries. */
+    size_t examples;        /**< Total observed transitions. */
+    size_t unique;          /**< Distinct ordinary spellings. */
+    const char **spellings; /**< Owned array of borrowed source spellings. */
+    size_t *mapping;        /**< Owned temporary vocabulary ID map. */
 } merge_workspace;
 
+/**
+ * @brief Reject nonfinite components in a stored centroid vector.
+ * @param model Borrowed model, kept alive for the operation.
+ * @param c Centroid row index.
+ * @return CGAI_STATUS_OK when valid, otherwise CGAI_STATUS_ERROR.
+ */
 static cgai_status validate_vector(const cgai_model *model, size_t c) {
     for (size_t d = 0; d < model->config.dimensions; ++d)
         if (!isfinite(model->centroids[c * model->config.dimensions + d]))
@@ -26,6 +39,13 @@ static cgai_status validate_vector(const cgai_model *model, size_t c) {
     return CGAI_STATUS_OK;
 }
 
+/**
+ * @brief Check one centroid count total and accumulate validated observations.
+ * @param model Borrowed model, kept alive for the operation.
+ * @param c Centroid row index.
+ * @param total Total available entries or mutable accumulated observations.
+ * @return CGAI_STATUS_OK when valid, otherwise CGAI_STATUS_ERROR.
+ */
 static cgai_status validate_row(const cgai_model *model, size_t c, uint64_t *total) {
     uint64_t row = 0U;
     for (size_t t = 0; t < model->vocabulary_size; ++t) {
@@ -41,6 +61,11 @@ static cgai_status validate_row(const cgai_model *model, size_t c, uint64_t *tot
     return validate_vector(model, c);
 }
 
+/**
+ * @brief Validate reserved vocabulary and conservation of learned observations.
+ * @param model Borrowed model, kept alive for the operation.
+ * @return CGAI_STATUS_OK when valid, otherwise CGAI_STATUS_ERROR.
+ */
 cgai_status cgai_model_validate_statistics(const cgai_model *model) {
     if (!model || model->vocabulary_size < 3U ||
         model->initialized_centroids > model->config.centroid_count ||
@@ -55,11 +80,23 @@ cgai_status cgai_model_validate_statistics(const cgai_model *model) {
     return total == model->examples_seen ? CGAI_STATUS_OK : cgai_fail("inconsistent examples seen");
 }
 
+/**
+ * @brief Compare borrowed token spellings lexicographically for vocabulary union.
+ * @param left Borrowed left comparison operand.
+ * @param right Borrowed right comparison operand.
+ * @return Negative, zero, or positive according to the requested ordering.
+ */
 static int compare_spellings(const void *left, const void *right) {
     return strcmp(*(const char *const *)left, *(const char *const *)right);
 }
 
 /* Ordinary union spellings are sorted; control tokens keep their original IDs. */
+/**
+ * @brief Find a reserved token or binary-search the sorted union vocabulary.
+ * @param model Borrowed model, kept alive for the operation.
+ * @param token Borrowed NUL-terminated token spelling.
+ * @return Vocabulary ID, or SIZE_MAX if absent.
+ */
 static size_t find_token(const cgai_model *model, const char *token) {
     for (size_t i = 0; i < 3U; ++i)
         if (!strcmp(model->vocabulary[i], token))
@@ -77,6 +114,12 @@ static size_t find_token(const cgai_model *model, const char *token) {
     return low < model->vocabulary_size && !strcmp(model->vocabulary[low], token) ? low : SIZE_MAX;
 }
 
+/**
+ * @brief Validate compatibility and accumulate one source into the merge budget.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @param source Borrowed trained source model.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int collect_source(merge_workspace *work, const cgai_model *source) {
     if (!source) {
         (void)cgai_fail("merge source must not be null");
@@ -102,6 +145,13 @@ static int collect_source(merge_workspace *work, const cgai_model *source) {
     return 1;
 }
 
+/**
+ * @brief Validate source uniqueness, compatibility, and total training counters.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @param sources Borrowed ordered source model handles.
+ * @param count Number of entries supplied to this operation.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int collect_sources(merge_workspace *work, const cgai_model *const *sources, size_t count) {
     if (!sources || count == 0U || count > 32U || !sources[0]) {
         (void)cgai_fail("merge requires 1 to 32 source models");
@@ -119,6 +169,12 @@ static int collect_sources(merge_workspace *work, const cgai_model *const *sourc
     return 1;
 }
 
+/**
+ * @brief Choose preserved or compacted capacity within storage and compute limits.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @param target Requested compacted capacity; zero preserves active rows.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int choose_capacity(merge_workspace *work, size_t target) {
     const size_t capacity = target ? target : work->rows;
     if (capacity == 0U || capacity > work->rows || capacity > CGAI_MAX_CENTROID_COUNT) {
@@ -135,6 +191,13 @@ static int choose_capacity(merge_workspace *work, size_t target) {
     return 1;
 }
 
+/**
+ * @brief Collect borrowed ordinary token spellings from all merge sources.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @param sources Borrowed ordered source model handles.
+ * @param count Number of entries supplied to this operation.
+ * @return Number of initialized result entries.
+ */
 static size_t gather_spellings(merge_workspace *work, const cgai_model *const *sources,
                                size_t count) {
     size_t used = 0U;
@@ -144,6 +207,13 @@ static size_t gather_spellings(merge_workspace *work, const cgai_model *const *s
     return used;
 }
 
+/**
+ * @brief Allocate remapping storage and sort and deduplicate source spellings.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @param sources Borrowed ordered source model handles.
+ * @param count Number of entries supplied to this operation.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int collect_vocabulary(merge_workspace *work, const cgai_model *const *sources,
                               size_t count) {
     work->spellings = (const char **)malloc(work->tokens * sizeof(*work->spellings));
@@ -160,6 +230,12 @@ static int collect_vocabulary(merge_workspace *work, const cgai_model *const *so
     return 1;
 }
 
+/**
+ * @brief Copy each unique spelling into output-owned vocabulary storage.
+ * @param output Writable destination; receives the result or owned output allocation.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int copy_spellings(cgai_model *output, const merge_workspace *work) {
     for (size_t i = 0; i < work->unique; ++i) {
         const size_t length = strlen(work->spellings[i]) + 1U;
@@ -173,6 +249,12 @@ static int copy_spellings(cgai_model *output, const merge_workspace *work) {
 }
 
 /* Allocate the union count matrix once instead of resizing it for every token. */
+/**
+ * @brief Allocate the union vocabulary and its zeroed observation matrix.
+ * @param output Writable destination; receives the result or owned output allocation.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int install_vocabulary(cgai_model *output, const merge_workspace *work) {
     const size_t vocabulary = work->unique + 3U;
     char **vocab = (char **)realloc(output->vocabulary, vocabulary * sizeof(char *));
@@ -188,6 +270,11 @@ static int install_vocabulary(cgai_model *output, const merge_workspace *work) {
     return output->token_counts != NULL;
 }
 
+/**
+ * @brief Create output storage after validating the merged numeric byte budget.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @return New owned model, or NULL with an allocation or validation diagnostic.
+ */
 static cgai_model *create_union(const merge_workspace *work) {
     const uint64_t bytes = (uint64_t)work->config.centroid_count *
                            (work->config.dimensions * sizeof(float) + sizeof(uint64_t) +
@@ -205,6 +292,13 @@ static cgai_model *create_union(const merge_workspace *work) {
     return output;
 }
 
+/**
+ * @brief Update an output mean with the observation weight of a source centroid.
+ * @param output Writable destination; receives the result or owned output allocation.
+ * @param destination Index of the output centroid to update.
+ * @param vector Borrowed source centroid vector.
+ * @param weight Number of observations represented by the source vector.
+ */
 static void blend_vector(cgai_model *output, size_t destination, const float *vector,
                          uint64_t weight) {
     const double ratio = (double)weight / (double)(output->cluster_sizes[destination] + weight);
@@ -214,6 +308,13 @@ static void blend_vector(cgai_model *output, size_t destination, const float *ve
     }
 }
 
+/**
+ * @brief Initialize a preserved row or blend into its nearest output centroid.
+ * @param output Writable destination; receives the result or owned output allocation.
+ * @param vector Borrowed source centroid vector.
+ * @param weight Number of observations represented by the source vector.
+ * @return Destination centroid index.
+ */
 static size_t assign_vector(cgai_model *output, const float *vector, uint64_t weight) {
     size_t destination;
     if (output->initialized_centroids < output->config.centroid_count) {
@@ -228,6 +329,13 @@ static size_t assign_vector(cgai_model *output, const float *vector, uint64_t we
     return destination;
 }
 
+/**
+ * @brief Add remapped source token counts into assigned output rows.
+ * @param output Writable destination; receives the result or owned output allocation.
+ * @param source Borrowed trained source model.
+ * @param mapping Writable source-to-output vocabulary ID map.
+ * @return One on success, or zero on validation/allocation failure.
+ */
 static int merge_source(cgai_model *output, const cgai_model *source, size_t *mapping) {
     for (size_t t = 0; t < source->vocabulary_size; ++t) {
         mapping[t] = find_token(output, source->vocabulary[t]);
@@ -245,6 +353,13 @@ static int merge_source(cgai_model *output, const cgai_model *source, size_t *ma
     return 1;
 }
 
+/**
+ * @brief Populate an independently owned model from the validated merge workspace.
+ * @param work Merge workspace containing validated totals and temporary storage.
+ * @param sources Borrowed ordered source model handles.
+ * @param count Number of entries supplied to this operation.
+ * @return New owned model, or NULL with an allocation or validation diagnostic.
+ */
 static cgai_model *build_union(const merge_workspace *work, const cgai_model *const *sources,
                                size_t count) {
     cgai_model *output = create_union(work);

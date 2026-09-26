@@ -8,12 +8,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+/** @brief Owned source models and expected composition results. */
 typedef struct composition_fixture {
-    cgai_model *a, *b, *preserved, *compact;
-    uint8_t *before;
-    size_t before_size;
+    cgai_model *a;         /**< First trained source. */
+    cgai_model *b;         /**< Second trained source. */
+    cgai_model *preserved; /**< Owned preserved union. */
+    cgai_model *compact;   /**< Owned compacted union. */
+    uint8_t *before;       /**< Original first-source bytes. */
+    size_t before_size;    /**< Length of the original artifact. */
 } composition_fixture;
 
+/**
+ * @brief Sum observations of one spelling across initialized centroid rows.
+ * @param model
+ * Borrowed model, kept alive for the operation.
+ * @param token Borrowed NUL-terminated token spelling.
+ * @return Total observed targets for the spelling, or zero when absent.
+ */
 static uint64_t total_token(const cgai_model *model, const char *token) {
     const cgai_token_id id = cgai_vocabulary_find(model, token);
     if (!cgai_token_id_is_valid(id))
@@ -24,6 +35,11 @@ static uint64_t total_token(const cgai_model *model, const char *token) {
     return total;
 }
 
+/**
+ * @brief Train independent source models and capture original artifact bytes.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int setup_fixture(composition_fixture *f) {
     cgai_config config = {8U, 3U, 2U, 42U};
     f->a = cgai_model_create(&config);
@@ -44,6 +60,11 @@ static int setup_fixture(composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Verify preserved rows, vocabulary remapping, and conserved token totals.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_preserved(composition_fixture *f) {
     const cgai_model *sources[] = {f->a, f->b};
     f->preserved = cgai_model_merge(sources, 2U, 0U);
@@ -61,6 +82,11 @@ static int check_preserved(composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Verify compacted means against observation-weighted source vectors.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_weighted_mean(const composition_fixture *f) {
     const cgai_model *sources[] = {f->a, f->b};
     for (size_t d = 0; d < f->compact->config.dimensions; ++d) {
@@ -76,6 +102,11 @@ static int check_weighted_mean(const composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Verify compaction and subsequent superset repacking conserve observations.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_compact(composition_fixture *f) {
     const cgai_model *sources[] = {f->a, f->b};
     f->compact = cgai_model_merge(sources, 2U, 1U);
@@ -94,6 +125,11 @@ static int check_compact(composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Verify composed artifacts survive serialization and independent import.
+ * @param model Borrowed model, kept alive for the operation.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_roundtrip(const cgai_model *model) {
     size_t size = 0U;
     TEST_CHECK(cgai_model_encode(model, NULL, 0U, &size) == CGAI_STATUS_OK, cgai_last_error());
@@ -107,6 +143,11 @@ static int check_roundtrip(const cgai_model *model) {
     return 0;
 }
 
+/**
+ * @brief Compare source bytes before and after model composition.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_source_unchanged(composition_fixture *f) {
     uint8_t *after = (uint8_t *)malloc(f->before_size);
     TEST_CHECK(after, "test allocation");
@@ -117,6 +158,11 @@ static int check_source_unchanged(composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Verify incompatible spaces, duplicate sources, and oversized targets fail.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_incompatible(const composition_fixture *f) {
     const cgai_model *sources[] = {f->a, f->b};
     f->b->config.seed++;
@@ -131,6 +177,11 @@ static int check_incompatible(const composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Verify inconsistent counts and nonfinite centroids are rejected.
+ * @param f Composition fixture owned by the parent test.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 static int check_invalid_statistics(const composition_fixture *f) {
     const cgai_model *sources[] = {f->a, f->b};
     f->b->cluster_sizes[0]++;
@@ -141,6 +192,10 @@ static int check_invalid_statistics(const composition_fixture *f) {
     return 0;
 }
 
+/**
+ * @brief Release every model and byte buffer owned by the composition fixture.
+ * @param f Composition fixture owned by the parent test.
+ */
 static void cleanup_fixture(composition_fixture *f) {
     cgai_model_destroy(f->compact);
     cgai_model_destroy(f->preserved);
@@ -149,6 +204,10 @@ static void cleanup_fixture(composition_fixture *f) {
     free(f->before);
 }
 
+/**
+ * @brief Run model composition conservation, compatibility, and ownership checks.
+ * @return Zero on success; a failed assertion reports the violated invariant.
+ */
 int test_composition(void) {
     composition_fixture f = {0};
     const int result = setup_fixture(&f) || check_preserved(&f) || check_compact(&f) ||

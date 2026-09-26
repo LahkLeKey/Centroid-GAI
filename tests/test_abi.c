@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+/** Fail the test immediately when the supplied assertion is false. */
 #define CHECK(condition) TEST_CHECK(condition, cgai_abi_last_error())
 
 /**
@@ -79,6 +80,26 @@ static void test_artifact_generation(cgai_abi_model *model) {
 }
 
 /**
+ * @brief Verify ABI matching buffers and rejected argument paths.
+ * @param model Borrowed model, kept alive for the operation.
+ */
+static void test_pattern_matching(cgai_abi_model *model) {
+    cgai_abi_buffer result = {0};
+    CHECK(cgai_abi_model_match_json(model, "native models", 3U, &result) == CGAI_ABI_OK);
+    CHECK(result.data != NULL && result.size == strlen((char *)result.data));
+    CHECK(strstr((char *)result.data, "\"matches\":[") != NULL);
+    CHECK(strstr((char *)result.data, "\"unknownTokens\":0") != NULL);
+    cgai_abi_buffer_free(&result);
+    CHECK(cgai_abi_model_match_json(NULL, "native", 1U, &result) == CGAI_ABI_INVALID_ARGUMENT);
+    CHECK(result.data == NULL && result.size == 0U);
+    CHECK(cgai_abi_model_match_json(model, "native", 0U, &result) == CGAI_ABI_INVALID_ARGUMENT);
+    CHECK(cgai_abi_model_match_json(model, "native", 11U, &result) == CGAI_ABI_INVALID_ARGUMENT);
+    CHECK(cgai_abi_model_match_json(model, "  ", 1U, &result) == CGAI_ABI_INVALID_ARGUMENT);
+    CHECK(cgai_abi_model_match_json(model, NULL, 1U, &result) == CGAI_ABI_INVALID_ARGUMENT);
+    CHECK(cgai_abi_model_match_json(model, "native", 1U, NULL) == CGAI_ABI_INVALID_ARGUMENT);
+}
+
+/**
  * @brief Run the ABI integration scenarios against a small reproducible fixture.
  *
  * This executable separates ABI layout and argument checks from operations requiring a trained
@@ -105,6 +126,7 @@ int main(void) {
     test_metadata(model);
 
     test_artifact_generation(model);
+    test_pattern_matching(model);
 
     /* Step 4: Destroy the shared fixture, then check the invalid import argument path. */
     cgai_abi_model_destroy(model);

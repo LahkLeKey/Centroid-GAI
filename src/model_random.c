@@ -2,11 +2,17 @@
 
 #include "internal/model_random.h"
 
+/** First splitmix64 avalanche multiplier. */
 static const uint64_t CGAI_MIX_MULTIPLIER_A = UINT64_C(0xbf58476d1ce4e5b9);
+/** Second splitmix64 avalanche multiplier. */
 static const uint64_t CGAI_MIX_MULTIPLIER_B = UINT64_C(0x94d049bb133111eb);
+/** Weyl increment advancing the splitmix64 state. */
 static const uint64_t CGAI_MIX_INCREMENT = UINT64_C(0x9e3779b97f4a7c15);
+/** First xor-shift distance. */
 static const unsigned CGAI_MIX_SHIFT_A = 30U;
+/** Second xor-shift distance. */
 static const unsigned CGAI_MIX_SHIFT_B = 27U;
+/** Final xor-shift distance. */
 static const unsigned CGAI_MIX_SHIFT_C = 31U;
 
 /**

@@ -5,8 +5,11 @@
 #include <math.h>
 #include <string.h>
 
+/** Initial FNV-style state before mixing the model seed. */
 static const uint64_t CGAI_HASH_OFFSET_BASIS = UINT64_C(1469598103934665603);
+/** Multiplicative byte-hash mixing constant. */
 static const uint64_t CGAI_HASH_PRIME = UINT64_C(1099511628211);
+/** Mask selecting the embedding component sign. */
 static const uint64_t CGAI_LOW_BIT_MASK = UINT64_C(1);
 
 /**

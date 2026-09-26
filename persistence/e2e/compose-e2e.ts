@@ -11,7 +11,11 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const persistenceRoot = fileURLToPath(new URL("..", import.meta.url));
-const apiUrl = "http://127.0.0.1:3000";
+const apiPort = process.env.CGAI_E2E_API_PORT ?? '3100';
+const databasePort = process.env.CGAI_E2E_POSTGRES_PORT ?? '55432';
+const apiUrl = `http://127.0.0.1:${apiPort}`;
+const composeArgs = ['compose', '-p', `centroid-gai-e2e-${process.pid}`];
+const composeEnvironment = { ...process.env, API_PORT: apiPort, POSTGRES_PORT: databasePort };
 const healthTimeoutMs = 180_000;
 const healthIntervalMs = 1_000;
 
@@ -37,7 +41,7 @@ async function waitForHealth(): Promise<void> {
 
     while (Date.now() < deadline) {
         try {
-            const response = await fetch(`${apiUrl}/health`);
+            const response = await fetch(`${apiUrl}/health`, { signal: AbortSignal.timeout(5000) });
             if (response.ok) {
                 return;
             }
@@ -54,7 +58,7 @@ async function waitForHealth(): Promise<void> {
 }
 
 /**
- * Starts Compose, runs E2E HTTP tests, and removes containers while retaining the database volume.
+ * Runs E2E in a fresh process-specific Compose project, then removes only its test resources.
  */
 async function main(): Promise<void> {
     let composeStarted = false;
@@ -62,19 +66,19 @@ async function main(): Promise<void> {
     try {
         // Step 1: Build and start every service so the test covers PostgreSQL, schema setup, the
         // native addon, and HTTP routing as one local deployment rather than a mocked process.
+        composeStarted = true;
         if (
             run("docker", [
-                "compose",
+                ...composeArgs,
                 "up",
                 "--detach",
                 "--build",
                 "--force-recreate",
                 "--remove-orphans",
-            ]) !== 0
+            ], composeEnvironment) !== 0
         ) {
             throw new Error("docker compose up failed");
         }
-        composeStarted = true;
 
         // Step 2: Wait on the public health endpoint instead of guessing container startup timing;
         // this also proves the API can reach its initialized database before tests begin.
@@ -94,10 +98,10 @@ async function main(): Promise<void> {
             throw new Error(`Compose API E2E tests failed with exit code ${status}`);
         }
     } finally {
-        // Step 4: Stop and remove containers even when health or an assertion fails. The named
-        // postgres-data volume is retained so repeated local runs do not destroy operator data.
+        // Step 4: This process owns a unique project, so cleanup cannot stop the developer stack.
         if (composeStarted) {
-            run("docker", ["compose", "down", "--remove-orphans"]);
+            run("docker", [...composeArgs, 'logs', '--no-color'], composeEnvironment);
+            run("docker", [...composeArgs, "down", "--volumes", "--remove-orphans"], composeEnvironment);
         }
     }
 }

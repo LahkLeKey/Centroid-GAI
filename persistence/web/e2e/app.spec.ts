@@ -1,11 +1,7 @@
 import {expect, test} from '@playwright/test';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 
 import {deleteViaApi, SAMPLE_TRAINING_TEXT, trainViaApi, uniqueName} from './helpers.ts';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TINY_CGAI_PATH = path.resolve(__dirname, '../../../build/tiny.cgai');
 
 test.describe('health and shell', () => {
     test('shows a healthy status indicator on load', async ({page}) => {
@@ -61,6 +57,7 @@ test.describe('model catalog', () => {
 
     test('selecting a model updates the chat header and inspector', async ({page}) => {
         await page.goto('/');
+        await page.getByRole('button', { name: 'Text generation', exact: true }).click();
         const sidebar = page.getByRole('complementary');
         await sidebar.locator('[data-testid="model-row"]', {hasText : modelA}).click();
         await expect(page.getByText(`Model: ${modelA}`)).toBeVisible();
@@ -71,6 +68,7 @@ test.describe('model catalog', () => {
 
     test('switching models clears the previous conversation', async ({page}) => {
         await page.goto('/');
+        await page.getByRole('button', { name: 'Text generation', exact: true }).click();
         const sidebar = page.getByRole('complementary');
         await sidebar.locator('[data-testid="model-row"]', {hasText : modelA}).click();
         await page.getByTestId('chat-input').fill('hello from a');
@@ -128,11 +126,17 @@ test.describe('train workflow', () => {
 test.describe('upload workflow', () => {
     test('uploading a .cgai artifact persists and selects it', async ({page}) => {
         const name = uniqueName('e2e-upload');
+        const fixture = `${name}-fixture`;
+        await trainViaApi(fixture, SAMPLE_TRAINING_TEXT);
+        const response = await fetch(`${process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:3000'}/api/v1/models/${fixture}`);
+        expect(response.ok).toBe(true);
+        const buffer = Buffer.from(await response.arrayBuffer());
+        await deleteViaApi(fixture);
         await page.goto('/');
         await page.getByRole('button', {name : 'New model'}).click();
         await page.getByRole('button', {name : 'Upload artifact'}).click();
         await page.getByLabel('Model name').fill(name);
-        await page.getByLabel('.cgai file').setInputFiles(TINY_CGAI_PATH);
+        await page.getByLabel('.cgai file').setInputFiles({ name: 'fixture.cgai', mimeType: 'application/octet-stream', buffer });
         await page.getByRole('button', {name : 'Upload & persist'}).click();
 
         await expect(page.getByText(`Model: ${name}`)).toBeVisible({timeout : 15_000});
@@ -157,8 +161,12 @@ test.describe('chat playground', () => {
 
     test.afterAll(async () => { await deleteViaApi(modelName); });
 
-    test('sends a prompt and displays a continuation', async ({page}) => {
+    test.beforeEach(async ({ page }) => {
         await page.goto('/');
+        await page.getByRole('button', { name: 'Text generation', exact: true }).click();
+    });
+
+    test('sends a prompt and displays a continuation', async ({page}) => {
         await page.getByRole('complementary')
             .locator('[data-testid="model-row"]', {hasText : modelName})
             .click();
@@ -175,7 +183,6 @@ test.describe('chat playground', () => {
     });
 
     test('re-enables the send button once a second reply lands', async ({page}) => {
-        await page.goto('/');
         await page.getByRole('complementary')
             .locator('[data-testid="model-row"]', {hasText : modelName})
             .click();
@@ -189,7 +196,6 @@ test.describe('chat playground', () => {
     });
 
     test('clear button resets the conversation', async ({page}) => {
-        await page.goto('/');
         await page.getByRole('complementary')
             .locator('[data-testid="model-row"]', {hasText : modelName})
             .click();
@@ -202,7 +208,6 @@ test.describe('chat playground', () => {
     });
 
     test('settings panel toggles generation parameter fields', async ({page}) => {
-        await page.goto('/');
         await page.getByRole('complementary')
             .locator('[data-testid="model-row"]', {hasText : modelName})
             .click();

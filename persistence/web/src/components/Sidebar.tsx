@@ -108,6 +108,7 @@ export function Sidebar({
                                     >
                                         <button type="button" aria-pressed={active} onClick={() => onSelect(model.name)} className="block w-full text-left">
                                             <p className="truncate pr-5 text-sm font-medium text-slate-100">{model.name}</p>
+                                            {model.composition && <span className="text-[10px] text-indigo-300">{model.composition.autoRebuild ? 'Live superset' : 'Snapshot superset'}</span>}
                                             <p className="mt-0.5 truncate font-mono text-[11px] text-slate-500">
                                                 d{model.dimensions} · c{model.centroidCount} · vocab {vocab.toLocaleString()}
                                             </p>

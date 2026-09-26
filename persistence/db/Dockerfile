@@ -8,13 +8,14 @@
 
 # Step 1: Install workspace dependencies for `@centroid-gai/db`. The root workspace manifest and
 # lockfile are required so bun recognizes this as a workspace member and resolves exact versions.
-FROM oven/bun:1 AS build
+FROM oven/bun:1.3.9 AS build
 
 WORKDIR /workspace/persistence
 
 COPY persistence/package.json persistence/bun.lock ./
 COPY persistence/db/package.json ./db/package.json
 COPY persistence/api/package.json ./api/package.json
+COPY persistence/web/package.json ./web/package.json
 RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY persistence/db/ ./db/
@@ -29,7 +30,7 @@ RUN DATABASE_URL=postgresql://contract:emit@localhost/unused bun run contract:em
 
 # Step 3: Copy only the finished package into the runtime image; no build tools ship to
 # production.
-FROM oven/bun:1 AS runtime
+FROM oven/bun:1.3.9 AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app/persistence/db
