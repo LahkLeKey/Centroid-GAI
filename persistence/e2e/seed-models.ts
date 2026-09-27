@@ -8,8 +8,8 @@
  * current corpus files. This makes the examples reproducible after a clean checkout or database
  * reset without coupling the seed workflow to Prisma internals.
  */
-import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import {readFile} from "node:fs/promises";
+import {fileURLToPath} from "node:url";
 
 interface ExampleModel {
     readonly name: string;
@@ -21,13 +21,8 @@ interface TrainResponse {
     readonly name: string;
     readonly id: string;
     readonly metadata: {
-        readonly formatVersion: number;
-        readonly libraryVersion: string;
-        readonly dimensions: number;
-        readonly centroidCount: number;
-        readonly contextWindow: number;
-        readonly vocabularySize: string;
-        readonly examplesSeen: string;
+        readonly formatVersion: number; readonly libraryVersion : string; readonly dimensions : number; readonly centroidCount : number; readonly contextWindow : number; readonly vocabularySize : string; readonly examplesSeen :
+                                                                                                                                                                                                                         string;
     };
 }
 
@@ -36,34 +31,34 @@ const apiUrl = process.env.CGAI_API_URL ?? "http://127.0.0.1:3000";
 
 const exampleModels: readonly ExampleModel[] = [
     {
-        name: "tiny-contexts",
-        corpusPath: "examples/model_corpora/tiny_contexts.txt",
-        description: "A compact corpus for inspecting the basic training flow.",
+        name : "tiny-contexts",
+        corpusPath : "examples/model_corpora/tiny_contexts.txt",
+        description : "A compact corpus for inspecting the basic training flow.",
     },
     {
-        name: "generation-patterns",
-        corpusPath: "examples/model_corpora/generation_patterns.txt",
-        description: "A corpus focused on nearest-context generation behavior.",
+        name : "generation-patterns",
+        corpusPath : "examples/model_corpora/generation_patterns.txt",
+        description : "A corpus focused on nearest-context generation behavior.",
     },
     {
-        name: "persistence-workflow",
-        corpusPath: "examples/model_corpora/persistence_workflow.txt",
-        description: "A corpus that follows train, persist, load, and generate steps.",
+        name : "persistence-workflow",
+        corpusPath : "examples/model_corpora/persistence_workflow.txt",
+        description : "A corpus that follows train, persist, load, and generate steps.",
     },
     {
-        name: "conversational-patterns",
-        corpusPath: "examples/model_corpora/conversational_patterns.txt",
-        description: "Everyday conversational turns: greetings, questions, and polite exchanges.",
+        name : "conversational-patterns",
+        corpusPath : "examples/model_corpora/conversational_patterns.txt",
+        description : "Everyday conversational turns: greetings, questions, and polite exchanges.",
     },
     {
-        name: "worldbuilding-vocabulary",
-        corpusPath: "examples/model_corpora/worldbuilding_vocabulary.txt",
-        description: "Original vocabulary for settings, factions, and systems of magic.",
+        name : "worldbuilding-vocabulary",
+        corpusPath : "examples/model_corpora/worldbuilding_vocabulary.txt",
+        description : "Original vocabulary for settings, factions, and systems of magic.",
     },
     {
-        name: "general-vocabulary",
-        corpusPath: "examples/model_corpora/general_vocabulary.txt",
-        description: "Everyday vocabulary outside the tooling and worldbuilding domains.",
+        name : "general-vocabulary",
+        corpusPath : "examples/model_corpora/general_vocabulary.txt",
+        description : "Everyday vocabulary outside the tooling and worldbuilding domains.",
     },
 ];
 
@@ -77,9 +72,9 @@ async function seedModel(model: ExampleModel): Promise<void> {
     // Step 2: Send the corpus through the public training route. The API performs native training,
     // native inspection, checksum calculation, and database replacement as one application flow.
     const response = await fetch(`${apiUrl}/api/v1/models/${model.name}/train`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text }),
+        method : "POST",
+        headers : {"content-type" : "application/json"},
+        body : JSON.stringify({text}),
     });
     if (!response.ok) {
         throw new Error(
@@ -96,8 +91,7 @@ async function seedModel(model: ExampleModel): Promise<void> {
         `  format=${result.metadata.formatVersion} library=${result.metadata.libraryVersion}` +
             ` dimensions=${result.metadata.dimensions} centroids=${result.metadata.centroidCount}` +
             ` context=${result.metadata.contextWindow} vocabulary=${
-                result.metadata.vocabularySize
-            }` +
+                result.metadata.vocabularySize}` +
             ` examples=${result.metadata.examplesSeen}`,
     );
 }
@@ -125,14 +119,14 @@ async function mergeStarterChatbot(): Promise<void> {
     const name = "starter-chatbot";
     // Step 1: Delete any previous composed artifact so reruns stay idempotent; merge refuses to
     // replace an existing destination.
-    await fetch(`${apiUrl}/api/v1/models/${name}`, { method: "DELETE" });
+    await fetch(`${apiUrl}/api/v1/models/${name}`, {method : "DELETE"});
 
     // Step 2: Merge preserves every source's active centroids rather than compacting them, so the
     // combined baseline keeps the full learned distribution of each domain.
     const response = await fetch(`${apiUrl}/api/v1/models/${name}/merge`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sources: exampleModels.map((model) => ({ name: model.name })) }),
+        method : "POST",
+        headers : {"content-type" : "application/json"},
+        body : JSON.stringify({sources : exampleModels.map((model) => ({name : model.name}))}),
     });
     if (!response.ok) {
         throw new Error(
@@ -147,8 +141,7 @@ async function mergeStarterChatbot(): Promise<void> {
         `  format=${result.metadata.formatVersion} library=${result.metadata.libraryVersion}` +
             ` dimensions=${result.metadata.dimensions} centroids=${result.metadata.centroidCount}` +
             ` context=${result.metadata.contextWindow} vocabulary=${
-                result.metadata.vocabularySize
-            }` +
+                result.metadata.vocabularySize}` +
             ` examples=${result.metadata.examplesSeen}`,
     );
 }
