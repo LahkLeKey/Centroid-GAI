@@ -13,6 +13,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  knowledge-ingestion:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install offline bulk-preparation test dependencies
+        run: python -m pip install -r tools/knowledge/bulk-requirements.txt
+      - name: Build native trainer for ingestion smoke test
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+      - name: Test Git encyclopedia import without network or credentials
+        env:
+          CGAI_EXECUTABLE: ${{ runner.os == 'Windows' && 'build/Release/cgai.exe' || 'build/cgai' }}
+        run: python -m unittest discover -s tools/knowledge/tests -v
+      - name: Verify committed encyclopedia checksums and Git size budgets
+        run: python -m tools.knowledge.bulk verify
+
   build:
     strategy:
       matrix:
@@ -50,6 +73,9 @@ jobs:
       - name: Test Node addon
         working-directory: persistence/api
         run: bun run native:test
+      - name: Verify committed encyclopedia native model clusters
+        working-directory: persistence/api
+        run: node src/knowledge/train-clusters.ts --verify
       - name: Evaluate model baselines without network or database
         working-directory: persistence/api
         run: |

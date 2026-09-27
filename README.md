@@ -55,6 +55,21 @@ With Visual Studio, the executable is normally at `build/Release/cgai.exe`.
 CLI arguments after the prompt are optional: maximum tokens, temperature, and
 random seed. Temperature `0` uses deterministic greedy selection.
 
+## Grow a training knowledgebase
+
+The [committed encyclopedia release](knowledge/encyclopedia/README.md) contains
+20,000 Wikipedia articles, 32 document clusters, and 147 trained model shards with
+2,352 native centroids. Every generated file stays below 1 MiB and uses ordinary
+Git storage. Source revisions, attribution, and checksums accompany the data.
+
+The [Git encyclopedia tools](docs/git-encyclopedia.md) import committed text into
+traceable corpora for `cgai train`, monitor content changes, and optionally pull
+a public Git repository into an isolated cache. The
+[starter configuration](examples/knowledge/encyclopedia.json) uses the encyclopedia
+already tracked under `examples/model_corpora/encyclopedia`. Model runtime reads
+local artifacts; no runtime crawling or API keys are involved. Public-web research
+can be incorporated through reviewed content commits with citations.
+
 ## Library API
 
 The documented public API is in [`include/centroid_gai.h`](include/centroid_gai.h). A typical

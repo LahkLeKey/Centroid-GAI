@@ -12,4 +12,7 @@ node_modules/
 *.tsbuildinfo
 persistence/*/build/
 examples/models/
+__pycache__/
+*.pyc
+/knowledge/**/*.lock
 

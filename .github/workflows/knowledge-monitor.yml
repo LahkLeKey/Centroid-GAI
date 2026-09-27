@@ -1,0 +1,36 @@
+name: Encyclopedia upstream monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 8 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compare the pinned dataset with its public Git branch
+        shell: bash
+        run: |
+          set +e
+          python -m tools.knowledge.bulk monitor > knowledge-monitor.json
+          status=$?
+          cat knowledge-monitor.json
+          cat knowledge-monitor.json >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -eq 3 ]; then
+            echo "::warning::The public encyclopedia source has a newer commit; review a new offline release."
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encyclopedia-upstream-status
+          path: knowledge-monitor.json

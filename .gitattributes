@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+knowledge/**/*.gz -text -filter
+knowledge/**/*.json text eol=lf
+knowledge/**/*.md text eol=lf
