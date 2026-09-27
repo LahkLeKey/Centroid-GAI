@@ -1,4 +1,4 @@
-# Hugging Face import plan
+# Hugging Face import: why not, and what we do instead
 
 ## Constraint
 
@@ -6,113 +6,70 @@ CGAI artifacts store hashed token embeddings, online k-means centroids, and
 per-centroid next-token frequency tables (see
 [model-composition.md](model-composition.md)). Pretrained transformer weights
 (attention matrices, layer norms, learned embeddings) have no structural
-counterpart in that format, so a Hugging Face checkpoint cannot be converted
-directly into a `.cgai` artifact. There is no import path that reads
-`model.safetensors` and emits centroids.
+counterpart in that format. This is architectural, not an authentication
+problem: downloading a public Hugging Face repository's `model.safetensors`
+without a token is just as unusable for CGAI as downloading it with one.
+There is no code path, present or planned, that reads transformer weights and
+emits centroids.
 
-The only supported path is **distillation**: run a pretrained Hugging Face
-model as a *teacher* to generate text, then train a CGAI model natively on
-that generated corpus through the existing `trainNativeModel` /
-`POST /api/v1/models/:name/train` path. The teacher never becomes part of the
-artifact; only its output text does, and that text is provenance-tracked like
-any other training corpus.
+A token-gated "teacher" pipeline (call a hosted Hugging Face model, train on
+its output) was prototyped and then dropped. It added an external service
+dependency, an API token requirement, and third-party licensing review for
+every model, none of which serve the actual goal: a bigger, hand-owned
+vocabulary and a more human-feeling baseline chatbot. That work is not
+present in this repository.
 
-## Pipeline
+## Decision: hand-authored, composable native corpora
+
+Instead of importing anything, the baseline grows through more, and more
+varied, hand-written corpora trained natively and combined with the existing
+merge tooling:
 
 ```
-Hugging Face model (teacher)
-  -> prompted generation, deterministic decoding settings recorded
-  -> generated corpus file(s) on disk, source-tagged
-  -> existing native training: trainNativeModel(text, config)
-  -> ordinary .cgai artifact, stored through the API like any other model
-  -> baseline harness (persistence/api/src/evaluation) scores it
+Domain-scoped corpus files (examples/model_corpora/*.txt)
+  -> trainNativeModel(text, config) per domain, same as any example model
+  -> POST /api/v1/models/:name/merge combines them into one composed model
+  -> baseline harness (persistence/api/src/evaluation) scores every model,
+     including the merged one, against recall/challenge/unknown probes
 ```
 
-Nothing new is required in the C core or ABI. The new work is a corpus-
-generation step that sits in front of training, plus provenance metadata.
+This uses only capability that already exists (`cgai_model_merge`,
+`createComposedArtifact`, the baseline suite); no new C, ABI, or HTTP surface
+is required. What changes is content: more corpora, in more domains, so the
+merged vocabulary and centroid coverage stop being smoke-test-sized.
 
-### 1. Model selection
+### Domains added
 
-Prioritize small, permissively licensed instruction/text models runnable
-locally or via the Hugging Face Inference API without a paid endpoint (for
-example distilled GPT-2-class or small Llama/Mistral-family checkpoints with
-compatible licenses). Reject models whose license forbids using outputs to
-train other models; record the license decision next to the generated corpus.
+- `conversational-patterns`: greetings, small talk, questions and answers,
+  and polite requests, so the merged model has some grounding in ordinary
+  turn-taking instead of only describing its own internals.
+- `worldbuilding-vocabulary`: original terms for places, factions, characters,
+  and systems of magic or technology, aimed at creative worldbuilding use
+  rather than any existing fictional property.
+- `general-vocabulary`: everyday nouns, verbs, and descriptive sentences
+  outside both the tooling and worldbuilding domains, to broaden token
+  coverage rather than deepen one topic.
 
-### 2. Prompted generation, not raw dumps
+Each is committed under `examples/model_corpora/`, trained by
+`persistence/e2e/seed-models.ts` alongside the original three corpora, and
+merged into a single `starter-chatbot` composed model so there is one
+artifact that represents "the current best combined baseline" rather than
+several disconnected small ones.
 
-Generate corpora from a fixed, versioned prompt set that mirrors the shape of
-`examples/model_corpora/*.txt` (short domain-scoped passages), not an
-unstructured scrape. This keeps documents comparable to existing corpora and
-lets the same tokenizer assumptions (`asciiTokens` in
-[metrics.ts](../persistence/api/src/evaluation/metrics.ts)) apply for
-evaluation later. Decoding parameters (temperature, seed, max tokens, model
-id/revision) are recorded with the output so a corpus can be regenerated or
-audited.
+### What stays out of scope
 
-### 3. Provenance
-
-Each generated corpus gets a sidecar record: teacher model id + revision,
-license, prompt set version, decoding settings, generation timestamp, and a
-SHA-256 of the resulting text. Trained artifacts already store their source
-text hash implicitly through `checksumSha256`; the sidecar is what lets a
-reviewer trace a `.cgai` file back to "which teacher, which prompts, which
-settings" without re-deriving it from the binary.
-
-### 4. Training and evaluation
-
-Feed the generated corpus through the same `train` endpoint used for hand-
-written corpora, under the `teacher/<name>` catalog name. Passing `--catalog`
-to the baseline benchmark downloads and scores every catalog entry, so a
-teacher-derived model is measured against the same recall/challenge/unknown
-probes and the unigram/backoff-3 reference models as hand-written corpora
-before it is treated as a real catalog entry, with no suite file changes
-required.
-
-### 5. What stays out of scope
-
-- No transformer inference embedded in the C core, ABI, or CLI.
+- No transformer inference, embedded or hosted, anywhere in the pipeline.
+- No scraping of third-party model weights or datasets; corpora are original
+  and hand-written.
 - No attempt to map attention/embedding weights onto centroids or token
   embeddings; CGAI's hashed embeddings are seed-derived, not learned.
-- No unattended re-generation: prompt sets and decoding settings are versioned
-  files reviewed like code, not fetched fresh on every run.
 
-## Decisions
+### Next steps
 
-- **Generation runs through the Hugging Face Inference API**, not local
-  transformer inference. This keeps the stack consistent with the rest of
-  `persistence` (Bun/TypeScript, no Python or embedded model runtime) and
-  needs no GPU. `HF_INFERENCE_ENDPOINT` can point at a self-hosted
-  OpenAI/TGI-compatible endpoint later without changing the corpus-in,
-  artifact-out shape.
-- **Teacher-derived models use a `teacher/<name>` catalog prefix** (for
-  example `teacher/distilgpt2-tiny-contexts`), distinct from hand-written
-  names like `tiny-contexts`. The API and database accept slashes as an
-  opaque part of the name; the CLI/HTTP client percent-encodes it. This lets
-  the baseline report and catalog listing filter by provenance without a
-  separate schema field.
+Vocabulary breadth is still limited by how much original text is hand-written
+and committed. Growing it further means adding more domain corpora the same
+way, not a different mechanism. The baseline harness (`bun run baseline`)
+is the way to tell whether a new corpus, or the merged superset, actually
+improved recall/challenge scores rather than just adding more tokens with no
+measurable effect.
 
-## Implementation
-
-[`examples/teacher-prompts/v1.json`](../examples/teacher-prompts/v1.json) is
-the versioned, domain-scoped prompt set described above.
-[`persistence/api/src/teacher/import-teacher-model.ts`](../persistence/api/src/teacher/import-teacher-model.ts)
-is the end-to-end script:
-
-```sh
-HF_TOKEN=... bun run --cwd persistence teacher:import -- \
-  --model distilgpt2 --name distilgpt2-v1 --license apache-2.0
-```
-
-It validates the license against a small reviewed allowlist (`apache-2.0`,
-`mit`, `bsd-2-clause`, `bsd-3-clause`, `cc0-1.0`; anything else needs
-`--allow-unlisted-license` after manual review), generates one paragraph per
-prompt-set domain with retry-on-cold-start, sanitizes output to the ASCII
-subset the baseline tokenizer scores, writes the corpus and a provenance
-sidecar under `build/teacher-corpora/` (gitignored, matching how generated
-`.cgai` files are already excluded from source control), and trains the
-result through the existing `POST /api/v1/models/:name/train` route. Running
-`bun run baseline --catalog http://127.0.0.1:3000` afterward automatically
-scores the new `teacher/*` model alongside hand-written ones, since the
-benchmark already downloads and evaluates every catalog entry when `--catalog`
-is passed.
