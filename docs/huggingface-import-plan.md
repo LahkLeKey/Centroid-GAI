@@ -62,12 +62,12 @@ settings" without re-deriving it from the binary.
 ### 4. Training and evaluation
 
 Feed the generated corpus through the same `train` endpoint used for hand-
-written corpora. Add the resulting model as another `source` entry in
-[`pattern-baseline-v1.json`](../examples/evaluation/pattern-baseline-v1.json)
-(or a new suite file scoped to teacher-derived corpora) so it is scored
-against recall/challenge/unknown probes and against the unigram/backoff-3
-reference models the same way hand-written corpora are, before it is treated
-as a real catalog entry.
+written corpora, under the `teacher/<name>` catalog name. Passing `--catalog`
+to the baseline benchmark downloads and scores every catalog entry, so a
+teacher-derived model is measured against the same recall/challenge/unknown
+probes and the unigram/backoff-3 reference models as hand-written corpora
+before it is treated as a real catalog entry, with no suite file changes
+required.
 
 ### 5. What stays out of scope
 
@@ -77,11 +77,42 @@ as a real catalog entry.
 - No unattended re-generation: prompt sets and decoding settings are versioned
   files reviewed like code, not fetched fresh on every run.
 
-## Open questions
+## Decisions
 
-- Where generation runs (local inference vs. Hugging Face Inference API) is a
-  cost/availability tradeoff, not an architectural one; either can feed the
-  same corpus-in, artifact-out path.
-- Whether teacher-derived models are stored in the same catalog namespace as
-  hand-written ones, or a distinct `teacher/` prefix, so operators can filter
-  the baseline report by provenance.
+- **Generation runs through the Hugging Face Inference API**, not local
+  transformer inference. This keeps the stack consistent with the rest of
+  `persistence` (Bun/TypeScript, no Python or embedded model runtime) and
+  needs no GPU. `HF_INFERENCE_ENDPOINT` can point at a self-hosted
+  OpenAI/TGI-compatible endpoint later without changing the corpus-in,
+  artifact-out shape.
+- **Teacher-derived models use a `teacher/<name>` catalog prefix** (for
+  example `teacher/distilgpt2-tiny-contexts`), distinct from hand-written
+  names like `tiny-contexts`. The API and database accept slashes as an
+  opaque part of the name; the CLI/HTTP client percent-encodes it. This lets
+  the baseline report and catalog listing filter by provenance without a
+  separate schema field.
+
+## Implementation
+
+[`examples/teacher-prompts/v1.json`](../examples/teacher-prompts/v1.json) is
+the versioned, domain-scoped prompt set described above.
+[`persistence/api/src/teacher/import-teacher-model.ts`](../persistence/api/src/teacher/import-teacher-model.ts)
+is the end-to-end script:
+
+```sh
+HF_TOKEN=... bun run --cwd persistence teacher:import -- \
+  --model distilgpt2 --name distilgpt2-v1 --license apache-2.0
+```
+
+It validates the license against a small reviewed allowlist (`apache-2.0`,
+`mit`, `bsd-2-clause`, `bsd-3-clause`, `cc0-1.0`; anything else needs
+`--allow-unlisted-license` after manual review), generates one paragraph per
+prompt-set domain with retry-on-cold-start, sanitizes output to the ASCII
+subset the baseline tokenizer scores, writes the corpus and a provenance
+sidecar under `build/teacher-corpora/` (gitignored, matching how generated
+`.cgai` files are already excluded from source control), and trains the
+result through the existing `POST /api/v1/models/:name/train` route. Running
+`bun run baseline --catalog http://127.0.0.1:3000` afterward automatically
+scores the new `teacher/*` model alongside hand-written ones, since the
+benchmark already downloads and evaluates every catalog entry when `--catalog`
+is passed.

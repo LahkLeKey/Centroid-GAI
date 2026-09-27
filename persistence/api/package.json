@@ -13,6 +13,7 @@
 		"api:test": "node --test src/api.test.ts",
 		"baseline:test": "node --test src/evaluation/metrics.test.ts",
 		"baseline": "node src/evaluation/benchmark.ts",
+		"teacher:import": "node src/teacher/import-teacher-model.ts",
 		"test": "bun run native:test",
 		"test:all": "bun run typecheck && bun run native:test && bun run api:test",
 		"typecheck": "tsc --noEmit",
