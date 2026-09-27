@@ -25,6 +25,22 @@
     {
       "name": "general-vocabulary",
       "path": "examples/model_corpora/general_vocabulary.txt"
+    },
+    {
+      "name": "encyclopedia-science-and-nature",
+      "path": "examples/model_corpora/encyclopedia/science_and_nature.txt"
+    },
+    {
+      "name": "encyclopedia-geography-and-places",
+      "path": "examples/model_corpora/encyclopedia/geography_and_places.txt"
+    },
+    {
+      "name": "encyclopedia-history-and-society",
+      "path": "examples/model_corpora/encyclopedia/history_and_society.txt"
+    },
+    {
+      "name": "encyclopedia-everyday-objects-and-processes",
+      "path": "examples/model_corpora/encyclopedia/everyday_objects_and_processes.txt"
     }
   ],
   "probes": [
