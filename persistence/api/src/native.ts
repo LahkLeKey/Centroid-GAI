@@ -36,6 +36,8 @@ export interface ModelMetadata {
 }
 
 interface NativeBinding {
+    createSpatialIndex(vectors: Float64Array, categories: Uint32Array): object;
+    querySpatialIndex(index: object, vector: Float64Array, options: Uint32Array): string;
     matchPatterns(payload: Buffer, text: string, limit: number): string;
     inspectContents(payload: Buffer, section: number, offset: number, limit: number, centroid: number): string;
     mergeModels(payloads: Buffer[], targetCentroids: number): Buffer;
@@ -67,6 +69,37 @@ if (binding.abiVersion() !== 2) {
 
 /** JSON Schema for the persisted artifact, exported by C and re-served at `/native/schema`. */
 export const nativePersistenceSchema: unknown = JSON.parse(binding.persistenceSchema());
+
+/** Results from exact immutable C index traversal; row indices refer to original input order. */
+export interface NativeSpatialResult {
+    neighbors: { index: number; squaredDistance: number }[];
+    comparisons: number;
+    visitedNodes: number;
+}
+
+/** Copy vectors into a C-owned immutable index, released by the Node owner object's finalizer. */
+export function createNativeSpatialIndex(vectors: number[][], categories: number[]) {
+    const dimensions = vectors[0]?.length ?? 0;
+    if (!vectors.length || vectors.length > 4096 || !dimensions || dimensions > 4096 ||
+        vectors.length * dimensions > 1048576 || categories.length !== vectors.length ||
+        categories.some(category => !Number.isInteger(category) || category < 0 || category >= 64) ||
+        vectors.some(vector => vector.length !== dimensions || !vector.every(Number.isFinite))) {
+        throw new TypeError('Invalid native spatial vectors or categories');
+    }
+    const count = vectors.length;
+    const index = binding.createSpatialIndex(new Float64Array(vectors.flat()), new Uint32Array(categories));
+    return {
+        query(vector: number[], limit = 5, category?: number, exclude?: number): NativeSpatialResult {
+            if (vector.length !== dimensions || !vector.every(Number.isFinite) || !Number.isInteger(limit) || limit < 1 || limit > 100 ||
+                (category !== undefined && (!Number.isInteger(category) || category < 0 || category >= 64)) ||
+                (exclude !== undefined && (!Number.isInteger(exclude) || exclude < 0 || exclude >= count))) {
+                throw new TypeError('Invalid native spatial query');
+            }
+            return JSON.parse(binding.querySpatialIndex(index, new Float64Array(vector),
+                new Uint32Array([limit, category ?? 0xffffffff, exclude ?? 0xffffffff]))) as NativeSpatialResult;
+        },
+    };
+}
 
 /**
  * Trains in native C and returns a database-ready binary artifact.

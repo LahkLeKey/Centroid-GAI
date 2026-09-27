@@ -11,6 +11,7 @@ from urllib.parse import urlsplit
 import uuid
 
 from . import git_source
+from .config import CODE_EXTENSIONS
 from .lock import acquire
 
 
@@ -18,7 +19,7 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def normalize(data: bytes, min_words: int) -> str:
+def normalize(data: bytes, min_words: int, *, code: bool = False) -> str:
     """Preserve text/Markdown structure while normalizing Unicode and whitespace."""
     text = data.decode("utf-8-sig", errors="strict")
     if "\0" in text or text.startswith("version https://git-lfs.github.com/spec/v1"):
@@ -30,9 +31,9 @@ def normalize(data: bytes, min_words: int) -> str:
     words = text.split()
     if len(words) < min_words:
         raise ValueError("too few words")
-    if sum(c.isalpha() for c in text) / max(1, len(text)) < 0.4:
+    if not code and sum(c.isalpha() for c in text) / max(1, len(text)) < 0.4:
         raise ValueError("low alphabetic content")
-    if len({word.casefold() for word in words}) / len(words) < 0.05:
+    if not code and len({word.casefold() for word in words}) / len(words) < 0.05:
         raise ValueError("excessive repetition")
     return text
 
@@ -78,7 +79,8 @@ def snapshot(repo: Path, ref: str, config, output: Path) -> dict:
         documents, rejected = {}, []
         for entry in entries:
             try:
-                text = normalize(git_source.blob(repo, entry.oid, config.max_file_bytes), config.min_words)
+                text = normalize(git_source.blob(repo, entry.oid, config.max_file_bytes), config.min_words,
+                                 code=Path(entry.path).suffix.lower() in CODE_EXTENSIONS)
             except (ValueError, UnicodeError) as exc:
                 rejected.append({"path": entry.path, "reason": str(exc)})
                 continue

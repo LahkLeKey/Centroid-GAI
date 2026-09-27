@@ -13,11 +13,11 @@ export function asciiTokens(text: string): string[] {
 }
 
 /** Train only on supplied corpora. Separate documents get separate BOS/EOS boundaries. */
-export function referenceModel(corpora: string[], contextWindow: number) {
+export function referenceModel(corpora: string[], contextWindow: number, tokenize = asciiTokens) {
     const counts = new Map<string, Map<string, number>>();
     for (const corpus of corpora) {
         const history = Array<string>(contextWindow).fill('<bos>');
-        for (const target of [...asciiTokens(corpus), '<eos>']) {
+        for (const target of [...tokenize(corpus), '<eos>']) {
             for (let size = 0; size <= contextWindow; size++) {
                 const key = JSON.stringify(size === 0 ? [] : history.slice(-size));
                 const row = counts.get(key) ?? new Map<string, number>();
@@ -28,7 +28,7 @@ export function referenceModel(corpora: string[], contextWindow: number) {
         }
     }
     return (prompt: string): string[] => {
-        const context = [...Array<string>(contextWindow).fill('<bos>'), ...asciiTokens(prompt)];
+        const context = [...Array<string>(contextWindow).fill('<bos>'), ...tokenize(prompt)];
         for (let size = contextWindow; size >= 0; size--) {
             const row = counts.get(JSON.stringify(size === 0 ? [] : context.slice(-size)));
             if (row) return [...row].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([token]) => token);

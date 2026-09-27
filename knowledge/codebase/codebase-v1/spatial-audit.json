@@ -1,0 +1,1 @@
+{"queries":352,"exactAgreement":true,"comparisons":22240,"exhaustiveComparisons":33952,"distanceComparisonsSaved":11712,"policy":"KD bounding-box search over inspected coordinates, plus cached five-neighbor edges. Timings are not inferred from comparison counts."}

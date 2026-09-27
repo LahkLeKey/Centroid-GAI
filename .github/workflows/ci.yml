@@ -81,10 +81,30 @@ jobs:
         run: |
           bun run baseline:test
           bun run baseline
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify repository training and record held-out quality
+        run: |
+          node --test persistence/api/src/evaluation/codebase-data.test.ts
+          python -m tools.knowledge snapshot --config examples/knowledge/codebase.json --repo . --ref HEAD --output build/knowledge/codebase
+          node persistence/api/src/evaluation/codebase.ts --snapshot build/knowledge/codebase --output build/evaluation/codebase
+      - name: Evaluate source retrieval and repository-question citations
+        run: |
+          node --test persistence/api/src/knowledge/retrieval.test.ts
+          node persistence/api/src/evaluation/repository.ts --snapshot build/knowledge/codebase --output build/evaluation/repository.json
+      - name: Verify static categorized codebase centroids and spatial neighbors
+        run: |
+          node --test persistence/api/src/knowledge/codebase-centroids.test.ts
+          node persistence/api/src/knowledge/codebase-centroids.ts --directory knowledge/codebase/codebase-v1 --verify
       - uses: actions/upload-artifact@v4
         with:
           name: model-baselines
-          path: build/evaluation/baseline.json
+          path: |
+            build/evaluation/baseline.json
+            build/evaluation/codebase
+            build/evaluation/repository.json
+            build/knowledge/codebase
           if-no-files-found: error
       - name: Configure native checks
         run: cmake -S . -B build-lint

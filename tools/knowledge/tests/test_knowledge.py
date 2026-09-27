@@ -75,6 +75,23 @@ class GitKnowledgeTests(unittest.TestCase):
         item = json.loads((self.output / "train.jsonl").read_text(encoding="utf-8"))
         self.assertEqual(len(item["sources"]), 2)
 
+    def test_code_import_is_opt_in_and_preserves_punctuation_and_provenance(self):
+        code = "int x[]={0,1,2,3,4,5,6,7,8,9};\n" * 30
+        (self.repo / "encyclopedia/sample.c").write_text(code, encoding="utf-8")
+        self.commit()
+        self.assertEqual(self.build()["documents"]["train"], 1)
+        cfg = replace(self.cfg, extensions=[".c"], min_words=1)
+        output = self.root / "code"
+        self.build(config=cfg, output=output)
+        item = json.loads((output / "train.jsonl").read_text(encoding="utf-8"))
+        self.assertEqual(item["text"], code.strip())
+        self.assertEqual(item["sources"][0]["path"], "encyclopedia/sample.c")
+        self.assertEqual(item["sources"][0]["commit"], resolve(self.repo, "HEAD"))
+        (self.repo / "encyclopedia/sample.c").write_bytes(b"int x;\0binary")
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "no usable"):
+            self.build(config=cfg, output=self.root / "bad-code")
+
     def test_monitor_added_modified_removed_and_ignores_unrelated_commits(self):
         self.build()
         path = self.output / "manifest.json"

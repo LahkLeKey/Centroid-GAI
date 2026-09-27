@@ -6,6 +6,9 @@ import json
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 
+PROSE_EXTENSIONS = {".txt", ".md", ".rst"}
+CODE_EXTENSIONS = {".c", ".h", ".ts", ".tsx", ".js", ".py", ".json", ".sql", ".prisma", ".css"}
+
 
 def relative_path(value: str) -> str:
     if (not isinstance(value, str) or not value or value.startswith(("/", "-"))
@@ -42,8 +45,8 @@ class Config:
             relative_path(path)
         if self.references_path is not None:
             relative_path(self.references_path)
-        if not self.extensions or any(ext not in {".txt", ".md", ".rst"} for ext in self.extensions):
-            raise ValueError("supported extensions are .txt, .md, and .rst")
+        if not self.extensions or any(ext not in PROSE_EXTENSIONS | CODE_EXTENSIONS for ext in self.extensions):
+            raise ValueError("unsupported text/source extension")
         for name in ("min_words", "max_files", "max_file_bytes", "max_total_bytes"):
             if type(getattr(self, name)) is not int or getattr(self, name) <= 0:
                 raise ValueError(f"{name} must be a positive integer")

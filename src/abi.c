@@ -48,7 +48,7 @@ cgai_abi_version(void) { /* Step 1: Expose the declaration version used to build
  */
 const char *cgai_abi_library_version(
     void) { /* Step 1: Return the static release label without creating a caller-owned buffer. */
-    return "0.2.0";
+    return "0.3.0";
 }
 
 /**

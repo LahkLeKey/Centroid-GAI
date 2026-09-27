@@ -70,6 +70,16 @@ already tracked under `examples/model_corpora/encyclopedia`. Model runtime reads
 local artifacts; no runtime crawling or API keys are involved. Public-web research
 can be incorporated through reviewed content commits with citations.
 
+The [repository training verification](docs/codebase-verification.md) imports the
+project's own committed code and documentation, checks repeatable native training,
+and records held-out prediction quality against simple reference models.
+The [repository source helper](docs/repository-retrieval.md) retrieves quoted
+snapshot passages with commit-pinned citations and evaluates repository questions,
+supporting evidence, and abstention without additional model training.
+The [static codebase release](knowledge/codebase/README.md) deduplicates source
+chunks into categorized native models and provides an exact spatial index and
+cached neighbors for their centroid vectors.
+
 ## Library API
 
 The documented public API is in [`include/centroid_gai.h`](include/centroid_gai.h). A typical

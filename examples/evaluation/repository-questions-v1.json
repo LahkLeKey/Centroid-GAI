@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "description": "Hand-authored development questions. Gold excerpts are checked against the supplied snapshot before scoring; this is not a held-out generalization benchmark.",
+  "questions": [
+    {
+      "id": "cli-training", "question": "How do I train a model using the CLI?",
+      "evidence": [{ "path": "README.md", "quote": "./build/cgai train examples/tiny_corpus.txt tiny.cgai 12" }]
+    },
+    {
+      "id": "tokenizer-location", "question": "Where is the tokenizer implemented?",
+      "evidence": [{ "path": "src/tokenizer.c", "quote": "cgai_status cgai_tokenize(const char *text, cgai_token_list *tokens)" }]
+    },
+    {
+      "id": "greedy-temperature", "question": "What does temperature zero do during generation?",
+      "evidence": [{ "path": "include/centroid_gai.h", "quote": "Finite nonnegative temperature; zero uses greedy selection." }]
+    },
+    {
+      "id": "token-ownership", "question": "How does cgai_token_list_destroy free token strings and reset the list?",
+      "evidence": [{ "path": "src/tokenizer.c", "quote": "memset(tokens, 0, sizeof(*tokens));" }]
+    },
+    {
+      "id": "artifact-checksum", "question": "Where is the SHA-256 checksum calculated before saving a model artifact?",
+      "evidence": [{ "path": "persistence/api/src/model-repository.ts", "quote": "return createHash(\"sha256\").update(payload).digest(\"hex\");" }]
+    },
+    {
+      "id": "artifact-portability", "question": "Are saved model artifacts portable across byte order and floating-point representations?",
+      "evidence": [{ "path": "docs/persistence.md", "quote": "producer and consumer must use compatible byte\norder and floating-point representations." }]
+    },
+    {
+      "id": "matching-source-passages", "question": "Can native centroid matching retrieve original source passages?",
+      "evidence": [{ "path": "docs/api-contract.md", "quote": "aggregate centroids cannot retrieve original passages." }]
+    },
+    {
+      "id": "matching-limit", "question": "What is the UTF-8 text size limit for pattern matching?",
+      "evidence": [{ "path": "docs/api-contract.md", "quote": "over 16,384 UTF-8 bytes returns\n413." }]
+    },
+    {
+      "id": "installed-headers", "question": "Which public headers are installed and which internal headers may change?",
+      "evidence": [{ "path": "docs/architecture.md", "quote": "headers under `include/` are installed: `centroid_gai.h` and `centroid_gai_abi.h`.\nHeaders under `src/internal/` may change\nwithout compatibility guarantees." }]
+    },
+    {
+      "id": "typed-identifiers", "question": "Why are token identifiers and centroid identifiers different struct types?",
+      "evidence": [{ "path": "docs/architecture.md", "quote": "the compiler rejects accidentally passing one where the other is expected." }]
+    },
+    {
+      "id": "git-dirty-files", "question": "Does the Git snapshot importer include staged dirty or untracked files?",
+      "evidence": [{ "path": "tools/knowledge/corpus.py", "quote": "Import only committed files; staged, dirty, and untracked content is ignored." }]
+    },
+    {
+      "id": "sampling-ties", "question": "How does greedy sampling break tied maximum token counts?",
+      "evidence": [{ "path": "src/model_sampling.c", "quote": "Tied maxima keep the first ID." }]
+    },
+    { "id": "unknown-weather", "question": "What is tomorrow's weather forecast in Chicago?", "evidence": [] },
+    { "id": "unknown-deployment", "question": "What is the production PostgreSQL database password?", "evidence": [] },
+    { "id": "unknown-gpu", "question": "How do I enable CUDA GPU training for this model?", "evidence": [] },
+    { "id": "unknown-performance", "question": "What is the measured production API p99 latency under ten thousand concurrent requests?", "evidence": [] }
+  ]
+}

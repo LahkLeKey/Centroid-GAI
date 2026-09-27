@@ -86,6 +86,9 @@ NAPI_MODULE_INIT() {
         {"mergeModels", NULL, cgai_node_merge, NULL, NULL, NULL, napi_default, NULL},
         {"matchPatterns", NULL, cgai_node_match, NULL, NULL, NULL, napi_default, NULL},
         {"generateModel", NULL, cgai_node_generate, NULL, NULL, NULL, napi_default, NULL},
+        {"createSpatialIndex", NULL, cgai_node_spatial_create, NULL, NULL, NULL, napi_default,
+         NULL},
+        {"querySpatialIndex", NULL, cgai_node_spatial_query, NULL, NULL, NULL, napi_default, NULL},
     };
     /* Step 2: Register the complete table using its element count, not its byte size. */
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]),

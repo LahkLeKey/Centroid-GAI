@@ -1,0 +1,792 @@
+{
+  "schema_version": 1,
+  "source": {
+    "name": "centroid-codebase",
+    "remote_url": null,
+    "commit": "50c7f509b30800c81c7da335045fcde964954c79",
+    "license_sha256": "a2ff27362b333425bc1f1ec99a47dbb50d3bc4579c57588137d971074000b952",
+    "references_sha256": null
+  },
+  "config": {
+    "name": "centroid-codebase",
+    "paths": [
+      "README.md",
+      "CMakeLists.txt",
+      "include",
+      "src",
+      "tests",
+      "docs",
+      "tools/knowledge",
+      "persistence/api/README.md",
+      "persistence/api/src",
+      "persistence/api/native",
+      "persistence/shared",
+      "persistence/db/README.md",
+      "persistence/db/src",
+      "persistence/db/migrations",
+      "persistence/web/README.md",
+      "persistence/web/src"
+    ],
+    "license": "MIT",
+    "license_path": "LICENSE",
+    "remote_url": null,
+    "branch": "main",
+    "extensions": [
+      ".txt",
+      ".md",
+      ".c",
+      ".h",
+      ".ts",
+      ".tsx",
+      ".py",
+      ".json",
+      ".sql",
+      ".prisma",
+      ".css"
+    ],
+    "references_path": null,
+    "min_words": 1,
+    "max_files": 2000,
+    "max_file_bytes": 2000000,
+    "max_total_bytes": 20000000,
+    "validation_percent": 20
+  },
+  "config_sha256": "8535aa0fe785d54ac93842ff3a0abd70bfff9e3e989429e723527a0c855147d5",
+  "entries": [
+    {
+      "path": "CMakeLists.txt",
+      "oid": "f4b1fc3b4719515c43f3da7d834d28e17db2c332",
+      "size": 5793
+    },
+    {
+      "path": "README.md",
+      "oid": "460acf975f5cb31a907cb1c16e90c43ccebbcd7c",
+      "size": 5270
+    },
+    {
+      "path": "docs/api-contract.md",
+      "oid": "e3acd5122c207016054d92bf4761592815f0cf9b",
+      "size": 7463
+    },
+    {
+      "path": "docs/architecture.md",
+      "oid": "7d440c687b8168d3d66b1d1b8d5183f70dcb4a04",
+      "size": 3511
+    },
+    {
+      "path": "docs/c-reading-guide.md",
+      "oid": "eb608352a37641cbcc56a7c9be887c2d85f4f292",
+      "size": 9118
+    },
+    {
+      "path": "docs/ci.md",
+      "oid": "57b5463743e9eb70d8d97bddbd8a46989a6abb27",
+      "size": 2186
+    },
+    {
+      "path": "docs/documentation-standard.md",
+      "oid": "a5053fe7a6a264921eef2013e47f2bb699acb662",
+      "size": 4294
+    },
+    {
+      "path": "docs/git-encyclopedia.md",
+      "oid": "45de01a52ae8007e9b657f92b54a924cceb8a9b2",
+      "size": 13761
+    },
+    {
+      "path": "docs/model-composition.md",
+      "oid": "6e0b16dc86b98bdcec03ed5a96a2e93eba92231a",
+      "size": 7369
+    },
+    {
+      "path": "docs/persistence.md",
+      "oid": "bef843a8e4799b77b4e0450dd41b33c2450959ee",
+      "size": 1276
+    },
+    {
+      "path": "include/centroid_gai.h",
+      "oid": "1048d2710af4ff39804d0bea94e0a65ed1996544",
+      "size": 9597
+    },
+    {
+      "path": "include/centroid_gai_abi.h",
+      "oid": "5115cdd96e9003d7b3a5eb5a82439c845e212ba9",
+      "size": 17430
+    },
+    {
+      "path": "persistence/api/README.md",
+      "oid": "920b2cd8abb333e8fca69982f4770f0e904384b0",
+      "size": 3586
+    },
+    {
+      "path": "persistence/api/native/addon.c",
+      "oid": "850d4af6824bd2980e0577e8237aaec48233936c",
+      "size": 5009
+    },
+    {
+      "path": "persistence/api/native/node_arguments.c",
+      "oid": "0e7ff952dc409fe8561842fe3cfa97f757b8f392",
+      "size": 6123
+    },
+    {
+      "path": "persistence/api/native/node_arguments.h",
+      "oid": "8ab22f8477e266113992a8c2d144226c6847f0eb",
+      "size": 1777
+    },
+    {
+      "path": "persistence/api/native/node_artifact.c",
+      "oid": "fd522862142f1f17469663370ffe40c522f15ed2",
+      "size": 3003
+    },
+    {
+      "path": "persistence/api/native/node_artifact.h",
+      "oid": "345ed81760fe5377d62c73539c083ee98d3149b6",
+      "size": 1686
+    },
+    {
+      "path": "persistence/api/native/node_callbacks.h",
+      "oid": "7d18ef7aafc159dccc3600e6382a37f748117085",
+      "size": 2558
+    },
+    {
+      "path": "persistence/api/native/node_composition.c",
+      "oid": "270400d740f55cb445c67281ea718f639b99a197",
+      "size": 8837
+    },
+    {
+      "path": "persistence/api/native/node_error.c",
+      "oid": "a2a54c0baef79872260a55b596fce871da163e78",
+      "size": 2247
+    },
+    {
+      "path": "persistence/api/native/node_error.h",
+      "oid": "877d32440b5758f2dc38ca7dab66e1133d4ffb74",
+      "size": 2614
+    },
+    {
+      "path": "persistence/api/native/node_generation.c",
+      "oid": "2c94e27450e5d4aa1c8cefb23e243f710e864a44",
+      "size": 7302
+    },
+    {
+      "path": "persistence/api/native/node_metadata.c",
+      "oid": "9385173bae7808a76b2e5c1265716c338829c79a",
+      "size": 5741
+    },
+    {
+      "path": "persistence/api/native/node_training.c",
+      "oid": "5f3bfe00ef8285a6a2071a8c3513f7ac93804a44",
+      "size": 4431
+    },
+    {
+      "path": "persistence/api/src/api.test.ts",
+      "oid": "c5db60e50cf631980a5d4a3cdf47730b86664df9",
+      "size": 16159
+    },
+    {
+      "path": "persistence/api/src/artifact-routes.ts",
+      "oid": "3f1eb074ed24adc47863d95bb2042dcc6599e618",
+      "size": 7506
+    },
+    {
+      "path": "persistence/api/src/cli.ts",
+      "oid": "cd6116b45302153596136c3366f958cd8326ffb8",
+      "size": 2469
+    },
+    {
+      "path": "persistence/api/src/composed-models.ts",
+      "oid": "05c33215bca75e0f49b7d24d5bb48da88c28f548",
+      "size": 4280
+    },
+    {
+      "path": "persistence/api/src/evaluation/benchmark.ts",
+      "oid": "91f872d351cd0b37c7b9d7d24601d6f8311e189a",
+      "size": 8555
+    },
+    {
+      "path": "persistence/api/src/evaluation/metrics.test.ts",
+      "oid": "765ef3a4736f6a3ecb4b2f61da82e00eaf857e5b",
+      "size": 1773
+    },
+    {
+      "path": "persistence/api/src/evaluation/metrics.ts",
+      "oid": "12950910abe6c7b57f4ae6021a2840e676257a4f",
+      "size": 3486
+    },
+    {
+      "path": "persistence/api/src/knowledge/train-clusters.ts",
+      "oid": "0e49b2e9750d5bb6497089bd1a59a542d040a706",
+      "size": 9450
+    },
+    {
+      "path": "persistence/api/src/model-repository.ts",
+      "oid": "0720060aea288c2fd58df9803a67a79b6c5fbbf1",
+      "size": 7250
+    },
+    {
+      "path": "persistence/api/src/native.test.ts",
+      "oid": "e0e96dd0f97f292287c6eba9e767a4b3d3dfaa9d",
+      "size": 8592
+    },
+    {
+      "path": "persistence/api/src/native.ts",
+      "oid": "de5fb7b04b1830da3d598097a13556cb46500c31",
+      "size": 6775
+    },
+    {
+      "path": "persistence/api/src/server.ts",
+      "oid": "7a4b608f0742870d9ddc32b14a18740a63b980cd",
+      "size": 11457
+    },
+    {
+      "path": "persistence/db/README.md",
+      "oid": "8a354f6a11149a42d18874d3244c02138db7cf76",
+      "size": 2620
+    },
+    {
+      "path": "persistence/db/migrations/app/20260925T0831_initial_artifacts/migration.json",
+      "oid": "28a0cce36a9f39d257316fa93f0b6fe55ff2f2cc",
+      "size": 252
+    },
+    {
+      "path": "persistence/db/migrations/app/20260925T0831_initial_artifacts/migration.ts",
+      "oid": "e348b296280e62ff548a2883ee4a88211e169124",
+      "size": 2549
+    },
+    {
+      "path": "persistence/db/migrations/app/20260925T0831_initial_artifacts/ops.json",
+      "oid": "e968054bba1151e77d5424bcd969305a581d33d3",
+      "size": 4915
+    },
+    {
+      "path": "persistence/db/migrations/app/20260925T0832_model_composition/migration.json",
+      "oid": "9a6a508c2b701b721bd55979ded52e4b141b2e7b",
+      "size": 314
+    },
+    {
+      "path": "persistence/db/migrations/app/20260925T0832_model_composition/migration.ts",
+      "oid": "fd47a4dc62dc8911d577239c314afddb1a64498c",
+      "size": 1092
+    },
+    {
+      "path": "persistence/db/migrations/app/20260925T0832_model_composition/ops.json",
+      "oid": "1070d795b3525d16e2a20745a253c47ece306727",
+      "size": 1377
+    },
+    {
+      "path": "persistence/db/migrations/snapshots/41715d3222bc02b3e0efe52e4c24c9d3f4b3b00add860c91e6640164421f9c5b/contract.d.ts",
+      "oid": "073c3d2aec667af6ef6284692a2f5fc2f6bfe3b7",
+      "size": 26230
+    },
+    {
+      "path": "persistence/db/migrations/snapshots/41715d3222bc02b3e0efe52e4c24c9d3f4b3b00add860c91e6640164421f9c5b/contract.json",
+      "oid": "ab0ab9726d956e0d325fcad4568508c5b4b160fe",
+      "size": 3954
+    },
+    {
+      "path": "persistence/db/migrations/snapshots/62ac50525fbaaab1bd1d00c278adbee7a99382172e57a7da5f8d4e4a62b6daef/contract.d.ts",
+      "oid": "403b919a9787a7a922fde6c57c3ab4aef90b0156",
+      "size": 27062
+    },
+    {
+      "path": "persistence/db/migrations/snapshots/62ac50525fbaaab1bd1d00c278adbee7a99382172e57a7da5f8d4e4a62b6daef/contract.json",
+      "oid": "a292551b9314cb18d45bbf4d50f4e194943ab246",
+      "size": 4162
+    },
+    {
+      "path": "persistence/db/src/prisma/contract.d.ts",
+      "oid": "403b919a9787a7a922fde6c57c3ab4aef90b0156",
+      "size": 27062
+    },
+    {
+      "path": "persistence/db/src/prisma/contract.json",
+      "oid": "0121b5adc0a64998c1713774b919a59cef4a267c",
+      "size": 9148
+    },
+    {
+      "path": "persistence/db/src/prisma/contract.prisma",
+      "oid": "6b739c227cfd3a10df941bca3e9e108090b2d0c4",
+      "size": 824
+    },
+    {
+      "path": "persistence/db/src/prisma/db.ts",
+      "oid": "853abe401d9cd5170e6d047b422a8aa160306700",
+      "size": 2127
+    },
+    {
+      "path": "persistence/db/src/temporal.d.ts",
+      "oid": "5ab71ef0b9d72ad6c98b95d24b3c7a5e107c8372",
+      "size": 41
+    },
+    {
+      "path": "persistence/shared/artifacts.ts",
+      "oid": "197f502dc3a0247d7214aa06ad369c8f503a1779",
+      "size": 2182
+    },
+    {
+      "path": "persistence/web/README.md",
+      "oid": "accfdac063583f9793e1e9cdff136c47fc522276",
+      "size": 5332
+    },
+    {
+      "path": "persistence/web/src/App.tsx",
+      "oid": "0853905b94fcd2988b6c132d5547a7d1d43e8c69",
+      "size": 9173
+    },
+    {
+      "path": "persistence/web/src/api/client.ts",
+      "oid": "8218e9940ce6d2a8d7738a38ba49b9f2ff0e1d54",
+      "size": 4908
+    },
+    {
+      "path": "persistence/web/src/components/ArtifactExplorer.tsx",
+      "oid": "7916c7d26837c84a571e2a876aca0c70c91b566a",
+      "size": 13300
+    },
+    {
+      "path": "persistence/web/src/components/ChatPlayground.tsx",
+      "oid": "a3807cc5d795ade761905f7cdb32aa471c21023c",
+      "size": 8673
+    },
+    {
+      "path": "persistence/web/src/components/CohortComparison.tsx",
+      "oid": "9a516c387375c4613ea6c4dc8ddca6ef6cb5d462",
+      "size": 8331
+    },
+    {
+      "path": "persistence/web/src/components/ModelComposer.tsx",
+      "oid": "02320d2884fa3978d5b53877dc53cad07a4fb3e5",
+      "size": 13429
+    },
+    {
+      "path": "persistence/web/src/components/ModelInspector.tsx",
+      "oid": "aef849b1016813fec2bf967a11a4b67d8cb20f82",
+      "size": 7558
+    },
+    {
+      "path": "persistence/web/src/components/ModelLabelEditor.tsx",
+      "oid": "9bb6177f03ed5b0af417bf944293dbbf3594982e",
+      "size": 5510
+    },
+    {
+      "path": "persistence/web/src/components/NewModelModal.tsx",
+      "oid": "73781f56ed61dd21100a12021428b190395c77fc",
+      "size": 9542
+    },
+    {
+      "path": "persistence/web/src/components/PatternDiscovery.tsx",
+      "oid": "22c884bcc0041997a9875cd0b995f14d4d9e7882",
+      "size": 2768
+    },
+    {
+      "path": "persistence/web/src/components/PatternMatcher.tsx",
+      "oid": "be2e0ab9c86df6bfa47f1921e960400e73e28ee9",
+      "size": 7378
+    },
+    {
+      "path": "persistence/web/src/components/Sidebar.tsx",
+      "oid": "687623fc02c94fd8c9129003786f8a1a47c03f51",
+      "size": 9863
+    },
+    {
+      "path": "persistence/web/src/components/SupersetWorkspace.tsx",
+      "oid": "a60bd3b323e677298cc3137ff862b102d9f01466",
+      "size": 5603
+    },
+    {
+      "path": "persistence/web/src/format.ts",
+      "oid": "c744b3bff11edb1186d773f2c4704b5303ad1d4f",
+      "size": 192
+    },
+    {
+      "path": "persistence/web/src/index.css",
+      "oid": "a4b793edd6219b2e7210560c8358b98215bb61d0",
+      "size": 391
+    },
+    {
+      "path": "persistence/web/src/main.tsx",
+      "oid": "bef5202a32cbd0632c43de40f6e908532903fd42",
+      "size": 230
+    },
+    {
+      "path": "persistence/web/src/modelLabels.ts",
+      "oid": "d425b38ac54d1dce628df6dc3bb3aaede575b995",
+      "size": 3916
+    },
+    {
+      "path": "persistence/web/src/vite-env.d.ts",
+      "oid": "42cbca90068e42ac3f96f0fc634b1a19a1b01249",
+      "size": 167
+    },
+    {
+      "path": "src/abi.c",
+      "oid": "791f94018d1ff34990cbde3e72d16b3d898ce245",
+      "size": 3729
+    },
+    {
+      "path": "src/abi_buffer.c",
+      "oid": "00aaa37e0a494722888075c8a59a95a9da0d828d",
+      "size": 1123
+    },
+    {
+      "path": "src/abi_config.c",
+      "oid": "fc445018dceff33019c596c68855c27bf6a67e2d",
+      "size": 1895
+    },
+    {
+      "path": "src/abi_generation.c",
+      "oid": "be990195fdef753ccba93a7a3dda23f89857a009",
+      "size": 3126
+    },
+    {
+      "path": "src/abi_inspection.c",
+      "oid": "b99aaf3a46c9a49f69f3e4b11c844f9fd5718dfb",
+      "size": 25353
+    },
+    {
+      "path": "src/abi_metadata.c",
+      "oid": "39ec8a50aa7dc61f4ddcbebae32f767aa8c7819b",
+      "size": 2246
+    },
+    {
+      "path": "src/abi_model.c",
+      "oid": "e572b2ae4a6c868c2829719573cb8d3a60df8057",
+      "size": 4568
+    },
+    {
+      "path": "src/abi_serialization.c",
+      "oid": "f05da6ab0b0f16a69caf20a940443da8e7759609",
+      "size": 4954
+    },
+    {
+      "path": "src/centroid_gai.c",
+      "oid": "dc30732f445c3fadbcfd42bcf3a26e8a9baf1c2b",
+      "size": 9347
+    },
+    {
+      "path": "src/cli.c",
+      "oid": "baa0fad1669781b0d546979ae987eb7afffcaf6f",
+      "size": 2233
+    },
+    {
+      "path": "src/cli_arguments.c",
+      "oid": "fe93700b20797ea4ba2fc1b7cb9bfbb2659d3012",
+      "size": 1511
+    },
+    {
+      "path": "src/cli_generation.c",
+      "oid": "0ea24582ba5d223b3818836a10e3a42a58504b34",
+      "size": 9348
+    },
+    {
+      "path": "src/cli_training.c",
+      "oid": "cfe7f2fa35380035f4c82ce2d9e635fe116af38c",
+      "size": 4519
+    },
+    {
+      "path": "src/error.c",
+      "oid": "3bb666a5159bceef9ce3eb520ab23e7fb49c035a",
+      "size": 2278
+    },
+    {
+      "path": "src/file_utils.c",
+      "oid": "6cd6e28744d2a2e0fb3543203f70ccaf581e1fae",
+      "size": 7247
+    },
+    {
+      "path": "src/internal/abi_utils.h",
+      "oid": "ede54cf53562842ea9db25159805496c72a33843",
+      "size": 1651
+    },
+    {
+      "path": "src/internal/cgai_internal.h",
+      "oid": "5a519bd0c3ebcc456003d6b4b5a13b2d2612444f",
+      "size": 6042
+    },
+    {
+      "path": "src/internal/cli.h",
+      "oid": "0d069d1fb41d69f082ba40e4cf8ceb1143e338c7",
+      "size": 786
+    },
+    {
+      "path": "src/internal/cli_commands.h",
+      "oid": "889e07064df3d3cb1412f7eb44e9792344377e1e",
+      "size": 2140
+    },
+    {
+      "path": "src/internal/constants.h",
+      "oid": "d4c6492c2628bdef8119df0129a8e98a921f8946",
+      "size": 2449
+    },
+    {
+      "path": "src/internal/error.h",
+      "oid": "4f5cf24dcb797a19643f96511c1d3637c46a66a7",
+      "size": 1757
+    },
+    {
+      "path": "src/internal/file_utils.h",
+      "oid": "8bbbb5ef0526313dcea71c9f343db3d4f7d3efbf",
+      "size": 1712
+    },
+    {
+      "path": "src/internal/model_centroid.h",
+      "oid": "1e74fd5548a77bb558cdb148f4291b509b13226f",
+      "size": 997
+    },
+    {
+      "path": "src/internal/model_embedding.h",
+      "oid": "ed87c9729344b9b7023870b05f5b11c778d8e148",
+      "size": 1107
+    },
+    {
+      "path": "src/internal/model_format.h",
+      "oid": "1f288720cb43a434ccc014e82f3248e5cec37977",
+      "size": 1028
+    },
+    {
+      "path": "src/internal/model_generation.h",
+      "oid": "fef1f512c6aa71d94c918a5a045b293cb28be811",
+      "size": 3554
+    },
+    {
+      "path": "src/internal/model_io.h",
+      "oid": "b4149478ab24d8d8f48824f140ced997ec965c0a",
+      "size": 1905
+    },
+    {
+      "path": "src/internal/model_random.h",
+      "oid": "201db1beb9eaf704a175011a01a85593c063f6af",
+      "size": 723
+    },
+    {
+      "path": "src/internal/model_sampling.h",
+      "oid": "c6cd207ab6dd083773c6f6cf49ae8ee6e5212f86",
+      "size": 1064
+    },
+    {
+      "path": "src/internal/model_validation.h",
+      "oid": "143916ddf106cc304b8a896f92586b510bcd27b5",
+      "size": 246
+    },
+    {
+      "path": "src/internal/size_utils.h",
+      "oid": "8705b5b81406f25fb56d715bb8d41f8540a5d1b8",
+      "size": 2133
+    },
+    {
+      "path": "src/internal/tokenizer.h",
+      "oid": "5f507efd1a8ff2a7cef0f2ed5a487ff4c8f5d61f",
+      "size": 1923
+    },
+    {
+      "path": "src/internal/vocabulary.h",
+      "oid": "5c6a1f33ba160cdf31d657c8c6e6430b6c690230",
+      "size": 1562
+    },
+    {
+      "path": "src/main.c",
+      "oid": "06eddbe9120b26c9975b6ae95d8f65255fe0213d",
+      "size": 917
+    },
+    {
+      "path": "src/model_centroid.c",
+      "oid": "19fb4fc12d4160629647b7b8d460a7c50fd95179",
+      "size": 2470
+    },
+    {
+      "path": "src/model_composition.c",
+      "oid": "4a3ed6ac0fc301d1f2661c03fa9711d393e00b0d",
+      "size": 17000
+    },
+    {
+      "path": "src/model_decode.c",
+      "oid": "2d0123fb27dbda73ff6ece856a97f8d13b2960bc",
+      "size": 16499
+    },
+    {
+      "path": "src/model_embedding.c",
+      "oid": "93b200847cd3d8a9c2460f6b1042c702e6433f78",
+      "size": 8500
+    },
+    {
+      "path": "src/model_encode.c",
+      "oid": "33b152da1e197ab7bb39cf247a4d17e847ebfab9",
+      "size": 10650
+    },
+    {
+      "path": "src/model_file.c",
+      "oid": "e663d1a63641943ead68d83bd2dc34a5e37d3c9c",
+      "size": 3235
+    },
+    {
+      "path": "src/model_generation.c",
+      "oid": "ed4db748365f73503b376959ce5f6e252669582c",
+      "size": 11761
+    },
+    {
+      "path": "src/model_generation_workspace.c",
+      "oid": "5c72ab7314d108dd214c22c58ce37387d9f522b7",
+      "size": 7033
+    },
+    {
+      "path": "src/model_random.c",
+      "oid": "73b2d3d51fd5918d5407b417ef4149d02067de7f",
+      "size": 2937
+    },
+    {
+      "path": "src/model_sampling.c",
+      "oid": "a49830a9833f19061c6dc07220e0b14ee94551df",
+      "size": 6039
+    },
+    {
+      "path": "src/model_training.c",
+      "oid": "eee9685df2ecf48074e388d39853635411b97eaf",
+      "size": 13814
+    },
+    {
+      "path": "src/tokenizer.c",
+      "oid": "e01b5e53087f1488ddfae70be739e5cad2f2beb4",
+      "size": 9921
+    },
+    {
+      "path": "src/vocabulary.c",
+      "oid": "0eb4e07fab977d15d02db6aa603351e070057b8c",
+      "size": 8876
+    },
+    {
+      "path": "tests/test_abi.c",
+      "oid": "b6a4da0fac88bf2418e739c636a7c4d9173d1513",
+      "size": 6303
+    },
+    {
+      "path": "tests/test_centroid_gai.c",
+      "oid": "520de9b22025fc9142216f6705d000d1cbf41c08",
+      "size": 9243
+    },
+    {
+      "path": "tests/test_composition.c",
+      "oid": "42220cba09acc6065d62923f08d7bf19892f01e0",
+      "size": 9401
+    },
+    {
+      "path": "tests/test_file_utils.c",
+      "oid": "2b53ab90c90c200c64095bf6d755de43506dd116",
+      "size": 2171
+    },
+    {
+      "path": "tests/test_internal.h",
+      "oid": "707d80f0df3e549299804e5c13d240540a68366b",
+      "size": 2880
+    },
+    {
+      "path": "tests/test_model_io.c",
+      "oid": "4f8561c4ae49474894325ccae5803905b542e372",
+      "size": 3865
+    },
+    {
+      "path": "tests/test_model_math.c",
+      "oid": "be34b93260a5df586877c10c031b6a91d07f5c0f",
+      "size": 3614
+    },
+    {
+      "path": "tests/test_runner.c",
+      "oid": "196d4c80893512c5b73e943068bcecf646810cb6",
+      "size": 991
+    },
+    {
+      "path": "tests/test_sampling.c",
+      "oid": "fd4ef8bd4bf02c90acedb7c964198ac0fe9000bb",
+      "size": 1973
+    },
+    {
+      "path": "tests/test_tokenizer.c",
+      "oid": "51fdc057b2d4f69779bbd20d8ea452111f2f4792",
+      "size": 2221
+    },
+    {
+      "path": "tests/test_utils.c",
+      "oid": "8d16f0f3653419ac4420ab401111c81dd5589347",
+      "size": 1296
+    },
+    {
+      "path": "tests/test_utils.h",
+      "oid": "7f7787e556c4ec8bf48eda13135460947055059a",
+      "size": 1701
+    },
+    {
+      "path": "tests/test_vocabulary.c",
+      "oid": "2ce7646c66a85e0291e4265dc82b5676bcff91f9",
+      "size": 3092
+    },
+    {
+      "path": "tools/knowledge/__init__.py",
+      "oid": "b6cd06b7ca4792242ee4f12da179d70c9e96a494",
+      "size": 85
+    },
+    {
+      "path": "tools/knowledge/__main__.py",
+      "oid": "9e7d0253b9c809d1dea926f38c9168aee37fa150",
+      "size": 2257
+    },
+    {
+      "path": "tools/knowledge/bulk-requirements.txt",
+      "oid": "ca5bbe8a9449eef456bf47609fa6d9df36cebd02",
+      "size": 29
+    },
+    {
+      "path": "tools/knowledge/bulk.py",
+      "oid": "52fb2422477fac13be27ebf1f499e407ca2b9b69",
+      "size": 16891
+    },
+    {
+      "path": "tools/knowledge/config.py",
+      "oid": "f5f27464a19e8f2029103c1bd55d77c93300407b",
+      "size": 3498
+    },
+    {
+      "path": "tools/knowledge/corpus.py",
+      "oid": "1b94ab190c57917b3235972311787fdb7d02f4dc",
+      "size": 8687
+    },
+    {
+      "path": "tools/knowledge/git_source.py",
+      "oid": "66d120355d623bc443d64fde54b4c9df35abf650",
+      "size": 5620
+    },
+    {
+      "path": "tools/knowledge/lock.py",
+      "oid": "81f2018fa2ecb452595fbe42c40cfc0ef12a894c",
+      "size": 676
+    },
+    {
+      "path": "tools/knowledge/tests/__init__.py",
+      "oid": "97702dacca4eaa4aa2404711ca6375e09b05a254",
+      "size": 63
+    },
+    {
+      "path": "tools/knowledge/tests/test_bulk.py",
+      "oid": "5b4e35cec4cddc99d3c08c4839194d08c8b9a5f4",
+      "size": 5481
+    },
+    {
+      "path": "tools/knowledge/tests/test_knowledge.py",
+      "oid": "bd37fd19c86a77d523e6b46f75ea8d61d8135ae9",
+      "size": 14088
+    }
+  ],
+  "rejected": [],
+  "documents": {
+    "train": 121,
+    "validation": 22
+  },
+  "files": {
+    "SOURCE_LICENSE.txt": "a2ff27362b333425bc1f1ec99a47dbb50d3bc4579c57588137d971074000b952",
+    "train.jsonl": "c26ef1891170e9ee20546c7fb16d60027e7217581326f2b274c52e466e72210e",
+    "train.txt": "19b33275afb9315d6dab525d3570e24f57bbd49eb13bfbc23b4ca84e9c75befa",
+    "validation.jsonl": "2fa84cd708923c647d1f7aedbda09330efe48db92acab953b7811b0300848e6d",
+    "validation.txt": "9374a98ec04f74606c907289c145df4c86d05af7286eb482d5e52157b7ae0f85"
+  },
+  "normalization": "utf8-nfc-line-endings-v1",
+  "deduplication": "normalized-text-sha256",
+  "split": "first-32-hash-bits-modulo-100"
+}

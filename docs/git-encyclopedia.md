@@ -131,8 +131,11 @@ Snapshots are new directories, never overwritten. They contain:
 - `manifest.json`: commit, source identity, configuration, complete selected
   file inventory, rejected files, document counts, and output checksums.
 
-The configuration specifies literal content paths and `.txt`, `.md`, or `.rst`
-extensions. Markdown/reStructuredText syntax is retained as source text; no code,
+The default configuration specifies literal content paths and `.txt`, `.md`, or `.rst`
+extensions. The [repository verification profile](codebase-verification.md) also opts
+into source-code extensions. The [static codebase builder](codebase-centroids.md)
+deduplicates that snapshot into categorized native shards with spatial centroid
+neighbors. Markdown/reStructuredText syntax is retained as source text; no code,
 markup plugins, or embedded commands execute. UTF-8 validation, control-character
 checks, minimum word count, alphabetic content, and repetition filters reject
 common bad inputs. Rejections appear in the manifest. File-count, per-file, and

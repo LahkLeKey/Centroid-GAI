@@ -46,5 +46,19 @@ napi_value cgai_node_inspect(napi_env env, napi_callback_info info);
  * @return JavaScript continuation String, or NULL with an argument/native/Node error.
  */
 napi_value cgai_node_generate(napi_env env, napi_callback_info info);
+/**
+ * @brief Copy typed coordinate/category arrays into an owned immutable C spatial index.
+ * @param env Borrowed Node environment.
+ * @param info Callback metadata containing Float64 and Uint32 arrays.
+ * @return Tagged owner object or NULL with a pending exception.
+ */
+napi_value cgai_node_spatial_create(napi_env env, napi_callback_info info);
+/**
+ * @brief Query a tagged index through the ABI with typed coordinates and options.
+ * @param env Borrowed Node environment.
+ * @param info Callback metadata containing owner, Float64 query, and Uint32 options.
+ * @return JSON result string or NULL with a pending exception.
+ */
+napi_value cgai_node_spatial_query(napi_env env, napi_callback_info info);
 
 #endif

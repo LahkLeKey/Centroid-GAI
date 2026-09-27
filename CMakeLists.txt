@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(centroid_gai VERSION 0.2.0 LANGUAGES C)
+project(centroid_gai VERSION 0.3.0 LANGUAGES C)
 
 option(CGAI_BUILD_TESTS "Build the test suite" ON)
 option(CGAI_BUILD_DOCS "Build API documentation with Doxygen" OFF)
@@ -32,6 +32,8 @@ add_library(centroid_gai
     src/model_file.c
     src/model_embedding.c
     src/model_centroid.c
+    src/spatial_index.c
+    src/spatial_query.c
     src/model_random.c
     src/model_sampling.c
     src/model_training.c
@@ -59,6 +61,7 @@ add_library(centroid_gai_abi SHARED
     src/abi_metadata.c
     src/abi_serialization.c
     src/abi_inspection.c
+    src/abi_spatial.c
 )
 add_library(centroid_gai::abi ALIAS centroid_gai_abi)
 target_compile_features(centroid_gai_abi PUBLIC c_std_11)
@@ -145,6 +148,10 @@ if(CGAI_BUILD_TESTS)
     target_link_libraries(centroid_gai_abi_tests PRIVATE centroid_gai::abi)
     cgai_enable_warnings(centroid_gai_abi_tests)
     add_test(NAME centroid_gai_abi_tests COMMAND centroid_gai_abi_tests)
+    add_executable(centroid_gai_spatial_tests tests/test_spatial.c tests/test_utils.c)
+    target_link_libraries(centroid_gai_spatial_tests PRIVATE centroid_gai::centroid_gai centroid_gai::abi)
+    cgai_enable_warnings(centroid_gai_spatial_tests)
+    add_test(NAME centroid_gai_spatial_tests COMMAND centroid_gai_spatial_tests)
 
     add_executable(centroid_gai_unit_tests
         tests/test_runner.c

@@ -322,6 +322,46 @@ CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_generate(const cgai_abi_model *mo
                                                         uint32_t max_tokens, double temperature,
                                                         uint64_t seed, cgai_abi_buffer *output);
 
+/** Immutable copied spatial index, independent of model lifetime. */
+typedef struct cgai_abi_spatial_index cgai_abi_spatial_index;
+/**
+ * @brief Copy compatible centroid coordinates and category IDs into an immutable spatial index.
+ * @param vectors Borrowed row-major count*dimensions doubles, finite with magnitude <=1e100.
+ * @param categories Borrowed count-element category IDs, each in 0..63.
+ * @param count Row count in 1..4096; count*dimensions must be at most 1048576.
+ * @param dimensions Coordinate count in 1..4096.
+ * @param output Required empty owner slot, reset to NULL on failure.
+ * @return OK with an owned index, INVALID_ARGUMENT for NULL output, or ERROR with last-error text.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_spatial_create(const double *vectors,
+                                                        const uint32_t *categories, uint32_t count,
+                                                        uint32_t dimensions,
+                                                        cgai_abi_spatial_index **output);
+/**
+ * @brief Release an owned spatial index after all concurrent queries finish.
+ * @param index Owned index or NULL. Input source models need not remain alive.
+ */
+CGAI_ABI_EXPORT void cgai_abi_spatial_destroy(cgai_abi_spatial_index *index);
+/**
+ * @brief Query exact spatial neighbors and return owned JSON with work counters.
+ *
+ * Queries are read-only and may run concurrently using distinct output descriptors. JSON reports
+ * neighbors as original row indices and squared distances, followed by comparisons and
+ * visitedNodes.
+ * @param index Borrowed live index.
+ * @param vector Borrowed dimension-sized query, finite with component magnitude <=1e100.
+ * @param limit Requested results in 1..100.
+ * @param category Category 0..63, or UINT32_MAX for all categories.
+ * @param exclude Original row index to exclude, or UINT32_MAX for none.
+ * @param output Required empty ABI buffer receiving JSON, released with cgai_abi_buffer_free().
+ * @return OK on success, INVALID_ARGUMENT for NULL output, or ERROR on invalid input/allocation.
+ * A non-NULL output is reset to empty before validation; an earlier allocation is not freed.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_spatial_query(const cgai_abi_spatial_index *index,
+                                                       const double *vector, uint32_t limit,
+                                                       uint32_t category, uint32_t exclude,
+                                                       cgai_abi_buffer *output);
+
 #ifdef __cplusplus
 }
 #endif
