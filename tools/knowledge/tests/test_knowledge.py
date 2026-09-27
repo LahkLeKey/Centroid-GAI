@@ -98,7 +98,7 @@ class GitKnowledgeTests(unittest.TestCase):
         (self.repo / "encyclopedia/geography.txt").write_text(ARTICLE + " More recent findings.", encoding="utf-8")
         self.commit()
         snapshot(self.repo, first["commit"], self.cfg, self.root / "old")
-        for name in ("train.txt", "train.jsonl", "validation.txt", "validation.jsonl", "SOURCE_LICENSE.txt"):
+        for name in ("train.txt", "train.jsonl", "validation.txt", "validation.jsonl", "SOURCE_LICENSE.txt", "manifest.json"):
             self.assertEqual((self.output / name).read_bytes(), (self.root / "old" / name).read_bytes())
 
     def test_citations_are_read_from_same_commit_and_changes_are_monitored(self):

@@ -242,6 +242,30 @@ def monitor_upstream(output):
     return 3 if result["update_available"] else 0
 
 
+def restore_model(directory, shard_id, destination):
+    """Restore one checksum-verified complete native artifact for existing model APIs."""
+    if destination.exists():
+        raise ValueError("model destination already exists")
+    manifest = json.loads((directory / "models.json").read_text(encoding="utf-8"))
+    shard = next((item for item in manifest["shards"] if item["id"] == shard_id), None)
+    if shard is None:
+        raise ValueError("unknown model shard")
+    relative_path(shard["model"]["path"])
+    path = directory / shard["model"]["path"]
+    if file_hash(path) != shard["model"]["sha256"]:
+        raise ValueError("compressed model checksum mismatch")
+    with gzip.open(path, "rb") as stream:
+        payload = stream.read(32 * 1024 * 1024 + 1)
+    if len(payload) > 32 * 1024 * 1024 or len(payload) != shard["artifactBytes"]:
+        raise ValueError("invalid decompressed model size")
+    if hashlib.sha256(payload).hexdigest() != shard["artifactSha256"]:
+        raise ValueError("native model checksum mismatch")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("xb") as stream:
+        stream.write(payload)
+    return {"shard": shard_id, "output": str(destination), "bytes": len(payload)}
+
+
 def file_hash(path):
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -274,11 +298,13 @@ def download(destination: Path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["download", "build", "verify", "monitor"])
+    parser.add_argument("command", choices=["download", "build", "verify", "monitor", "restore"])
     parser.add_argument("--cache", type=Path, default=Path("build/knowledge/downloads/simplewiki.parquet"))
     parser.add_argument("--output", type=Path, default=Path("knowledge/encyclopedia/simplewiki-v1"))
     parser.add_argument("--articles", type=int, default=20000)
     parser.add_argument("--clusters", type=int, default=32)
+    parser.add_argument("--shard", help="model shard ID for restore")
+    parser.add_argument("--model-output", type=Path, help="new .cgai file for restore")
     args = parser.parse_args()
     if args.command == "download":
         download(args.cache)
@@ -288,8 +314,12 @@ def main():
             build(args.cache, args.output, args.articles, args.clusters)
     elif args.command == "verify":
         print(json.dumps(verify_sources(args.output), indent=2))
-    else:
+    elif args.command == "monitor":
         return monitor_upstream(args.output)
+    else:
+        if not args.shard or args.model_output is None:
+            parser.error("restore requires --shard and --model-output")
+        print(json.dumps(restore_model(args.output, args.shard, args.model_output), indent=2))
     return 0
 
 

@@ -8,7 +8,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tools.knowledge.bulk import canonical_json, cluster_articles, deterministic_gzip, FILE_LIMIT, select_articles, write_bounded, write_shard
+from tools.knowledge.bulk import canonical_json, cluster_articles, deterministic_gzip, FILE_LIMIT, restore_model, select_articles, write_bounded, write_shard
 
 
 class BulkTests(unittest.TestCase):
@@ -37,6 +37,29 @@ class BulkTests(unittest.TestCase):
             self.assertEqual(shard["sha256"], hashlib.sha256(packed).hexdigest())
             self.assertEqual(shard["content_sha256"], hashlib.sha256(b"".join(records)).hexdigest())
             self.assertEqual(gzip.decompress(packed), b"".join(records))
+
+    def test_model_restore_checks_both_checksums_and_refuses_overwrite(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            payload = b"CGAI001\0fixture-model-bytes"
+            packed = deterministic_gzip(payload)
+            (root / "fixture.cgai.gz").write_bytes(packed)
+            manifest = {"shards": [{"id": "fixture", "model": {"path": "fixture.cgai.gz",
+                "sha256": hashlib.sha256(packed).hexdigest()}, "artifactBytes": len(payload),
+                "artifactSha256": hashlib.sha256(payload).hexdigest()}]}
+            (root / "models.json").write_bytes(canonical_json(manifest))
+            target = root / "restored.cgai"
+            restore_model(root, "fixture", target)
+            self.assertEqual(target.read_bytes(), payload)
+            with self.assertRaisesRegex(ValueError, "already exists"):
+                restore_model(root, "fixture", target)
+            manifest["shards"][0]["artifactSha256"] = "0" * 64
+            (root / "models.json").write_bytes(canonical_json(manifest))
+            with self.assertRaisesRegex(ValueError, "native model checksum"):
+                restore_model(root, "fixture", root / "bad.cgai")
+            (root / "fixture.cgai.gz").write_bytes(b"corrupted")
+            with self.assertRaisesRegex(ValueError, "compressed model checksum"):
+                restore_model(root, "fixture", root / "bad.cgai")
 
     @unittest.skipUnless(importlib.util.find_spec("numpy"), "bulk clustering requires numpy")
     def test_cluster_assignments_and_centroids_repeat(self):
