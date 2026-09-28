@@ -18,6 +18,23 @@ node persistence/api/src/knowledge/codebase-centroids.ts --snapshot build/knowle
 node persistence/api/src/knowledge/codebase-centroids.ts --directory knowledge/codebase/codebase-v1 --verify
 ```
 
+To include encyclopedia native clusters in the same self-contained static index,
+first recreate its local release as described in the
+[bulk encyclopedia instructions](git-encyclopedia.md#bulk-encyclopedia-release),
+then pass that generated release directory:
+
+```powershell
+node persistence/api/src/knowledge/codebase-centroids.ts --snapshot build/knowledge/static-source-v1 --output build/knowledge/static-knowledge-v1 --encyclopedia build/knowledge/rebuilt-release
+node persistence/api/src/knowledge/codebase-centroids.ts --directory build/knowledge/static-knowledge-v1 --verify
+```
+
+The combined release copies the encyclopedia manifests, license, source shards,
+and native model shards from the generated local release. It verifies their checksums and native dimensions before
+indexing their vectors alongside codebase centroids. IDs use the
+`encyclopedia:<shard-id>:<centroid-id>` namespace; categories use
+`encyclopedia/<cluster-id>`. The release can be verified without the original
+encyclopedia directory. Omitting `--encyclopedia` retains the codebase-only build.
+
 The snapshot profile includes package READMEs as well as root documentation.
 Only committed source enters the snapshot. The release records the source commit,
 snapshot manifest hash, generator hashes, native-addon hash, runtime environment,
@@ -98,6 +115,47 @@ It does not replace the C library's inference search or provide a semantic
 embedding of a repository question. The first audit saved 11,712 of 33,952 vector
 distance comparisons (34.5%) with exact neighbor agreement. Pruning efficiency
 depends on vector distribution and dimensionality.
+
+## Compile static knowledge into C
+
+The checked-in native knowledge is a compact baseline: the three highest-observation
+rows per category, selected deterministically by observation count and then stable ID.
+It keeps 126 of the source release's 2,528 rows while preserving selected IDs,
+descriptions, observation counts, and vectors. Lookups and nearest-neighbor queries
+operate on this baseline subset, not the full encyclopedia corpus.
+
+Each category under `src/knowledge_catalog/` is a small, independently compiled
+C module with a constant centroid array. The files are the maintained baseline source;
+the master `src/knowledge_catalog.c` registers modules and maps sorted global rows
+to category-local rows. Exact duplicate vectors are reclustered when the baseline is
+compiled. CMake discovers the category sources automatically.
+
+To build the same baseline from a verified combined release, write to a separate
+output path and apply the baseline cap:
+
+```powershell
+node persistence/api/src/knowledge/compile-native-knowledge.ts --release build/knowledge/static-knowledge-v1 --output build/static_knowledge_baseline.c --top-per-category 3
+node persistence/api/src/knowledge/compile-native-knowledge.ts --source-c build/static_knowledge_baseline.c --output src/knowledge_catalog.c --top-per-category 3
+cmake --build build
+```
+
+`centroid_gai_knowledge.h` exposes read-only sorted centroid/category accessors
+and `cgai_static_knowledge_create_index()`. Each row exposes a readable
+description, and `cgai_static_knowledge_category_description()` describes its
+category. The returned index uses the ordinary exact spatial API; query row IDs
+map to `cgai_static_knowledge_centroid_at()`. Category and row descriptions are
+inspection hints, not article summaries or explanations of individual vector
+dimensions. To normalize or verify the checked-in C baseline without a source release,
+run:
+
+```powershell
+node persistence/api/src/knowledge/compile-native-knowledge.ts --source-c src/knowledge_catalog.c --output src/knowledge_catalog.c
+```
+
+The compiled baseline contains vectors, counts, and descriptions, not article or model
+archives, so those files are not needed at runtime. The index supports spatial lookup
+only; per-centroid token counts and text generation remain in local source/model
+releases.
 
 ## Use a native shard
 

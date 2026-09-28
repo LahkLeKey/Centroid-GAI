@@ -300,12 +300,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["download", "build", "verify", "monitor", "restore"])
     parser.add_argument("--cache", type=Path, default=Path("build/knowledge/downloads/simplewiki.parquet"))
-    parser.add_argument("--output", type=Path, default=Path("knowledge/encyclopedia/simplewiki-v1"))
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--articles", type=int, default=20000)
     parser.add_argument("--clusters", type=int, default=32)
     parser.add_argument("--shard", help="model shard ID for restore")
     parser.add_argument("--model-output", type=Path, help="new .cgai file for restore")
     args = parser.parse_args()
+    if args.output is None:
+        args.output = (Path("knowledge/encyclopedia/simplewiki-v1") if args.command == "monitor"
+                       else Path("build/knowledge/rebuilt-release"))
     if args.command == "download":
         download(args.cache)
     elif args.command == "build":

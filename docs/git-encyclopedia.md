@@ -12,8 +12,9 @@ native cluster training uses the existing Node addon.
 
 ## Bulk encyclopedia release
 
-The [committed release](../knowledge/encyclopedia/README.md) contains 20,000 actual
-articles and trained centroid shards. Its source is Wikimedia's public
+The [compiled release](../knowledge/encyclopedia/README.md) embeds centroids from
+20,000 selected articles into native C. Compressed source/model shards are not
+committed; regenerate them locally when needed. The source is Wikimedia's public
 [2023-11-01 Simple English Wikipedia dataset](https://huggingface.co/datasets/wikimedia/wikipedia/blob/3e1f92c331f318af862b87e2319ed5dc26d80f5d/20231101.simple/train-00000-of-00001.parquet),
 pinned to Git revision `3e1f92c331f318af862b87e2319ed5dc26d80f5d` and verified against
 the upstream SHA-256. Downloading requires no account or key. This is an offline
@@ -53,26 +54,25 @@ although changing the selected dataset can change clustering across the release.
 The file-size caps do not remove cumulative Git-history growth; create deliberate
 versioned releases instead of committing every intermediate training run.
 
-Verify committed data and complete model payloads without downloading:
+Verify a locally rebuilt source/model release:
 
 ```powershell
-python -m tools.knowledge.bulk verify
-node persistence/api/src/knowledge/train-clusters.ts --verify
+python -m tools.knowledge.bulk verify --output build/knowledge/rebuilt-release
+node persistence/api/src/knowledge/train-clusters.ts --directory build/knowledge/rebuilt-release --verify
 ```
 
 Restore a shard for existing CLI/API use:
 
 ```powershell
-python -m tools.knowledge.bulk restore --shard cluster-000-0000 --model-output build/knowledge/cluster-000-0000.cgai
+python -m tools.knowledge.bulk restore --output build/knowledge/rebuilt-release --shard cluster-000-0000 --model-output build/knowledge/cluster-000-0000.cgai
 .\build\cgai.exe generate build/knowledge/cluster-000-0000.cgai "the Earth" 20 0 42
 ```
 
-The `.cgai.gz` files are complete trained models. `centroids/` JSON files expose
-vectors and leading next-token counts for inspection; they are not model loaders.
-Models remain separate to preserve bounded size. Consumers can load the shards
-they need or use the existing model-composition API within its resource limits.
-No automatic routing, aggregate-model deployment, or factual-quality claim is
-implied by producing these artifacts.
+The locally generated `.cgai.gz` files are complete trained models.
+`centroids/` JSON files expose vectors and leading next-token counts for inspection;
+they are not model loaders. The checked-in C table supports native spatial lookup,
+not generation. Recreate full model shards locally to use generation or model
+composition. No factual-quality claim is implied by producing these artifacts.
 
 Check the upstream Git revision:
 
@@ -87,12 +87,10 @@ an update signal; review the data-file checksum before making a new release.
 Changing the pinned snapshot requires updating the revision, expected size, and
 SHA-256 constants together, then rebuilding into a new directory. No key is needed.
 
-All native shards were trained twice with identical bytes. All 149 source/license/
-manifest files were independently rebuilt and matched byte-for-byte, and the
-complete native release was regenerated against its existing files. The initial
-native build uses x64 little-endian artifacts and Node 25.2.1. The core's native
-numeric format means identical bytes across different compilers/architectures
-are not guaranteed; use a matching build environment for binary reproduction.
+The original native shards were trained twice with identical bytes and independently
+reproduced before conversion to the compiled C centroid table. Reproducing native
+artifact bytes assumes compatible compiler, floating-point ABI, byte order, and
+runtime; use a matching build environment when regenerating local archives.
 
 The starter [configuration](../examples/knowledge/encyclopedia.json) imports the
 four encyclopedia text files already committed under

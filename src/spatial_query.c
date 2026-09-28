@@ -94,7 +94,7 @@ static void visit_leaf(spatial_query *query, const cgai_spatial_node *node) {
         const size_t row = query->index->order[i];
         if (row != query->request->exclude &&
             (query->request->category == CGAI_SPATIAL_ALL_CATEGORIES ||
-             query->index->categories[row] == query->request->category))
+             (query->index->categories[row] & (UINT64_C(1) << query->request->category))))
             insert_hit(query, row);
     }
 }
@@ -157,7 +157,7 @@ static int valid_request(const cgai_spatial_index *index, const cgai_spatial_req
     return cgai_spatial_finite(request->vector, index->dimensions);
 }
 
-/**
+/*
  * @brief Find exact neighbors without allocating or mutating the index.
  * @param index Borrowed live immutable index.
  * @param request Borrowed options and query coordinates.

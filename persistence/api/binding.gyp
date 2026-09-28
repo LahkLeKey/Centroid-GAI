@@ -27,6 +27,7 @@
         "../../src/spatial_query.c",
         "../../src/abi_spatial.c",
         "native/node_spatial.c",
+        "../../src/json_writer.c",
         "../../src/model_random.c",
         "../../src/abi_buffer.c",
         "../../src/abi_generation.c",

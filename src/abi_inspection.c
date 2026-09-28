@@ -2,22 +2,15 @@
 #include "centroid_gai_abi.h"
 #include "internal/abi_utils.h"
 #include "internal/error.h"
+#include "internal/json_writer.h"
 #include "internal/model_embedding.h"
 #include "internal/model_generation.h"
 #include <inttypes.h>
 #include <math.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/** @brief Owned expandable JSON output and sticky allocation failure state. */
-typedef struct json_writer {
-    char *data;      /**< Owned UTF-8 buffer. */
-    size_t size;     /**< Written bytes excluding NUL. */
-    size_t capacity; /**< Allocated byte capacity. */
-    int failed;      /**< Nonzero after an allocation or formatting error. */
-} json_writer;
 /** @brief Token identifier paired with its observation frequency. */
 typedef struct token_rank {
     size_t id;      /**< Vocabulary token ID. */
@@ -29,89 +22,6 @@ typedef struct inspection_page {
     uint32_t limit;    /**< Maximum result entries. */
     uint32_t centroid; /**< Selected active centroid ID. */
 } inspection_page;
-
-/**
- * @brief Grow the owned JSON buffer while checking allocation capacity.
- * @param writer Mutable JSON buffer; records allocation failure for its caller.
- * @param needed Required allocation capacity in bytes.
- * @return One on success, or zero on validation/allocation failure.
- */
-static int reserve(json_writer *writer, size_t needed) {
-    if (needed <= writer->capacity)
-        return 1;
-    size_t capacity = writer->capacity ? writer->capacity : 1024U;
-    while (capacity < needed) {
-        if (capacity > SIZE_MAX / 2U) {
-            capacity = needed;
-            break;
-        }
-        capacity *= 2U;
-    }
-    char *data = (char *)realloc(writer->data, capacity);
-    if (!data)
-        return 0;
-    writer->data = data;
-    writer->capacity = capacity;
-    return 1;
-}
-
-/**
- * @brief Append formatted JSON while keeping both variadic traversals local and balanced.
- * @param writer Mutable JSON buffer; records allocation failure for its caller.
- * @param format Borrowed printf-compatible format string.
- */
-static void append(json_writer *writer, const char *format, ...) {
-    if (writer->failed)
-        return;
-    va_list args;
-    va_start(args, format);
-    const int length = vsnprintf(NULL, 0, format, args);
-    va_end(args);
-    if (length < 0 || (size_t)length > SIZE_MAX - writer->size - 1U ||
-        !reserve(writer, writer->size + (size_t)length + 1U)) {
-        writer->failed = 1;
-    } else {
-        va_start(args, format);
-        (void)vsnprintf(writer->data + writer->size, writer->capacity - writer->size, format, args);
-        va_end(args);
-        writer->size += (size_t)length;
-    }
-}
-
-/**
- * @brief Append literal UTF-8 bytes without variadic argument handling.
- * @param writer Mutable JSON output buffer.
- * @param value Borrowed NUL-terminated text to copy.
- */
-static void append_text(json_writer *writer, const char *value) {
-    if (writer->failed)
-        return;
-    const size_t length = strlen(value);
-    if (length > SIZE_MAX - writer->size - 1U || !reserve(writer, writer->size + length + 1U)) {
-        writer->failed = 1;
-        return;
-    }
-    memcpy(writer->data + writer->size, value, length + 1U);
-    writer->size += length;
-}
-
-/**
- * @brief Append a quoted JSON string, escaping control bytes and delimiters.
- * @param writer Mutable JSON buffer; records allocation failure for its caller.
- * @param value Borrowed input value to validate or serialize.
- */
-static void string_value(json_writer *writer, const char *value) {
-    append_text(writer, "\"");
-    for (const unsigned char *p = (const unsigned char *)value; *p; ++p) {
-        if (*p == '"' || *p == '\\')
-            append(writer, "\\%c", (int)*p);
-        else if (*p < 32U)
-            append(writer, "\\u%04x", (unsigned int)*p);
-        else
-            append(writer, "%c", (int)*p);
-    }
-    append_text(writer, "\"");
-}
 
 /**
  * @brief Order token ranks by descending observations, then ascending token ID.
@@ -133,10 +43,11 @@ static int compare_counts(const void *left, const void *right) {
  * @param id Vocabulary or centroid index for the selected entry.
  * @param count Number of entries supplied to this operation.
  */
-static void token_json(json_writer *writer, const cgai_model *model, size_t id, uint64_t count) {
-    append(writer, "{\"id\":%zu,\"token\":", id);
-    string_value(writer, model->vocabulary[id]);
-    append(writer, ",\"count\":\"%" PRIu64 "\"}", count);
+static void token_json(cgai_json_writer *writer, const cgai_model *model, size_t id,
+                       uint64_t count) {
+    cgai_json_append(writer, "{\"id\":%zu,\"token\":", id);
+    cgai_json_string(writer, model->vocabulary[id]);
+    cgai_json_append(writer, ",\"count\":\"%" PRIu64 "\"}", count);
 }
 
 /**
@@ -144,13 +55,13 @@ static void token_json(json_writer *writer, const cgai_model *model, size_t id, 
  * @param writer Mutable JSON buffer; records allocation failure for its caller.
  * @param model Borrowed model, kept alive for the operation.
  */
-static void summary_json(json_writer *writer, const cgai_model *model) {
+static void summary_json(cgai_json_writer *writer, const cgai_model *model) {
     const uint64_t vectors =
         (uint64_t)model->config.centroid_count * model->config.dimensions * sizeof(float);
     const uint64_t counts =
         (uint64_t)model->config.centroid_count * model->vocabulary_size * sizeof(uint64_t);
     const uint64_t sizes = (uint64_t)model->config.centroid_count * sizeof(uint64_t);
-    append(
+    cgai_json_append(
         writer,
         "{\"dimensions\":%zu,\"centroidCount\":%zu,\"initializedCentroids\":%zu,\"contextWindow\":%"
         "zu,\"seed\":\"%" PRIu64
@@ -167,7 +78,7 @@ static void summary_json(json_writer *writer, const cgai_model *model) {
  * @param model Borrowed model, kept alive for the operation.
  * @param id Vocabulary or centroid index for the selected entry.
  */
-static void centroid_json(json_writer *writer, const cgai_model *model, size_t id) {
+static void centroid_json(cgai_json_writer *writer, const cgai_model *model, size_t id) {
     double norm = 0.0;
     size_t targets = 0U;
     for (size_t d = 0; d < model->config.dimensions; ++d) {
@@ -177,18 +88,19 @@ static void centroid_json(json_writer *writer, const cgai_model *model, size_t i
     for (size_t t = 0; t < model->vocabulary_size; ++t)
         if (model->token_counts[id * model->vocabulary_size + t])
             targets++;
-    append(writer,
-           "{\"id\":%zu,\"observations\":\"%" PRIu64 "\",\"norm\":%.9g,\"distinctTargets\":%zu}",
-           id, model->cluster_sizes[id], sqrt(norm), targets);
+    cgai_json_append(writer,
+                     "{\"id\":%zu,\"observations\":\"%" PRIu64
+                     "\",\"norm\":%.9g,\"distinctTargets\":%zu}",
+                     id, model->cluster_sizes[id], sqrt(norm), targets);
 }
 
 /**
- * @brief Sum a token across active rows and append its vocabulary entry.
+ * @brief Sum a token across active rows and cgai_json_append its vocabulary entry.
  * @param writer Mutable JSON buffer; records allocation failure for its caller.
  * @param model Borrowed model, kept alive for the operation.
  * @param id Vocabulary or centroid index for the selected entry.
  */
-static void vocabulary_json(json_writer *writer, const cgai_model *model, size_t id) {
+static void vocabulary_json(cgai_json_writer *writer, const cgai_model *model, size_t id) {
     uint64_t count = 0U;
     for (size_t c = 0; c < model->initialized_centroids; ++c)
         count += model->token_counts[c * model->vocabulary_size + id];
@@ -202,22 +114,22 @@ static void vocabulary_json(json_writer *writer, const cgai_model *model, size_t
  * @param section Inspection section selector.
  * @param page Validated pagination and centroid selection.
  */
-static void page_json(json_writer *writer, const cgai_model *model, uint32_t section,
+static void page_json(cgai_json_writer *writer, const cgai_model *model, uint32_t section,
                       inspection_page page) {
     const size_t total = section == 1U ? model->vocabulary_size : model->initialized_centroids;
     const size_t begin = page.offset > total ? total : (size_t)page.offset;
     const size_t end = total - begin > page.limit ? begin + page.limit : total;
-    append(writer, "{\"total\":%zu,\"offset\":%" PRIu64 ",\"limit\":%u,\"items\":[", total,
-           page.offset, page.limit);
+    cgai_json_append(writer, "{\"total\":%zu,\"offset\":%" PRIu64 ",\"limit\":%u,\"items\":[",
+                     total, page.offset, page.limit);
     for (size_t i = begin; i < end; ++i) {
         if (i != begin)
-            append_text(writer, ",");
+            cgai_json_text(writer, ",");
         if (section == 1U)
             vocabulary_json(writer, model, i);
         else
             centroid_json(writer, model, i);
     }
-    append_text(writer, "]}");
+    cgai_json_text(writer, "]}");
 }
 
 /**
@@ -248,18 +160,18 @@ static size_t rank_tokens(const cgai_model *model, size_t centroid, token_rank *
  * @param ranks Writable or borrowed token ranks, as required by this operation.
  * @param total Total available entries or mutable accumulated observations.
  */
-static void ranked_page_json(json_writer *writer, const cgai_model *model, inspection_page page,
-                             const token_rank *ranks, size_t total) {
+static void ranked_page_json(cgai_json_writer *writer, const cgai_model *model,
+                             inspection_page page, const token_rank *ranks, size_t total) {
     const size_t begin = page.offset > total ? total : (size_t)page.offset;
     const size_t end = total - begin > page.limit ? begin + page.limit : total;
-    append(writer, "{\"total\":%zu,\"offset\":%" PRIu64 ",\"limit\":%u,\"items\":[", total,
-           page.offset, page.limit);
+    cgai_json_append(writer, "{\"total\":%zu,\"offset\":%" PRIu64 ",\"limit\":%u,\"items\":[",
+                     total, page.offset, page.limit);
     for (size_t i = begin; i < end; ++i) {
         if (i != begin)
-            append_text(writer, ",");
+            cgai_json_text(writer, ",");
         token_json(writer, model, ranks[i].id, ranks[i].count);
     }
-    append_text(writer, "]}");
+    cgai_json_text(writer, "]}");
 }
 
 /**
@@ -268,21 +180,22 @@ static void ranked_page_json(json_writer *writer, const cgai_model *model, inspe
  * @param model Borrowed model, kept alive for the operation.
  * @param page Validated pagination and centroid selection.
  */
-static void detail_json(json_writer *writer, const cgai_model *model, inspection_page page) {
+static void detail_json(cgai_json_writer *writer, const cgai_model *model, inspection_page page) {
     token_rank *ranks = (token_rank *)malloc(model->vocabulary_size * sizeof(*ranks));
     if (!ranks) {
         writer->failed = 1;
         return;
     }
     const size_t total = rank_tokens(model, page.centroid, ranks);
-    append(writer, "{\"id\":%u,\"observations\":\"%" PRIu64 "\",\"vector\":[", page.centroid,
-           model->cluster_sizes[page.centroid]);
+    cgai_json_append(writer, "{\"id\":%u,\"observations\":\"%" PRIu64 "\",\"vector\":[",
+                     page.centroid, model->cluster_sizes[page.centroid]);
     for (size_t d = 0; d < model->config.dimensions; ++d)
-        append(writer, "%s%.9g", d ? "," : "",
-               (double)model->centroids[(size_t)page.centroid * model->config.dimensions + d]);
-    append_text(writer, "],\"tokens\":");
+        cgai_json_append(
+            writer, "%s%.9g", d ? "," : "",
+            (double)model->centroids[(size_t)page.centroid * model->config.dimensions + d]);
+    cgai_json_text(writer, "],\"tokens\":");
     ranked_page_json(writer, model, page, ranks, total);
-    append_text(writer, "}");
+    cgai_json_text(writer, "}");
     free(ranks);
 }
 
@@ -305,7 +218,7 @@ static void aggregate_targets(const cgai_model *model, token_rank *ranks) {
  * @param model Borrowed model, kept alive for the operation.
  * @param limit Maximum number of result entries.
  */
-static void highlights_json(json_writer *writer, const cgai_model *model, uint32_t limit) {
+static void highlights_json(cgai_json_writer *writer, const cgai_model *model, uint32_t limit) {
     token_rank *ranks = (token_rank *)calloc(model->vocabulary_size, sizeof(*ranks));
     if (!ranks) {
         writer->failed = 1;
@@ -315,9 +228,9 @@ static void highlights_json(json_writer *writer, const cgai_model *model, uint32
     const size_t total = model->vocabulary_size - 3U;
     qsort(ranks, total, sizeof(*ranks), compare_counts);
     const inspection_page page = {0U, limit, 0U};
-    append_text(writer, "{\"tokens\":");
+    cgai_json_text(writer, "{\"tokens\":");
     ranked_page_json(writer, model, page, ranks, total);
-    append_text(writer, "}");
+    cgai_json_text(writer, "}");
     free(ranks);
 }
 
@@ -331,7 +244,7 @@ static void highlights_json(json_writer *writer, const cgai_model *model, uint32
  */
 static cgai_abi_status inspect_section(const cgai_model *model, uint32_t section,
                                        inspection_page page, cgai_abi_buffer *output) {
-    json_writer writer = {0};
+    cgai_json_writer writer = {0};
     if (section == 0U)
         summary_json(&writer, model);
     else if (section < 3U)
@@ -457,7 +370,7 @@ static size_t nearest_matches(const cgai_model *model, const float *embedding, s
  * @param model Borrowed model, kept alive for the operation.
  * @param workspace Prepared temporary context and vector storage.
  */
-static void matched_context_json(json_writer *writer, const cgai_model *model,
+static void matched_context_json(cgai_json_writer *writer, const cgai_model *model,
                                  const generation_workspace *workspace) {
     const size_t count = workspace->prompt_tokens.count;
     const size_t begin =
@@ -466,14 +379,15 @@ static void matched_context_json(json_writer *writer, const cgai_model *model,
     for (size_t i = begin; i < count; ++i)
         if (workspace->history[i].value == CGAI_TOKEN_UNKNOWN)
             unknown++;
-    append(writer, "{\"inputTokens\":%zu,\"unknownTokens\":%zu,\"context\":[", count, unknown);
+    cgai_json_append(writer, "{\"inputTokens\":%zu,\"unknownTokens\":%zu,\"context\":[", count,
+                     unknown);
     for (size_t i = begin; i < count; ++i) {
-        append(writer, "%s{\"token\":", i == begin ? "" : ",");
-        string_value(writer, workspace->prompt_tokens.items[i]);
-        append(writer, ",\"known\":%s}",
-               workspace->history[i].value == CGAI_TOKEN_UNKNOWN ? "false" : "true");
+        cgai_json_append(writer, "%s{\"token\":", i == begin ? "" : ",");
+        cgai_json_string(writer, workspace->prompt_tokens.items[i]);
+        cgai_json_append(writer, ",\"known\":%s}",
+                         workspace->history[i].value == CGAI_TOKEN_UNKNOWN ? "false" : "true");
     }
-    append_text(writer, "],\"matches\":[");
+    cgai_json_text(writer, "],\"matches\":[");
 }
 
 /**
@@ -483,7 +397,7 @@ static void matched_context_json(json_writer *writer, const cgai_model *model,
  * @param matches Writable or borrowed nearest-centroid entries.
  * @param count Number of entries supplied to this operation.
  */
-static void matched_rows_json(json_writer *writer, const cgai_model *model,
+static void matched_rows_json(cgai_json_writer *writer, const cgai_model *model,
                               const centroid_match *matches, size_t count) {
     token_rank *ranks = (token_rank *)malloc(model->vocabulary_size * sizeof(*ranks));
     if (!ranks) {
@@ -493,13 +407,14 @@ static void matched_rows_json(json_writer *writer, const cgai_model *model,
     for (size_t i = 0; i < count; ++i) {
         const size_t id = matches[i].id;
         const size_t total = rank_tokens(model, id, ranks);
-        append(writer,
-               "%s{\"centroidId\":%zu,\"squaredDistance\":%.17g,\"observations\":\"%" PRIu64
-               "\",\"targets\":",
-               i ? "," : "", id, matches[i].distance, model->cluster_sizes[id]);
+        cgai_json_append(
+            writer,
+            "%s{\"centroidId\":%zu,\"squaredDistance\":%.17g,\"observations\":\"%" PRIu64
+            "\",\"targets\":",
+            i ? "," : "", id, matches[i].distance, model->cluster_sizes[id]);
         const inspection_page page = {0U, 10U, (uint32_t)id};
         ranked_page_json(writer, model, page, ranks, total);
-        append_text(writer, "}");
+        cgai_json_text(writer, "}");
     }
     free(ranks);
 }
@@ -520,10 +435,10 @@ static cgai_abi_status match_json(const cgai_model *model, generation_workspace 
                            workspace->scratch);
     centroid_match matches[10];
     const size_t count = nearest_matches(model, workspace->embedding, limit, matches);
-    json_writer writer = {0};
+    cgai_json_writer writer = {0};
     matched_context_json(&writer, model, workspace);
     matched_rows_json(&writer, model, matches, count);
-    append_text(&writer, "]}");
+    cgai_json_text(&writer, "]}");
     if (writer.failed) {
         free(writer.data);
         (void)cgai_fail("could not allocate pattern match JSON");

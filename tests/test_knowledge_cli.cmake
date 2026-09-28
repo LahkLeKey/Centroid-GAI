@@ -1,0 +1,20 @@
+# Exercise the built native executable without Node, source releases, or a database.
+function(check_command expected pattern)
+    execute_process(COMMAND "${CGAI_EXE}" knowledge ${ARGN}
+        RESULT_VARIABLE status OUTPUT_VARIABLE output ERROR_VARIABLE error)
+    if(NOT status EQUAL expected)
+        message(FATAL_ERROR "knowledge ${ARGN}: status ${status}; ${error}")
+    endif()
+    if(NOT "${output}${error}" MATCHES "${pattern}")
+        message(FATAL_ERROR "knowledge ${ARGN}: expected ${pattern}; got ${output}${error}")
+    endif()
+endfunction()
+
+check_command(0 "centroids in [0-9]+ categories" categories)
+check_command(0 "database-000:0000" list database)
+check_command(0 "Database schemas" find database-000:0000)
+check_command(0 "database-000:" nearest database-000:0000 3 database)
+check_command(2 "Unknown knowledge category" list absent)
+check_command(2 "Unknown knowledge centroid" find absent)
+check_command(2 "limit must be 1-100" nearest database-000:0000 101)
+check_command(2 "Usage:" nearest)

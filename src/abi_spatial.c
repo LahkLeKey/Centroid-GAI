@@ -13,7 +13,7 @@ typedef struct spatial_json {
     size_t used; /**< Bytes already written, excluding the terminator. */
 } spatial_json;
 
-/**
+/*
  * @brief Copy caller coordinates into an independently owned core index.
  * @param vectors Borrowed count*dimensions finite doubles.
  * @param categories Borrowed count-element category array in 0..63.
@@ -36,7 +36,7 @@ cgai_abi_status cgai_abi_spatial_create(const double *vectors, const uint32_t *c
     return *output ? CGAI_ABI_OK : CGAI_ABI_ERROR;
 }
 
-/**
+/*
  * @brief Destroy an ABI spatial owner using the matching core allocator.
  * @param index Owned index or NULL; no concurrent call may retain it.
  */
@@ -116,7 +116,7 @@ static cgai_abi_status serialize_hits(const cgai_spatial_hit *hits, const cgai_s
     return finish_json(json, stats, output);
 }
 
-/**
+/*
  * @brief Translate fixed-width query options and return exact neighbors as JSON.
  * @param index Borrowed immutable spatial owner.
  * @param vector Borrowed dimension-sized query vector.

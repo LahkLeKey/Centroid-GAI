@@ -3,6 +3,13 @@
 #define CGAI_CLI_COMMANDS_H
 #include <stddef.h>
 /**
+ * @brief Execute native compiled-knowledge discovery and lookup commands.
+ * @param argc Process argument count, at least two.
+ * @param argv Borrowed arguments with knowledge at index one.
+ * @return Zero on success, two for syntax errors, or one for native query failure.
+ */
+int cgai_cli_knowledge(int argc, char **argv);
+/**
  * @brief Convert a fully consumed decimal argument into a positive native size.
  *
  * strtoull returns both a numeric result and an end pointer. errno detects reported conversion

@@ -21,6 +21,75 @@ phases; a branch may exit before reaching a later step.
 | What is stored as model bytes? | `src/model_encode.c` | `src/model_decode.c` and `src/internal/model_format.h` |
 | What examples show correct API usage? | `tests/test_centroid_gai.c` | `tests/test_abi.c` and focused unit tests |
 
+## Use static knowledge to find C examples
+
+The compiled knowledge index is a routing aid: category descriptions and centroid
+target-word cues suggest which subsystem to inspect. A centroid is not a source
+snippet, and its vector has no human-readable coordinate meaning. Read the named
+source and test files before copying a pattern.
+
+Native callers needing arbitrary vector queries can create an index with `cgai_static_knowledge_create_index()`,
+query it with `cgai_spatial_query()`, and use each hit's row with
+`cgai_static_knowledge_centroid_at()`. The row provides a stable ID, readable
+category, description, observation count, and vector. Destroy the created index
+with `cgai_spatial_destroy()`; centroid rows and their strings are borrowed static
+storage. A nearby centroid is only a hint for choosing a subsystem, not a claim
+that its vector or target words explain a specific implementation.
+
+| New C work | Start with these repository examples |
+| --- | --- |
+| Numeric algorithm over model state | `src/model_centroid.c`, `src/model_embedding.c`, `tests/test_model_math.c` |
+| Temporary workspace, allocation, partial-failure cleanup | `src/model_generation_workspace.c`, `src/model_training.c` |
+| Public operation and diagnostics | `include/centroid_gai.h`, `src/centroid_gai.c` |
+| ABI conversion and ownership boundary | `include/centroid_gai_abi.h`, `src/abi_generation.c`, `tests/test_abi.c` |
+| Binary buffers and checked sizing | `src/model_encode.c`, `src/model_decode.c`, `src/internal/size_utils.h`, `tests/test_model_io.c` |
+| Spatial index/query behavior | `include/centroid_gai_spatial.h`, `src/spatial_index.c`, `src/spatial_query.c`, `tests/test_spatial.c` |
+| Internal module test | `tests/test_model_math.c`, `tests/test_internal.h`, `tests/test_runner.c` |
+
+The codebase centroid release also contains source-chunk records under
+`knowledge/codebase/codebase-v1/sources/`; those records retain the relevant file,
+commit, and line provenance. Use the compiled index to narrow the category, then
+use the source manifest and files above for implementation evidence.
+
+## Add a C11 module
+
+1. Keep implementation in `src/<module>.c`. Add a private declaration header at
+   `src/internal/<module>.h` only when another internal module needs that boundary.
+   Put a stable supported API in `include/`; do not expose private model structs.
+2. Add the `.c` file to the `centroid_gai` source list in `CMakeLists.txt`. Keep
+   module responsibility narrow and follow the existing header include grouping:
+   project headers first, then C library headers.
+3. Put a Doxygen file brief on the source and a function contract on each
+   nontrivial operation. State borrowed versus owned pointers, cleanup owner,
+   failure behavior, mutation, concurrency assumptions, and output validity.
+   Keep numbered `Step` comments aligned with the actual control flow when they
+   make a multi-phase function easier to inspect.
+4. Use `cgai_status` for fallible core operations and `cgai_fail()` for the
+   thread-local diagnostic. Clear the diagnostic at public operation entry points.
+   Do not confuse core success (`CGAI_STATUS_OK == 1`) with ABI success
+   (`CGAI_ABI_OK == 0`); translate status at the ABI boundary.
+5. Check element-count addition and multiplication with
+   `cgai_size_add()`/`cgai_size_mul()` before converting counts to allocation
+   byte sizes. Zero-initialize workspaces and make one destructor safe for
+   partial initialization. Keep borrowed inputs separate from owned buffers.
+6. Preserve type distinctions such as `cgai_token_id` and `cgai_centroid_id`;
+   convert to raw array indices only at storage boundaries. Prefer `const` for
+   borrowed read-only inputs and use explicit output parameters where the API
+   needs to report both a value and a status.
+7. Add focused behavior tests. For a test in the internal unit executable,
+   declare it in `tests/test_internal.h`, call it from `tests/test_runner.c`,
+   and add its source to `centroid_gai_unit_tests` in `CMakeLists.txt`. Use
+   `TEST_CHECK`, which remains active in release builds. Public API or ABI tests
+   belong in their corresponding dedicated test target.
+8. Build with the repository's strict C11 configuration: extensions are off,
+   and owned C targets use `-Wall -Wextra -Wpedantic -Wconversion` (or the
+   MSVC warning equivalent). Run the focused C test, then `cgai_lint` and
+   `cgai_format_check`; run the Doxygen `docs` target when public contracts change.
+
+Avoid copying a function just because a centroid is nearby in vector space. Select
+the example by responsibility and contract, then adapt its ownership and error
+behavior to the new operation.
+
 In generated HTML, function pages include their source and links to referenced
 functions. Private helpers and test functions are included, so a reader can
 follow the implementation without guessing which file contains the next step.

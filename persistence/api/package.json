@@ -20,6 +20,7 @@
 		"repository:evaluate": "node src/evaluation/repository.ts",
 		"codebase:centroids": "node src/knowledge/codebase-centroids.ts",
 		"codebase:centroids:test": "node --test src/knowledge/codebase-centroids.test.ts",
+		"knowledge:compile:test": "node --test src/knowledge/compile-native-knowledge.test.ts",
 		"test": "bun run native:test",
 		"test:all": "bun run typecheck && bun run native:test && bun run api:test",
 		"typecheck": "tsc --noEmit",

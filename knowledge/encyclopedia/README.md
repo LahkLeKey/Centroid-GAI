@@ -1,28 +1,33 @@
-# Versioned encyclopedia clusters
+# Compiled encyclopedia knowledge
 
-`simplewiki-v1/` contains a real, reproducible initial training release:
+The runtime encyclopedia centroids are compiled into a master translation unit
+and 42 separately compiled category implementations under [`src/knowledge_catalog`](../../src/knowledge_catalog).
+Each row has a comment with topic cues, representative frequent content words,
+its stable ID, and observation count; the native API in `centroid_gai_knowledge.h`
+exposes those descriptions and the sorted table. Topic cues are inspection aids,
+not summaries of specific articles. It contains:
 
 - **20,000 articles**, selected deterministically from the 241,787-row Simple
   English Wikipedia snapshot dated 2023-11-01.
-- **32 document clusters**, partitioned into **147 source/model shards**.
+- **32 document clusters**, originally partitioned into **147 source/model shards**.
 - **2,352 learned native context centroids** and **5,195,609 training examples**.
-- About **21.6 MB** of generated files; the largest generated file is **117,358 bytes**.
-- Every generated file is capped at **1 MiB**; a release is capped at **128 MiB**.
+- Sorted stable centroid IDs, categories, observation counts, and 32D vectors.
 
-These are ordinary Git files with LFS filtering disabled for compressed shards.
-The 156,885,218-byte upstream Parquet file stays in the ignored local build cache.
-The data and attribution license is [separate from the code license](simplewiki-v1/LICENSE.md).
+The compressed article/model payloads are not committed. The manifests retain the
+dataset revision, cluster/shard IDs, and original hashes; the attribution license
+is [separate from the code license](simplewiki-v1/LICENSE.md). Regeneration writes
+compressed intermediates under `build/knowledge/rebuilt-release/`, not into this
+directory.
 
 `sources.json` pins the public dataset's Git revision, original download checksum,
 selection/cluster algorithms, attribution, and source-shard hashes. `models.json`
-maps each source shard to its compressed complete native model and readable
-centroid inspection. No timestamps or machine-local paths enter generated data.
+records the native training configuration and original model hashes. No timestamps
+or machine-local paths enter the compiled table.
 
-Source JSONL gzip files retain page IDs, titles, complete selected article text,
-article URLs, attribution, and revision-history URLs. Model gzip files contain
-normal `.cgai` artifacts. The centroid JSON files expose learned vectors and the
-12 leading next-token counts per centroid; full counts are in the model artifact.
-Generation samples are deterministic smoke checks, not factual-quality evaluations.
+The C table is a spatial index, not a generation model: it does not contain article
+text or next-token distributions. Recreate the source and model archives locally
+when retraining, inspecting article text, or using generation APIs. Centroid JSON
+inspection records remain available for reviewing vectors and leading target counts.
 
 Document clustering uses deterministic signed term hashing plus spherical
 k-means. Each size-bounded shard is trained independently with 16 native context
@@ -31,8 +36,6 @@ clusters and native context centroids serve different purposes. Raw counts shoul
 not be interpreted as 2,352 independently verified knowledge facts.
 
 See [bulk build, verification, and monitoring](../../docs/git-encyclopedia.md#bulk-encyclopedia-release)
-for exact commands. Source preparation was rebuilt independently with identical
-hashes. Each native model was trained twice and compared byte-for-byte, and the
-complete native release was regenerated against the existing files. Reproducing
-native bytes assumes the same floating-point ABI/compiler behavior; the artifact
-format is native, not a cross-platform portable interchange format.
+for regeneration commands. The compiled table is tested by the native spatial
+suite. Native artifact reproduction still assumes compatible compiler, floating-
+point ABI, and byte order.

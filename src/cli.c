@@ -19,7 +19,9 @@ static void usage(FILE *stream) {
     fprintf(stream, "Centroid-GAI: compact centroid-based text generation\n\n"
                     "Usage:\n"
                     "  cgai train <corpus.txt> <model.cgai> [centroids]\n"
-                    "  cgai generate <model.cgai> <prompt> [max-tokens] [temperature] [seed]\n");
+                    "  cgai generate <model.cgai> <prompt> [max-tokens] [temperature] [seed]\n"
+                    "  cgai knowledge [categories | list <category-key> | find <id> | "
+                    "nearest <id> [limit] [category-key]]\n");
 }
 
 /**
@@ -35,6 +37,8 @@ static void usage(FILE *stream) {
  * status.
  */
 int cgai_cli_run(int argc, char **argv) {
+    if (argc >= 2 && strcmp(argv[1], "knowledge") == 0)
+        return cgai_cli_knowledge(argc, argv);
     /* Step 1: Recognize training only when its required paths and optional centroid count fit. */
     if (argc >= 2 && strcmp(argv[1], "train") == 0 && (argc == 4 || argc == 5)) {
         return cgai_cli_train(argc, argv);

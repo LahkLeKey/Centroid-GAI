@@ -21,6 +21,10 @@ endfunction()
 
 include(cmake/Lint.cmake)
 
+# Each knowledge catalog category is an independent C translation unit.
+file(GLOB CGAI_KNOWLEDGE_CATALOG_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/knowledge_catalog/*.c")
+
 add_library(centroid_gai
     src/centroid_gai.c
     src/error.c
@@ -34,6 +38,12 @@ add_library(centroid_gai
     src/model_centroid.c
     src/spatial_index.c
     src/spatial_query.c
+    src/static_knowledge.c
+    src/knowledge_query.c
+    src/knowledge_clusters.c
+    src/json_writer.c
+    src/knowledge_catalog.c
+    ${CGAI_KNOWLEDGE_CATALOG_SOURCES}
     src/model_random.c
     src/model_sampling.c
     src/model_training.c
@@ -62,6 +72,7 @@ add_library(centroid_gai_abi SHARED
     src/abi_serialization.c
     src/abi_inspection.c
     src/abi_spatial.c
+    src/abi_knowledge.c
 )
 add_library(centroid_gai::abi ALIAS centroid_gai_abi)
 target_compile_features(centroid_gai_abi PUBLIC c_std_11)
@@ -85,7 +96,7 @@ if(CGAI_ENABLE_SANITIZERS AND NOT MSVC)
     target_link_options(centroid_gai PUBLIC -fsanitize=address,undefined)
 endif()
 
-add_executable(cgai src/main.c src/cli.c src/cli_arguments.c src/cli_training.c src/cli_generation.c)
+add_executable(cgai src/main.c src/cli.c src/cli_arguments.c src/cli_training.c src/cli_generation.c src/cli_knowledge.c)
 cgai_enable_warnings(cgai)
 target_link_libraries(cgai PRIVATE centroid_gai::centroid_gai)
 if(WIN32)
@@ -152,6 +163,12 @@ if(CGAI_BUILD_TESTS)
     target_link_libraries(centroid_gai_spatial_tests PRIVATE centroid_gai::centroid_gai centroid_gai::abi)
     cgai_enable_warnings(centroid_gai_spatial_tests)
     add_test(NAME centroid_gai_spatial_tests COMMAND centroid_gai_spatial_tests)
+    add_executable(centroid_gai_knowledge_tests tests/test_knowledge.c tests/test_utils.c)
+    target_link_libraries(centroid_gai_knowledge_tests PRIVATE centroid_gai::centroid_gai centroid_gai::abi)
+    cgai_enable_warnings(centroid_gai_knowledge_tests)
+    add_test(NAME centroid_gai_knowledge_tests COMMAND centroid_gai_knowledge_tests)
+    add_test(NAME centroid_gai_knowledge_cli_tests COMMAND ${CMAKE_COMMAND}
+        -DCGAI_EXE=$<TARGET_FILE:cgai> -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_knowledge_cli.cmake)
 
     add_executable(centroid_gai_unit_tests
         tests/test_runner.c

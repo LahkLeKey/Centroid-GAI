@@ -81,11 +81,10 @@ do not explain the low native accuracy. For `How do I train a model?`, both mode
 generate repeated underscores. Other questions yield repeated comment syntax.
 Increasing centroid count from 24 to 72 does not establish useful answer quality.
 
-The committed encyclopedia's existing verifier also passes for all 147 shards,
-2,352 centroids, and 5,195,609 training examples. That command verifies saved data
-and counts; its `deterministicRepeatVerified` field records the original training
-claim and does not itself rerun training. Use this repository harness when fresh
-repeat-training evidence is needed for repository corpora.
+The compiled encyclopedia table contains 2,352 sorted native centroids from the
+same 147 trained shards. The native spatial test checks row order, metadata, and
+exact lookup. Compressed article/model payloads are intentionally not committed;
+recreate them locally to rerun training or inspect full token distributions.
 
 ## Criteria for a useful helper
 

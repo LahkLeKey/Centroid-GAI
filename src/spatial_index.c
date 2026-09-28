@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
+/*
  * @brief Validate coordinates without overflowing subsequent squared distances.
  * @param values Borrowed count-element array, or NULL.
  * @param count Number of values to inspect.
@@ -22,7 +22,7 @@ int cgai_spatial_finite(const double *values, size_t count) {
     return 1;
 }
 
-/**
+/*
  * @brief Release all owned allocations, including partially constructed indexes.
  * @param index Owned index or NULL; no concurrent query may retain it.
  */
@@ -51,7 +51,7 @@ static int allocate_arrays(cgai_spatial_index *index) {
     index->vectors = calloc(cells, sizeof(double));
     index->minimum = calloc(cells, sizeof(double));
     index->maximum = calloc(cells, sizeof(double));
-    index->categories = calloc(index->count, sizeof(uint32_t));
+    index->categories = calloc(index->count, sizeof(uint64_t));
     index->order = calloc(index->count, sizeof(size_t));
     index->nodes = calloc(index->count, sizeof(cgai_spatial_node));
     /* Step 2: Let the caller use one cleanup path for any failed allocation. */
@@ -75,7 +75,7 @@ static void measure_bounds(cgai_spatial_index *index, size_t id) {
     /* Step 2: Expand the bounds and membership mask over every row in this subtree. */
     for (size_t i = node->begin; i < node->begin + node->count; ++i) {
         const size_t row = index->order[i];
-        node->categories |= UINT64_C(1) << index->categories[row];
+        node->categories |= index->categories[row];
         for (size_t d = 0; d < index->dimensions; ++d) {
             const double value = index->vectors[row * index->dimensions + d];
             minimum[d] = fmin(minimum[d], value);
@@ -174,20 +174,20 @@ static size_t build_node(cgai_spatial_index *index, size_t begin, size_t count) 
  * @return Nonzero for valid data; copied allocations remain owned on failure.
  */
 static int copy_inputs(cgai_spatial_index *index, const double *vectors,
-                       const uint32_t *categories) {
+                       const uint64_t *categories) {
     /* Step 1: Copy arrays so later caller edits cannot alter bounds or membership. */
     memcpy(index->vectors, vectors, index->count * index->dimensions * sizeof(double));
-    memcpy(index->categories, categories, index->count * sizeof(uint32_t));
+    memcpy(index->categories, categories, index->count * sizeof(uint64_t));
     /* Step 2: Validate the owned values before building the tree. */
     for (size_t i = 0; i < index->count; ++i) {
-        if (index->categories[i] >= 64U)
+        if (index->categories[i] == 0U)
             return 0;
         index->order[i] = i;
     }
     return cgai_spatial_finite(index->vectors, index->count * index->dimensions);
 }
 
-/**
+/*
  * @brief Allocate an immutable spatial index and copy the caller's compatible vectors.
  * @param vectors Borrowed row-major count*dimensions doubles, bounded by magnitude 1e100.
  * @param categories Borrowed count category IDs in 0..63.
@@ -195,7 +195,7 @@ static int copy_inputs(cgai_spatial_index *index, const double *vectors,
  * @param dimensions Component count in 1..4096.
  * @return Owned index or NULL with a diagnostic; partial allocations are released on failure.
  */
-cgai_spatial_index *cgai_spatial_create(const double *vectors, const uint32_t *categories,
+cgai_spatial_index *cgai_spatial_create_masked(const double *vectors, const uint64_t *categories,
                                         size_t count, size_t dimensions) {
     /* Step 1: Bound every allocation product before multiplication or input reads. */
     if (!vectors || !categories || !count || count > 4096U || !dimensions || dimensions > 4096U ||
@@ -219,4 +219,22 @@ cgai_spatial_index *cgai_spatial_create(const double *vectors, const uint32_t *c
     /* Step 3: Publish only after the complete tree has been built. */
     (void)build_node(index, 0U, count);
     return index;
+}
+
+cgai_spatial_index *cgai_spatial_create(const double *vectors, const uint32_t *categories,
+    size_t count, size_t dimensions) {
+    if (!vectors || !categories || !count || count > 4096U || !dimensions || dimensions > 4096U ||
+        count > 1048576U / dimensions) {
+        (void)cgai_fail("invalid spatial inputs or size limit");
+        return NULL;
+    }
+    uint64_t masks[4096];
+    for (size_t row = 0U; row < count; ++row) {
+        if (categories[row] >= 64U) {
+            (void)cgai_fail("invalid spatial category");
+            return NULL;
+        }
+        masks[row] = UINT64_C(1) << categories[row];
+    }
+    return cgai_spatial_create_masked(vectors, masks, count, dimensions);
 }

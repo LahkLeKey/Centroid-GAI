@@ -322,6 +322,49 @@ CGAI_ABI_EXPORT cgai_abi_status cgai_abi_model_generate(const cgai_abi_model *mo
                                                         uint32_t max_tokens, double temperature,
                                                         uint64_t seed, cgai_abi_buffer *output);
 
+/** Owned compiled-knowledge search context, independent of external files and model artifacts. */
+typedef struct cgai_abi_knowledge_index cgai_abi_knowledge_index;
+/**
+ * @brief Open a reusable compiled-knowledge search context.
+ * @param output Required empty ownership slot, reset on failure.
+ * @return OK with ownership, INVALID_ARGUMENT for NULL output, or ERROR with diagnostic.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_knowledge_open(cgai_abi_knowledge_index **output);
+/**
+ * @brief Destroy a compiled-knowledge context after all queries finish.
+ * @param index Owned context or NULL.
+ */
+CGAI_ABI_EXPORT void cgai_abi_knowledge_close(cgai_abi_knowledge_index *index);
+/**
+ * @brief Return release identity, dimensions, count, and stable category keys as JSON.
+ * @param output Required empty buffer; release successful output with cgai_abi_buffer_free().
+ * @return OK, INVALID_ARGUMENT for NULL output, or ERROR on serialization failure.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_knowledge_catalog(cgai_abi_buffer *output);
+/**
+ * @brief Inspect a bounded page of sorted compiled centroid metadata.
+ * @param offset Zero-based starting row; offsets beyond the table yield an empty page.
+ * @param limit Maximum rows from 1 through 100.
+ * @param output Required empty buffer; release successful output with cgai_abi_buffer_free().
+ * @return OK, INVALID_ARGUMENT for invalid output/limit, or ERROR on serialization failure.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_knowledge_page(uint32_t offset, uint32_t limit,
+                                                        cgai_abi_buffer *output);
+/**
+ * @brief Query neighbors by stable ID without transferring vectors across the ABI.
+ * @param index Borrowed context from cgai_abi_knowledge_open().
+ * @param id Borrowed NUL-terminated stable centroid ID; source row is excluded.
+ * @param limit Maximum results from 1 through 100.
+ * @param category Compiled category index, or UINT32_MAX for all categories.
+ * @param output Required empty buffer; release successful JSON with cgai_abi_buffer_free().
+ * @return OK, INVALID_ARGUMENT for NULL output, or ERROR with diagnostic. Output is empty on
+ * failure.
+ */
+CGAI_ABI_EXPORT cgai_abi_status cgai_abi_knowledge_neighbors(const cgai_abi_knowledge_index *index,
+                                                             const char *id, uint32_t limit,
+                                                             uint32_t category,
+                                                             cgai_abi_buffer *output);
+
 /** Immutable copied spatial index, independent of model lifetime. */
 typedef struct cgai_abi_spatial_index cgai_abi_spatial_index;
 /**

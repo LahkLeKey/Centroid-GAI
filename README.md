@@ -57,10 +57,10 @@ random seed. Temperature `0` uses deterministic greedy selection.
 
 ## Grow a training knowledgebase
 
-The [committed encyclopedia release](knowledge/encyclopedia/README.md) contains
-20,000 Wikipedia articles, 32 document clusters, and 147 trained model shards with
-2,352 native centroids. Every generated file stays below 1 MiB and uses ordinary
-Git storage. Source revisions, attribution, and checksums accompany the data.
+The [compiled encyclopedia release](knowledge/encyclopedia/README.md) embeds 2,352
+native centroids from 20,000 Simple English Wikipedia articles into the C library.
+Source revisions, attribution, and original checksums remain documented; compressed
+article/model shards are recreated locally only when needed for regeneration.
 
 The [Git encyclopedia tools](docs/git-encyclopedia.md) import committed text into
 traceable corpora for `cgai train`, monitor content changes, and optionally pull

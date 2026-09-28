@@ -1,6 +1,7 @@
 /** @file test_spatial.c @brief Independent exhaustive, lifetime, and ABI checks for spatial
  * indexes. */
 #include "centroid_gai_abi.h"
+#include "centroid_gai_knowledge.h"
 #include "centroid_gai_spatial.h"
 #include "test_utils.h"
 #include <math.h>
@@ -100,17 +101,10 @@ static void check_query(const cgai_spatial_index *index, const spatial_fixture *
 /**
  * @brief Exercise arbitrary queries, category masks, exclusions, and copied-input lifetime.
  * All mutable query output lives on the stack; the native index never borrows the fixture.
+ * @param index Borrowed immutable spatial index.
+ * @param fixture Borrowed reference coordinates and categories.
  */
-static void test_exact_queries(void) {
-    /* Step 1: Build and retain a reference copy, then overwrite the input passed to construction.
-     */
-    spatial_fixture fixture;
-    fill_fixture(&fixture);
-    spatial_fixture copied = fixture;
-    cgai_spatial_index *index = cgai_spatial_create(copied.vectors, copied.categories, 64U, 3U);
-    TEST_CHECK(index != NULL, cgai_last_error());
-    memset(&copied, 0, sizeof(copied));
-    /* Step 2: Compare off-grid coordinates and every selection policy against the reference. */
+static void check_selection_policies(cgai_spatial_index *index, const spatial_fixture *fixture) {
     const size_t limits[] = {1U, 5U, 100U};
     for (size_t i = 0; i < 65U; ++i) {
         const double vector[] = {(double)i * 5.1, 0.05, 0.25};
@@ -119,10 +113,21 @@ static void test_exact_queries(void) {
                 const cgai_spatial_request request = {vector, limits[k],
                                                       category == 4U ? UINT32_MAX : category,
                                                       i == 64U ? SIZE_MAX : i};
-                check_query(index, &fixture, &request);
+                check_query(index, fixture, &request);
             }
         }
     }
+}
+
+/** Exercise arbitrary queries after overwriting the input passed to construction. */
+static void test_exact_queries(void) {
+    spatial_fixture fixture;
+    fill_fixture(&fixture);
+    spatial_fixture copied = fixture;
+    cgai_spatial_index *index = cgai_spatial_create(copied.vectors, copied.categories, 64U, 3U);
+    TEST_CHECK(index != NULL, cgai_last_error());
+    memset(&copied, 0, sizeof(copied));
+    check_selection_policies(index, &fixture);
     cgai_spatial_destroy(index);
 }
 
@@ -201,6 +206,78 @@ static void test_spatial_abi(void) {
     cgai_abi_spatial_destroy(NULL);
 }
 
+/** @brief Exercise the compiled static knowledge table and its native exact-query index. */
+static void test_compiled_metadata(void) {
+    const size_t count = cgai_static_knowledge_centroid_count();
+    const size_t category_count = cgai_static_knowledge_category_count();
+    TEST_CHECK(count > 0U && count <= 4096U, "compiled knowledge centroid count mismatch");
+    TEST_CHECK(category_count > 0U && category_count <= 64U,
+               "compiled knowledge category count mismatch");
+    const char *release_hash = cgai_static_knowledge_release_sha256();
+    TEST_CHECK(release_hash != NULL && strlen(release_hash) == 64U,
+               "compiled knowledge release hash mismatch");
+    const cgai_static_knowledge_centroid *first = cgai_static_knowledge_centroid_at(0U);
+    TEST_CHECK(first != NULL && first->observations > 0U && first->category < category_count &&
+                   cgai_static_knowledge_category_name(first->category) != NULL &&
+                   strchr(cgai_static_knowledge_category_name(first->category), '/') == NULL &&
+                   cgai_static_knowledge_category_description(first->category) != NULL &&
+                   strlen(cgai_static_knowledge_category_description(first->category)) > 20U &&
+                   first->description != NULL && strlen(first->description) > 20U,
+               "compiled knowledge first row mismatch");
+    TEST_CHECK(cgai_static_knowledge_centroid_at(count) == NULL &&
+                   cgai_static_knowledge_category_name(category_count) == NULL,
+               "compiled knowledge bounds mismatch");
+}
+
+/** Check sorted rows, readable descriptions, and encyclopedia coverage. */
+static void test_compiled_rows(void) {
+    const size_t count = cgai_static_knowledge_centroid_count();
+    const size_t category_count = cgai_static_knowledge_category_count();
+    int found_encyclopedia = 0;
+    for (size_t row = 1U; row < count; ++row) {
+        const cgai_static_knowledge_centroid *previous =
+            cgai_static_knowledge_centroid_at(row - 1U);
+        const cgai_static_knowledge_centroid *current = cgai_static_knowledge_centroid_at(row);
+        TEST_CHECK(previous != NULL && current != NULL && strcmp(previous->id, current->id) < 0,
+                   "compiled knowledge rows are not sorted");
+        TEST_CHECK(current->category < category_count &&
+                       cgai_static_knowledge_category_name(current->category) != NULL &&
+                       strchr(cgai_static_knowledge_category_name(current->category), '/') ==
+                           NULL &&
+                       cgai_static_knowledge_category_description(current->category) != NULL &&
+                       current->description != NULL && strlen(current->description) > 20U,
+                   "compiled knowledge category reference is invalid");
+        if (strncmp(current->id, "encyclopedia:", 13U) == 0) {
+            found_encyclopedia = 1;
+            TEST_CHECK(strstr(current->description, "article-title cues include") != NULL,
+                       "encyclopedia row is missing human-readable topic labels");
+            TEST_CHECK(strstr(cgai_static_knowledge_category_description(current->category),
+                              "article-title cues include") != NULL,
+                       "encyclopedia category is missing human-readable topic labels");
+        }
+    }
+    TEST_CHECK(found_encyclopedia, "compiled encyclopedia centroids are missing");
+}
+
+/** Verify exact lookup in the low-level spatial index exposed for native vector callers. */
+static void test_compiled_vector_query(void) {
+    const cgai_static_knowledge_centroid *first = cgai_static_knowledge_centroid_at(0U);
+    double vector[CGAI_STATIC_KNOWLEDGE_DIMENSIONS];
+    for (size_t dimension = 0U; dimension < CGAI_STATIC_KNOWLEDGE_DIMENSIONS; ++dimension)
+        vector[dimension] = (double)first->vector[dimension];
+    const cgai_spatial_request request = {vector, 5U, CGAI_SPATIAL_ALL_CATEGORIES,
+                                          CGAI_SPATIAL_NO_EXCLUSION};
+    cgai_spatial_hit hits[5];
+    cgai_spatial_stats stats;
+    cgai_spatial_index *index = cgai_static_knowledge_create_index();
+    TEST_CHECK(index != NULL, cgai_last_error());
+    TEST_CHECK(cgai_spatial_query(index, &request, hits, &stats) == CGAI_STATUS_OK,
+               cgai_last_error());
+    TEST_CHECK(stats.count == 5U && hits[0].row == 0U && hits[0].squared_distance == 0.0,
+               "compiled knowledge query did not return its exact source row");
+    cgai_spatial_destroy(index);
+}
+
 /**
  * @brief Run native spatial correctness, lifetime, invalid-input, and ABI regressions.
  * @return Zero after all assertions pass; assertions terminate on failure.
@@ -211,5 +288,8 @@ int main(void) {
     test_ties_and_failures();
     test_invalid_construction();
     test_spatial_abi();
+    test_compiled_metadata();
+    test_compiled_rows();
+    test_compiled_vector_query();
     return 0;
 }

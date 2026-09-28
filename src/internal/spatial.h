@@ -20,7 +20,7 @@ struct cgai_spatial_index {
     double *vectors;          /**< Owned count*dimensions copied coordinates. */
     double *minimum;          /**< Owned count*dimensions lower-bound capacity. */
     double *maximum;          /**< Owned count*dimensions upper-bound capacity. */
-    uint32_t *categories;     /**< Owned count input category IDs. */
+    uint64_t *categories;     /**< Owned count category-membership masks. */
     size_t *order;            /**< Owned row permutation used by leaves. */
     cgai_spatial_node *nodes; /**< Owned count-element node capacity. */
 };

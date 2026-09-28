@@ -11,6 +11,8 @@ file(GLOB_RECURSE CGAI_FORMAT_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/include/*.h"
     "${PROJECT_SOURCE_DIR}/persistence/api/native/*.c"
     "${PROJECT_SOURCE_DIR}/persistence/api/native/*.h")
+list(FILTER CGAI_CORE_LINT_SOURCES EXCLUDE REGEX "/knowledge_catalog(\\.c$|/)")
+list(FILTER CGAI_FORMAT_SOURCES EXCLUDE REGEX "/knowledge_catalog(\\.[ch]$|/)")
 
 # node-gyp keeps downloaded headers under the running Node version.
 find_program(CGAI_NODE_EXECUTABLE NAMES node)

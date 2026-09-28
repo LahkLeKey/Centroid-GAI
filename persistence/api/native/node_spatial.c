@@ -111,7 +111,7 @@ static napi_value create_spatial(napi_env env, spatial_view vectors, spatial_vie
     return wrap_spatial(env, owner);
 }
 
-/**
+/*
  * @brief Validate array kinds and create an immutable C index.
  * @param env Borrowed Node environment.
  * @param info Borrowed callback arguments: Float64Array coordinates and Uint32Array categories.
@@ -184,7 +184,7 @@ static napi_value query_spatial(napi_env env, const node_spatial *owner, spatial
     return cgai_node_check(env, status) ? result : NULL;
 }
 
-/**
+/*
  * @brief Validate a branded owner and query arrays before invoking read-only native traversal.
  * @param env Borrowed Node environment.
  * @param info Callback metadata containing owner, Float64 query, and three Uint32 options.
