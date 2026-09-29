@@ -23,18 +23,18 @@ phases; a branch may exit before reaching a later step.
 
 ## Use static knowledge to find C examples
 
-The compiled knowledge index is a routing aid: category descriptions and centroid
-target-word cues suggest which subsystem to inspect. A centroid is not a source
-snippet, and its vector has no human-readable coordinate meaning. Read the named
-source and test files before copying a pattern.
+For a complete lookup and return-data example, read the
+[compiled knowledge catalog guide](knowledge-catalog.md).
 
-Native callers needing arbitrary vector queries can create an index with `cgai_static_knowledge_create_index()`,
-query it with `cgai_spatial_query()`, and use each hit's row with
-`cgai_static_knowledge_centroid_at()`. The row provides a stable ID, readable
-category, description, observation count, and vector. Destroy the created index
-with `cgai_spatial_destroy()`; centroid rows and their strings are borrowed static
-storage. A nearby centroid is only a hint for choosing a subsystem, not a claim
-that its vector or target words explain a specific implementation.
+The compiled knowledge index contains manually authored examples of build,
+database, and native C operations. Its coordinates are explicit feature weights,
+and its descriptions explain the represented operations. Query results return
+stored descriptions and squared distances; the records do not execute those operations.
+
+Native callers can create an index with `cgai_static_knowledge_create_index()`,
+query it with `cgai_spatial_query()`, and resolve each hit through
+`cgai_static_knowledge_centroid_at()`. Destroy the index with
+`cgai_spatial_destroy()`; records and strings are borrowed static storage.
 
 | New C work | Start with these repository examples |
 | --- | --- |
@@ -48,8 +48,8 @@ that its vector or target words explain a specific implementation.
 
 The codebase centroid release also contains source-chunk records under
 `knowledge/codebase/codebase-v1/sources/`; those records retain the relevant file,
-commit, and line provenance. Use the compiled index to narrow the category, then
-use the source manifest and files above for implementation evidence.
+commit, and line provenance. These historical snapshots are separate from the
+manual catalog. Use the files above for current implementation evidence.
 
 ## Add a C11 module
 

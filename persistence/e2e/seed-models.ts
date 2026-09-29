@@ -60,26 +60,6 @@ const exampleModels: readonly ExampleModel[] = [
         corpusPath : "examples/model_corpora/general_vocabulary.txt",
         description : "Everyday vocabulary outside the tooling and worldbuilding domains.",
     },
-    {
-        name : "encyclopedia-science-and-nature",
-        corpusPath : "examples/model_corpora/encyclopedia/science_and_nature.txt",
-        description : "General scientific and natural phenomena described in plain language.",
-    },
-    {
-        name : "encyclopedia-geography-and-places",
-        corpusPath : "examples/model_corpora/encyclopedia/geography_and_places.txt",
-        description : "Landforms, climates, and settlement patterns described generically.",
-    },
-    {
-        name : "encyclopedia-history-and-society",
-        corpusPath : "examples/model_corpora/encyclopedia/history_and_society.txt",
-        description : "General patterns of how communities and institutions change over time.",
-    },
-    {
-        name : "encyclopedia-everyday-objects-and-processes",
-        corpusPath : "examples/model_corpora/encyclopedia/everyday_objects_and_processes.txt",
-        description : "How common tools, foods, and routines work.",
-    },
 ];
 
 /** Trains one named model by sending its committed corpus to the API upsert endpoint. */

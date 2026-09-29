@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'node:test';
@@ -49,6 +49,25 @@ test('checked-in centroid C implementations regenerate byte-for-byte', t => {
     for (const name of Object.keys(expected))
         expected[name] = expected[name]!.replaceAll('\r\n', '\n');
     assert.deepEqual(snapshot(join(directory, 'knowledge_catalog')), expected);
+});
+
+test('reject duplicate and out-of-range sparse C coordinates', t => {
+    const directory = mkdtempSync(join(tmpdir(), 'cgai-sparse-'));
+    t.after(() => rmSync(directory, {recursive : true, force : true}));
+    const sourceDirectory = fileURLToPath(new URL('../../../../src/', import.meta.url));
+    const source = join(directory, 'knowledge_catalog.c');
+    cpSync(join(sourceDirectory, 'knowledge_catalog.c'), source);
+    cpSync(join(sourceDirectory, 'knowledge_catalog'), join(directory, 'knowledge_catalog'),
+           {recursive : true});
+    const category = join(directory, 'knowledge_catalog/00-build-and-configuration.c');
+    const original = readFileSync(category, 'utf8');
+    for (const axis of [0, 32]) {
+        writeFileSync(category, original.replace('[0 /* configuration */] = 1.0F,',
+            `[0 /* configuration */] = 1.0F, [${axis}] = 0.5F,`));
+        const result = compile(source, join(directory, 'output/knowledge_catalog.c'));
+        assert.notEqual(result.status, 0);
+        assert.match(result.stderr, /Invalid vector component/);
+    }
 });
 
 for (const legacyFragments of [false, true]) {

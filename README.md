@@ -57,18 +57,10 @@ random seed. Temperature `0` uses deterministic greedy selection.
 
 ## Grow a training knowledgebase
 
-The [compiled encyclopedia release](knowledge/encyclopedia/README.md) embeds 2,352
-native centroids from 20,000 Simple English Wikipedia articles into the C library.
-Source revisions, attribution, and original checksums remain documented; compressed
-article/model shards are recreated locally only when needed for regeneration.
-
-The [Git encyclopedia tools](docs/git-encyclopedia.md) import committed text into
-traceable corpora for `cgai train`, monitor content changes, and optionally pull
-a public Git repository into an isolated cache. The
-[starter configuration](examples/knowledge/encyclopedia.json) uses the encyclopedia
-already tracked under `examples/model_corpora/encyclopedia`. Model runtime reads
-local artifacts; no runtime crawling or API keys are involved. Public-web research
-can be incorporated through reviewed content commits with citations.
+The [compiled C knowledge catalog](docs/knowledge-catalog.md) contains nine
+manually authored vectors for build, database, and native C operations. Each
+coordinate has a named feature, and each result returns a readable description.
+The former imported encyclopedia release has been removed.
 
 The [repository training verification](docs/codebase-verification.md) imports the
 project's own committed code and documentation, checks repeatable native training,

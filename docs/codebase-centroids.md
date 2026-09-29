@@ -118,44 +118,17 @@ depends on vector distribution and dimensionality.
 
 ## Compile static knowledge into C
 
-The checked-in native knowledge is a compact baseline: the three highest-observation
-rows per category, selected deterministically by observation count and then stable ID.
-It keeps 126 of the source release's 2,528 rows while preserving selected IDs,
-descriptions, observation counts, and vectors. Lookups and nearest-neighbor queries
-operate on this baseline subset, not the full encyclopedia corpus.
+The checked-in catalog is now a manually authored C baseline: nine records across
+build, database, and native-core categories. It does not use the historical trained
+codebase or encyclopedia vectors. See [the catalog guide](knowledge-catalog.md)
+for feature definitions, returned data, and maintenance commands.
 
-Each category under `src/knowledge_catalog/` is a small, independently compiled
-C module with a constant centroid array. The files are the maintained baseline source;
-the master `src/knowledge_catalog.c` registers modules and maps sorted global rows
-to category-local rows. Exact duplicate vectors are reclustered when the baseline is
-compiled. CMake discovers the category sources automatically.
-
-To build the same baseline from a verified combined release, write to a separate
-output path and apply the baseline cap:
+Historical release tooling remains available for experiments. Write imported C
+tables to a separate build directory rather than replacing the manual catalog:
 
 ```powershell
-node persistence/api/src/knowledge/compile-native-knowledge.ts --release build/knowledge/static-knowledge-v1 --output build/static_knowledge_baseline.c --top-per-category 3
-node persistence/api/src/knowledge/compile-native-knowledge.ts --source-c build/static_knowledge_baseline.c --output src/knowledge_catalog.c --top-per-category 3
-cmake --build build
+node persistence/api/src/knowledge/compile-native-knowledge.ts --release build/knowledge/static-knowledge-v1 --output build/imported/knowledge_catalog.c --top-per-category 3
 ```
-
-`centroid_gai_knowledge.h` exposes read-only sorted centroid/category accessors
-and `cgai_static_knowledge_create_index()`. Each row exposes a readable
-description, and `cgai_static_knowledge_category_description()` describes its
-category. The returned index uses the ordinary exact spatial API; query row IDs
-map to `cgai_static_knowledge_centroid_at()`. Category and row descriptions are
-inspection hints, not article summaries or explanations of individual vector
-dimensions. To normalize or verify the checked-in C baseline without a source release,
-run:
-
-```powershell
-node persistence/api/src/knowledge/compile-native-knowledge.ts --source-c src/knowledge_catalog.c --output src/knowledge_catalog.c
-```
-
-The compiled baseline contains vectors, counts, and descriptions, not article or model
-archives, so those files are not needed at runtime. The index supports spatial lookup
-only; per-centroid token counts and text generation remain in local source/model
-releases.
 
 ## Use a native shard
 

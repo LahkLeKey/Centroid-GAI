@@ -81,7 +81,7 @@ function loadGeneratedC(path: string): NativeTable {
     const dimensions = source.match(
         /(?:cgai_knowledge_catalog_dimensions|cgai_static_knowledge_dimensions) = (\d+)U;/);
     const releaseSha = source.match(
-        /(?:cgai_knowledge_catalog_release_sha256|cgai_static_knowledge_release_sha256_value)\[\] = "([a-f0-9]{64})";/);
+        /(?:cgai_knowledge_catalog_release_sha256|cgai_static_knowledge_release_sha256_value)\[\] = "([a-f0-9]{64}|)";/);
     if (!dimensions || !releaseSha)
         throw new Error('Generated C table is missing required metadata');
     const categoryKeys = new Map<number, string>();
@@ -129,10 +129,10 @@ function loadGeneratedC(path: string): NativeTable {
     const sharedVectors =
         sharedBlock ? [...sharedBlock[1]!.matchAll(/\{([^{}]+)\}/g) ].map(match => match[1]!) : [];
     const rowPattern =
-        /\{\s*(?:\.id\s*=\s*)?"([a-zA-Z0-9_:/.-]+)",\s*(?:\.category\s*=\s*)?(\d+)U,\s*(?:\.observations\s*=\s*)?UINT64_C\((\d+)\),\s*(?:(?:\.description\s*=\s*)?"((?:[^"\\]|\\.)*)",\s*)?(?:\.cluster\s*=\s*\d+U,\s*)?(?:\.vector\s*=\s*)?(?:(?:\(const float\[CGAI_STATIC_KNOWLEDGE_DIMENSIONS\]\))?\{([^{}]+)\}|(?:cgai_knowledge_catalog_vectors|cgai_shared_knowledge_vectors)\[(\d+)\])\s*\},?/g;
+        /\{\s*(?:\.id\s*=\s*)?"([a-zA-Z0-9_:/.-]+)",\s*(?:\.category\s*=\s*)?(\d+)U,\s*(?:\.observations\s*=\s*)?UINT64_C\((\d+)\),\s*(?:(?:\.description\s*=\s*)?"((?:[^"\\]|\\.)*)",\s*)?(?:\.cluster\s*=\s*\d+U,\s*)?(?:\.vector\s*=\s*)?(?:(?:\(const float\[CGAI_STATIC_KNOWLEDGE_DIMENSIONS\]\))?\{([^{}]+)\}|(?:cgai_knowledge_catalog_vectors|cgai_shared_knowledge_vectors)\[\s*(\d+)\s*\])\s*\},?/g;
     for (const row of rows.matchAll(rowPattern)) {
         const categoryIndex = Number(row[2]);
-        const category = categoryKeyFromId(row[1]!);
+        const category = moduleMetadata?.[categoryIndex]?.key ?? categoryKeyFromId(row[1]!);
         if (categoryIndex >= categoryLabels.length ||
             (categoryKeys.has(categoryIndex) && categoryKeys.get(categoryIndex) !== category))
             throw new Error(`Generated C table category mismatch: ${row[1]}`);
@@ -140,12 +140,23 @@ function loadGeneratedC(path: string): NativeTable {
         const vectorText = row[5] ?? sharedVectors[Number(row[6])];
         if (!vectorText)
             throw new Error(`Missing shared vector: ${row[1]}`);
-        const vector = vectorText.split(',').filter(value => value.trim()).map(value => {
-            const literal = value.trim();
-            if (!literal.endsWith('F'))
+        // C baseline vectors use sparse designated initializers; omitted axes are zero.
+        const literals = vectorText.replace(/\/\*[\s\S]*?\*\//g, '').split(',')
+                             .map(value => value.trim()).filter(Boolean);
+        const vector: number[] = [];
+        let component = 0;
+        for (const literal of literals) {
+            const entry = literal.match(/^(?:\[\s*(\d+)\s*\]\s*=\s*)?([-+0-9.eE]+)F$/);
+            if (!entry)
                 throw new Error(`Invalid generated float literal: ${literal}`);
-            return Number(literal.slice(0, -1));
-        });
+            if (entry[1] !== undefined)
+                component = Number(entry[1]);
+            if (component >= Number(dimensions[1]) || vector[component] !== undefined)
+                throw new Error(`Invalid vector component: ${literal}`);
+            vector[component++] = Number(entry[2]);
+        }
+        for (let component = 0; component < Number(dimensions[1]); ++component)
+            vector[component] ??= 0;
         if (!category || vector.length !== Number(dimensions[1]) || !vector.every(Number.isFinite))
             throw new Error(`Invalid generated centroid row: ${row[1]}`);
         const description = row[4] === undefined ? '' : JSON.parse(`"${row[4]}"`) as string;
@@ -185,6 +196,10 @@ function loadGeneratedC(path: string): NativeTable {
 }
 
 function categoryKeyFromId(id: string) {
+    // Maintained baseline IDs belong to a category, not an external model shard.
+    const baseline = id.match(/^([a-z0-9/-]+):baseline-\d{3,}$/);
+    if (baseline)
+        return baseline[1]!;
     if (id.startsWith('encyclopedia:')) {
         const shard = id.slice('encyclopedia:'.length).split(':')[0]!;
         const cluster = shard.match(/^(cluster-\d+)-\d{4}$/)?.[1];
@@ -473,9 +488,14 @@ for (const point of points) {
             : categoryDescription;
 }
 
+const manualFeatures = [
+    'configuration', 'schema', 'read', 'write', 'validation', 'memory', 'numeric',
+    'serialization'
+];
+
 function cFloat(value: number) {
-    const literal = value.toPrecision(9);
-    return `${/ [.eE ] /.test(literal) ? literal : `${literal}.0`}F`;
+    const literal = table.releaseSha256 === '' ? String(value) : value.toPrecision(9);
+    return `${/[.eE]/.test(literal) ? literal : `${literal}.0`}F`;
 }
 
 const categoryIds = new Map(categories.map((category, index) => [category, index]));
@@ -532,6 +552,8 @@ const categoryFiles = categories.map((category, index) => {
         `/* Category: ${readableName}; centroids: ${members.length}. */`,
         '#include "../knowledge_catalog.h"',
         '',
+        '/* Immutable search records, sorted by ID. Coordinates rank squared Euclidean',
+        ' * distance. See docs/knowledge-catalog.md for feature definitions and results. */',
         'static const cgai_static_knowledge_centroid centroids[] = {',
         ...members.flatMap((point, row) => {
             rowReferences.set(point.id, {category : index, row});
@@ -540,13 +562,17 @@ const categoryFiles = categories.map((category, index) => {
             const categoryId = categoryIds.get(point.category);
             return [
                 '    {',
-                `        .id = ${cString(point.id)}, .category = ${categoryId}U, .observations = UINT64_C(${point.observations}),`,
+                `        .id = ${cString(point.id)},`,
+                `        .category = ${categoryId}U,`,
+                `        .observations = UINT64_C(${point.observations}),`,
                 `        .description = ${JSON.stringify(point.description)},`,
                 `        .cluster = ${cluster.index}U,`,
                 ...(cluster.shared !== undefined ? [`        .vector = cgai_knowledge_catalog_vectors[${cluster.shared}]`] : [
                 '        .vector = (const float[CGAI_STATIC_KNOWLEDGE_DIMENSIONS]){',
-                ...Array.from({length: Math.ceil(vector.length / 4)}, (_, offset) =>
-                    `            ${vector.slice(offset * 4, offset * 4 + 4).join(', ')}${offset * 4 + 4 < vector.length ? ',' : ''}`),
+                ...(table.releaseSha256 === '' ? vector.flatMap((value, axis) =>
+                    cluster.vector[axis] === 0 && (axis !== 0 || cluster.vector.some(value => value !== 0)) ? [] :
+                    [`            [${axis} /* ${manualFeatures[axis] ?? 'reserved'} */] = ${value},`]) : Array.from({length: Math.ceil(vector.length / 4)}, (_, offset) =>
+                    `            ${vector.slice(offset * 4, offset * 4 + 4).join(', ')}${offset * 4 + 4 < vector.length ? ',' : ''}`)),
                 '        }']), '    },'
             ];
         }),
@@ -563,7 +589,11 @@ const categoryFiles = categories.map((category, index) => {
         '    .rows = centroids',
         '};',
         '',
-        `const cgai_knowledge_module *${symbol}(void) { return &module; }`,
+        '/** Return borrowed category metadata and rows, valid for the process lifetime.',
+        ' * No allocation, file access, database query, or vector search occurs here. */',
+        `const cgai_knowledge_module *${symbol}(void) {`,
+        '    return &module;',
+        '}',
         ''
     ];
     return {name, symbol, count : members.length, source : lines.join('\n')};
@@ -599,7 +629,7 @@ const source = [
     `const size_t cgai_knowledge_catalog_row_count = ${points.length}U;`,
     `const size_t cgai_knowledge_catalog_cluster_count = ${clusters.size}U;`,
     `const size_t cgai_knowledge_catalog_dimensions = ${dimensions}U;`,
-    `const char cgai_knowledge_catalog_release_sha256[] = ${cString(table.releaseSha256)};`, ''
+    `const char cgai_knowledge_catalog_release_sha256[] = ${JSON.stringify(table.releaseSha256)};`, ''
 ].join('\n');
 
 const existingOutput = existsSync(output) ? readFileSync(output, 'utf8') : undefined;

@@ -1,53 +1,52 @@
 /* Curated static knowledge baseline; maintain these C sources directly. */
-/* Category: Database and Persistence; centroids: 3. */
+/* Category: Native C Core; centroids: 3. */
 #include "../knowledge_catalog.h"
 
 /* Immutable search records, sorted by ID. Coordinates rank squared Euclidean
  * distance. See docs/knowledge-catalog.md for feature definitions and results. */
 static const cgai_static_knowledge_centroid centroids[] = {
     {
-        .id = "database:lookup",
-        .category = 1U,
+        .id = "native-core:allocate",
+        .category = 2U,
         .observations = UINT64_C(0),
-        .description = "Read a record by key; return the matching record or an explicit not-found result.",
-        .cluster = 3U,
+        .description = "Allocate a buffer; return an owned pointer or NULL, and release it with free.",
+        .cluster = 6U,
         .vector = (const float[CGAI_STATIC_KNOWLEDGE_DIMENSIONS]){
-            [1 /* schema */] = 1.0F,
-            [2 /* read */] = 1.0F,
             [4 /* validation */] = 0.5F,
+            [5 /* memory */] = 1.0F,
         }
     },
     {
-        .id = "database:schema",
-        .category = 1U,
+        .id = "native-core:distance",
+        .category = 2U,
         .observations = UINT64_C(0),
-        .description = "Define record fields, types, and constraints used to validate stored data.",
-        .cluster = 4U,
+        .description = "Sum squared coordinate differences; return a nonnegative numeric distance.",
+        .cluster = 7U,
         .vector = (const float[CGAI_STATIC_KNOWLEDGE_DIMENSIONS]){
-            [1 /* schema */] = 1.0F,
-            [4 /* validation */] = 1.0F,
+            [2 /* read */] = 0.5F,
+            [6 /* numeric */] = 1.0F,
         }
     },
     {
-        .id = "database:write",
-        .category = 1U,
+        .id = "native-core:serialize",
+        .category = 2U,
         .observations = UINT64_C(0),
-        .description = "Validate a record and persist it; return success or an error describing the failure.",
-        .cluster = 5U,
+        .description = "Encode a record into bytes; return an owned buffer and its length or an error.",
+        .cluster = 8U,
         .vector = (const float[CGAI_STATIC_KNOWLEDGE_DIMENSIONS]){
-            [1 /* schema */] = 1.0F,
-            [3 /* write */] = 1.0F,
+            [3 /* write */] = 0.5F,
             [4 /* validation */] = 0.5F,
+            [7 /* serialization */] = 1.0F,
         }
     },
 };
 
 static const cgai_knowledge_module module = {
     .category = {
-        .index = 1U,
-        .key = "database",
-        .name = "Database and Persistence",
-        .description = "Database schemas, record lookup, and validated writes",
+        .index = 2U,
+        .key = "native-core",
+        .name = "Native C Core",
+        .description = "C memory ownership, numeric distance, and byte serialization",
         .count = sizeof(centroids) / sizeof(centroids[0])
     },
     .rows = centroids
@@ -55,6 +54,6 @@ static const cgai_knowledge_module module = {
 
 /** Return borrowed category metadata and rows, valid for the process lifetime.
  * No allocation, file access, database query, or vector search occurs here. */
-const cgai_knowledge_module *cgai_knowledge_database(void) {
+const cgai_knowledge_module *cgai_knowledge_native_core(void) {
     return &module;
 }

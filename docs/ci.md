@@ -19,14 +19,7 @@ Bun 1.3.9 is pinned in CI and Docker images for reproducible workspace installs.
 The separate knowledge-ingestion job uses Python's standard library and Git,
 builds the C trainer, and tests commit-pinned encyclopedia snapshots, change
 monitoring, and native training/generation on Linux and Windows. It needs no
-credentials or external services; see [Git encyclopedia](git-encyclopedia.md)
-for local commands.
-
-CI also verifies every committed bulk source checksum and the 1 MiB file/128 MiB
-release budgets. The native job loads all committed compressed model shards and
-checks their metadata and training-corpus checksums. A separate weekly/manual
-`knowledge-monitor.yml` workflow compares the upstream dataset's public Git ref
-with the pinned revision. It reports updates without downloading or retraining.
+credentials or external services.
 
 For local service-boundary verification, run `bun run test:e2e` from `persistence`.
 It creates a process-specific Compose project, defaults to API port 3100 and

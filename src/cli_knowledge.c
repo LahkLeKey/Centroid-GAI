@@ -19,7 +19,9 @@ static void print_centroid(const cgai_static_knowledge_centroid *point) {
  */
 static int list_categories(void) {
     printf("%zu centroids in %zu categories; release %s\n", cgai_static_knowledge_centroid_count(),
-           cgai_static_knowledge_category_count(), cgai_static_knowledge_release_sha256());
+           cgai_static_knowledge_category_count(),
+           cgai_static_knowledge_release_sha256()[0] ? cgai_static_knowledge_release_sha256()
+                                                     : "manual C baseline");
     for (size_t i = 0U; i < cgai_static_knowledge_category_count(); ++i) {
         const cgai_static_knowledge_category *category = cgai_static_knowledge_category_at(i);
         printf("%s\t%zu\t%s\n", category->key, category->count, category->name);

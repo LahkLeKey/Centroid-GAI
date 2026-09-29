@@ -214,10 +214,10 @@ static void test_compiled_metadata(void) {
     TEST_CHECK(category_count > 0U && category_count <= 64U,
                "compiled knowledge category count mismatch");
     const char *release_hash = cgai_static_knowledge_release_sha256();
-    TEST_CHECK(release_hash != NULL && strlen(release_hash) == 64U,
+    TEST_CHECK(release_hash != NULL && release_hash[0] == '\0',
                "compiled knowledge release hash mismatch");
     const cgai_static_knowledge_centroid *first = cgai_static_knowledge_centroid_at(0U);
-    TEST_CHECK(first != NULL && first->observations > 0U && first->category < category_count &&
+    TEST_CHECK(first != NULL && first->observations == 0U && first->category < category_count &&
                    cgai_static_knowledge_category_name(first->category) != NULL &&
                    strchr(cgai_static_knowledge_category_name(first->category), '/') == NULL &&
                    cgai_static_knowledge_category_description(first->category) != NULL &&
@@ -229,11 +229,10 @@ static void test_compiled_metadata(void) {
                "compiled knowledge bounds mismatch");
 }
 
-/** Check sorted rows, readable descriptions, and encyclopedia coverage. */
+/** Check sorted rows, readable descriptions, and manually authored records. */
 static void test_compiled_rows(void) {
     const size_t count = cgai_static_knowledge_centroid_count();
     const size_t category_count = cgai_static_knowledge_category_count();
-    int found_encyclopedia = 0;
     for (size_t row = 1U; row < count; ++row) {
         const cgai_static_knowledge_centroid *previous =
             cgai_static_knowledge_centroid_at(row - 1U);
@@ -247,16 +246,11 @@ static void test_compiled_rows(void) {
                        cgai_static_knowledge_category_description(current->category) != NULL &&
                        current->description != NULL && strlen(current->description) > 20U,
                    "compiled knowledge category reference is invalid");
-        if (strncmp(current->id, "encyclopedia:", 13U) == 0) {
-            found_encyclopedia = 1;
-            TEST_CHECK(strstr(current->description, "article-title cues include") != NULL,
-                       "encyclopedia row is missing human-readable topic labels");
-            TEST_CHECK(strstr(cgai_static_knowledge_category_description(current->category),
-                              "article-title cues include") != NULL,
-                       "encyclopedia category is missing human-readable topic labels");
-        }
+        TEST_CHECK(current->observations == 0U, "manual records must not claim training counts");
+        TEST_CHECK(strncmp(cgai_static_knowledge_category_key(current->category), "encyclopedia/",
+                           13U) != 0,
+                   "retired encyclopedia category remains");
     }
-    TEST_CHECK(found_encyclopedia, "compiled encyclopedia centroids are missing");
 }
 
 /** Verify exact lookup in the low-level spatial index exposed for native vector callers. */

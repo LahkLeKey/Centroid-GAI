@@ -12,20 +12,20 @@ extern "C" {
 
 /** Read-only compiled centroid row; row order is ascending stable ID. */
 typedef struct cgai_static_knowledge_centroid {
-    const char *id;          /**< Stable ID such as `encyclopedia:cluster-000-0000:0000`. */
+    const char *id;          /**< Catalog ID such as `database:lookup`; not a file path. */
     uint32_t category;       /**< Index into cgai_static_knowledge_category_name(). */
     uint32_t cluster;        /**< Canonical geometric cluster; exact float32 duplicates share it. */
-    uint64_t observations;   /**< Training transitions represented by this centroid. */
-    const char *description; /**< Human-readable topic and learned-token summary. */
+    uint64_t observations;   /**< Training transitions; zero for manually authored records. */
+    const char *description; /**< Human-readable description returned with this record. */
     const float *vector; /**< Borrowed immutable 32-component coordinates, shared across aliases. */
 } cgai_static_knowledge_centroid;
 
 /** Canonical cluster metadata; every source ID remains available as an alias row. */
 typedef struct cgai_static_knowledge_cluster {
-    size_t row; /**< Global row of the earliest stable ID representing this cluster. */
-    size_t aliases; /**< Number of original rows represented by this vector. */
+    size_t row;            /**< Global row of the earliest stable ID representing this cluster. */
+    size_t aliases;        /**< Number of original rows represented by this vector. */
     uint64_t observations; /**< Sum of observations across aliases, preserving provenance. */
-    uint64_t categories; /**< Union of category membership bits across aliases. */
+    uint64_t categories;   /**< Union of category membership bits across aliases. */
 } cgai_static_knowledge_cluster;
 
 /** Count distinct exact float32 vectors.
@@ -37,7 +37,8 @@ size_t cgai_static_knowledge_cluster_count(void);
  * @param output Required writable metadata, cleared on failure.
  * @return OK on success, otherwise ERROR with a diagnostic.
  */
-cgai_status cgai_static_knowledge_cluster_get(size_t cluster, cgai_static_knowledge_cluster *output);
+cgai_status cgai_static_knowledge_cluster_get(size_t cluster,
+                                              cgai_static_knowledge_cluster *output);
 /** Create a standard spatial index with one row per canonical cluster.
  * @return Owned index, or NULL on failure; destroy with cgai_spatial_destroy().
  * Row IDs are cluster IDs. Category filters use the union of all alias memberships.
@@ -49,7 +50,7 @@ typedef struct cgai_static_knowledge_category {
     uint32_t index;          /**< Stable category index for filtered neighbor queries. */
     const char *key;         /**< Stable machine-readable key. */
     const char *name;        /**< Human-readable category name. */
-    const char *description; /**< Description of the category's learned contexts. */
+    const char *description; /**< Description of the category's records. */
     size_t count;            /**< Number of category-local centroid rows. */
 } cgai_static_knowledge_category;
 
@@ -116,8 +117,8 @@ const char *cgai_static_knowledge_category_key(size_t category);
  */
 const char *cgai_static_knowledge_category_description(size_t category);
 
-/** SHA-256 of the verified static release manifest used to generate this table.
- * @return Borrowed NUL-terminated release SHA-256.
+/** SHA-256 of an imported release manifest, or an empty string for a manual baseline.
+ * @return Borrowed NUL-terminated release SHA-256 or empty string.
  */
 const char *cgai_static_knowledge_release_sha256(void);
 
@@ -152,7 +153,9 @@ size_t cgai_static_knowledge_find(const char *id);
 /**
  * @brief Find other compiled centroids nearest to a stable centroid ID.
  *
- * Results exclude the source row and sort by squared distance, then stable ID. Queries
+ * Results exclude the source cluster and sort by squared distance, then stable ID.
+ * Each hit names a representative global row; resolve it with centroid_at() to
+ * read its metadata and vector. Only stats->count entries in hits are valid. Queries
  * allocate no memory and may run concurrently with separate hit arrays and statistics.
  * @param index Borrowed context returned by cgai_static_knowledge_open().
  * @param id Borrowed NUL-terminated stable centroid ID.

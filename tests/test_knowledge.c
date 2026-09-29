@@ -150,6 +150,10 @@ static void check_module(size_t category) {
         const cgai_static_knowledge_centroid *point =
             cgai_static_knowledge_category_centroid_at(category, row);
         TEST_CHECK(point && point->category == category, "category-local row mismatch");
+        const size_t key_length = strlen(metadata->key);
+        TEST_CHECK(strncmp(point->id, metadata->key, key_length) == 0 &&
+                       point->id[key_length] == ':',
+                   "compiled record ID must belong to its baseline category");
         TEST_CHECK(cgai_static_knowledge_category_centroid_find(category, point->id) == point,
                    "category-local binary lookup mismatch");
         TEST_CHECK(cgai_static_knowledge_centroid_at(cgai_static_knowledge_find(point->id)) ==
@@ -173,10 +177,37 @@ static void check_modules(void) {
     TEST_CHECK(cgai_static_knowledge_category_at(SIZE_MAX) == NULL &&
                    cgai_static_knowledge_category_find(NULL) == SIZE_MAX &&
                    cgai_static_knowledge_category_find("absent") == SIZE_MAX &&
-                   cgai_static_knowledge_category_centroid_find(SIZE_MAX, "build-000:0000") ==
+                   cgai_static_knowledge_category_centroid_find(SIZE_MAX, "build:compile") ==
                        NULL &&
                    cgai_static_knowledge_category_centroid_find(0U, NULL) == NULL,
                "invalid category lookup accepted");
+}
+
+/** Check the manual baseline's documented feature geometry and result records.
+ * @param index Borrowed compiled search context.
+ */
+static void check_manual_baseline(cgai_static_knowledge_index *index) {
+    const size_t category = cgai_static_knowledge_category_find("database");
+    cgai_spatial_hit hits[3];
+    cgai_spatial_stats stats;
+    TEST_CHECK(cgai_static_knowledge_neighbors(index, "database:lookup", 3U, (uint32_t)category,
+                                               hits, &stats) == CGAI_STATUS_OK,
+               "manual database lookup failed");
+    TEST_CHECK(stats.count == 2U, "source record must be excluded");
+    const cgai_static_knowledge_centroid *schema = cgai_static_knowledge_centroid_at(hits[0].row);
+    const cgai_static_knowledge_centroid *write = cgai_static_knowledge_centroid_at(hits[1].row);
+    TEST_CHECK(strcmp(schema->id, "database:schema") == 0 && hits[0].squared_distance == 1.25,
+               "schema should be the nearest database operation");
+    TEST_CHECK(strcmp(write->id, "database:write") == 0 && hits[1].squared_distance == 2.0,
+               "write should be the second database operation");
+    TEST_CHECK(strstr(schema->description, "fields, types, and constraints") != NULL,
+               "hit must resolve to readable stored data");
+    for (size_t row = 0; row < cgai_static_knowledge_centroid_count(); ++row) {
+        const cgai_static_knowledge_centroid *point = cgai_static_knowledge_centroid_at(row);
+        TEST_CHECK(point->observations == 0U, "manual record claims learned observations");
+        for (size_t axis = 8U; axis < CGAI_STATIC_KNOWLEDGE_DIMENSIONS; ++axis)
+            TEST_CHECK(point->vector[axis] == 0.0F, "reserved feature must be zero");
+    }
 }
 
 /** Run native query and ABI integration regressions.
@@ -186,6 +217,7 @@ int main(void) {
     check_modules();
     cgai_static_knowledge_index *index = cgai_static_knowledge_open();
     TEST_CHECK(index != NULL, cgai_last_error());
+    check_manual_baseline(index);
     check_categories(index);
     check_invalid(index);
     cgai_static_knowledge_close(index);
