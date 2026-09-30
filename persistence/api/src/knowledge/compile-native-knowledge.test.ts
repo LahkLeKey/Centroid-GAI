@@ -38,7 +38,7 @@ function snapshot(directory: string): Record<string, string> {
 test('checked-in centroid C implementations regenerate byte-for-byte', t => {
     const directory = mkdtempSync(join(tmpdir(), 'cgai-regenerate-'));
     t.after(() => rmSync(directory, {recursive : true, force : true}));
-    const sourceDirectory = fileURLToPath(new URL('../../../../src/', import.meta.url));
+    const sourceDirectory = fileURLToPath(new URL('../../../../src/knowledge/', import.meta.url));
     const output = join(directory, 'knowledge_catalog.c');
     const result = compile(join(sourceDirectory, 'knowledge_catalog.c'), output);
     assert.equal(result.status, 0, result.stderr);
@@ -54,7 +54,7 @@ test('checked-in centroid C implementations regenerate byte-for-byte', t => {
 test('reject duplicate and out-of-range sparse C coordinates', t => {
     const directory = mkdtempSync(join(tmpdir(), 'cgai-sparse-'));
     t.after(() => rmSync(directory, {recursive : true, force : true}));
-    const sourceDirectory = fileURLToPath(new URL('../../../../src/', import.meta.url));
+    const sourceDirectory = fileURLToPath(new URL('../../../../src/knowledge/', import.meta.url));
     const source = join(directory, 'knowledge_catalog.c');
     cpSync(join(sourceDirectory, 'knowledge_catalog.c'), source);
     cpSync(join(sourceDirectory, 'knowledge_catalog'), join(directory, 'knowledge_catalog'),

@@ -35,9 +35,9 @@ const results = dataset.test.map((entry) => {
 const sourceDirectory = resolve(fileURLToPath(root));
 const git = (...args: string[]) => execFileSync('git', ['-c', `safe.directory=${sourceDirectory.replace(/\\/g, '/')}`, ...args], { cwd: root, encoding: 'utf8' }).trim();
 const implementationFiles = [
-    'src/chat_model.c', 'src/chat_prompt.c', 'src/chat_evaluation.c', 'src/chat_codec.c',
-    'src/neural_model.c', 'src/neural_math.c', 'src/neural_training.c', 'src/neural_generation.c',
-    'src/neural_vocabulary.c', 'src/internal/chat_internal.h', 'src/internal/neural_internal.h',
+    'src/chat/chat_model.c', 'src/chat/chat_prompt.c', 'src/chat/chat_evaluation.c', 'src/chat/chat_codec.c',
+    'src/neural/neural_model.c', 'src/neural/neural_math.c', 'src/neural/neural_training.c', 'src/neural/neural_generation.c',
+    'src/neural/neural_vocabulary.c', 'src/internal/chat_internal.h', 'src/internal/neural_internal.h',
     'include/centroid_gai_chat.h', 'include/centroid_gai_neural.h',
     'persistence/api/src/chat-native.ts', 'persistence/api/src/chat/dataset.ts',
     'persistence/api/src/evaluation/chat.ts',

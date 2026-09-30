@@ -43,13 +43,13 @@ status, and research/memory design. Each guide labels planned behavior explicitl
 
 ## Code map
 
-- `src/neural_*.c` and `include/centroid_gai_neural.h`: working neural prototype.
-- `include/centroid_gai_chat.h`, `src/chat_*.c`: implemented conversation protocol and codec.
+- `src/neural/` and `include/centroid_gai_neural.h`: working neural prototype.
+- `include/centroid_gai_chat.h`, `src/chat/`: implemented conversation protocol and codec.
 - `persistence/api/`: HTTP service, native Node bridge, chat workers, research and memory.
 - `persistence/db/`: model storage contracts and database migrations.
 - `persistence/shared/`: versioned service, chat and research contracts.
 - `tests/` and `examples/neural/`: correctness checks and small learning fixtures.
-- `src/knowledge_catalog/` and `persistence/api/src/knowledge/`: supporting catalog
+- `src/knowledge/knowledge_catalog/` and `persistence/api/src/knowledge/`: supporting catalog
   and source-retrieval tools, distinct from neural model weights.
 
 Licensed under [MIT](LICENSE).

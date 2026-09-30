@@ -69,7 +69,7 @@
       "priority": 40,
       "dependsOn": [],
       "summary": "Collect licensed, reviewed dialogue examples with source-separated training and evaluation families. Preserve the existing frozen neural evaluation and report generalization separately from training fit.",
-      "paths": ["src/chat_model.c", "src/chat_prompt.c", "src/neural_training.c", "docs/neural-centroid.md"],
+      "paths": ["src/chat/chat_model.c", "src/chat/chat_prompt.c", "src/neural/neural_training.c", "docs/neural-centroid.md"],
       "checks": [
         {"command": "ctest --test-dir build/dev -C Release --output-on-failure", "cwd": "."},
         {"command": "bun run typecheck", "cwd": "persistence"},

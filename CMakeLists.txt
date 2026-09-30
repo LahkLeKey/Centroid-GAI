@@ -23,44 +23,44 @@ include(cmake/Lint.cmake)
 
 # Each knowledge catalog category is an independent C translation unit.
 file(GLOB CGAI_KNOWLEDGE_CATALOG_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/knowledge_catalog/*.c")
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/knowledge/knowledge_catalog/*.c")
 
 add_library(centroid_gai
-    src/centroid_gai.c
-    src/error.c
-    src/file_utils.c
-    src/model_generation.c
-    src/model_generation_workspace.c
-    src/model_decode.c
-    src/model_encode.c
-    src/model_file.c
-    src/model_embedding.c
-    src/model_centroid.c
-    src/spatial_index.c
-    src/spatial_query.c
-    src/static_knowledge.c
-    src/knowledge_query.c
-    src/knowledge_clusters.c
-    src/json_writer.c
-    src/knowledge_catalog.c
+    src/chat/chat_codec.c
+    src/chat/chat_evaluation.c
+    src/chat/chat_model.c
+    src/chat/chat_prompt.c
+    src/core/error.c
+    src/core/file_utils.c
+    src/core/json_writer.c
+    src/core/model_random.c
+    src/core/tokenizer.c
+    src/core/vocabulary.c
+    src/knowledge/knowledge_catalog.c
+    src/knowledge/knowledge_clusters.c
+    src/knowledge/knowledge_query.c
+    src/knowledge/static_knowledge.c
+    src/model/centroid_gai.c
+    src/model/model_centroid.c
+    src/model/model_composition.c
+    src/model/model_decode.c
+    src/model/model_embedding.c
+    src/model/model_encode.c
+    src/model/model_file.c
+    src/model/model_generation.c
+    src/model/model_generation_workspace.c
+    src/model/model_sampling.c
+    src/model/model_training.c
+    src/neural/neural_evaluation.c
+    src/neural/neural_file.c
+    src/neural/neural_generation.c
+    src/neural/neural_math.c
+    src/neural/neural_model.c
+    src/neural/neural_training.c
+    src/neural/neural_vocabulary.c
+    src/spatial/spatial_index.c
+    src/spatial/spatial_query.c
     ${CGAI_KNOWLEDGE_CATALOG_SOURCES}
-    src/model_random.c
-    src/model_sampling.c
-    src/model_training.c
-    src/neural_model.c
-    src/neural_vocabulary.c
-    src/neural_math.c
-    src/neural_training.c
-    src/neural_evaluation.c
-    src/neural_generation.c
-    src/neural_file.c
-    src/chat_model.c
-    src/chat_prompt.c
-    src/chat_evaluation.c
-    src/chat_codec.c
-    src/model_composition.c
-    src/tokenizer.c
-    src/vocabulary.c
 )
 add_library(centroid_gai::centroid_gai ALIAS centroid_gai)
 set_target_properties(centroid_gai PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -68,22 +68,23 @@ target_include_directories(centroid_gai
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 target_compile_features(centroid_gai PUBLIC c_std_11)
 
 cgai_enable_warnings(centroid_gai)
 
 add_library(centroid_gai_abi SHARED
-    src/abi.c
-    src/abi_model.c
-    src/abi_config.c
-    src/abi_buffer.c
-    src/abi_generation.c
-    src/abi_metadata.c
-    src/abi_serialization.c
-    src/abi_inspection.c
-    src/abi_spatial.c
-    src/abi_knowledge.c
+    src/abi/abi.c
+    src/abi/abi_buffer.c
+    src/abi/abi_config.c
+    src/abi/abi_generation.c
+    src/abi/abi_inspection.c
+    src/abi/abi_knowledge.c
+    src/abi/abi_metadata.c
+    src/abi/abi_model.c
+    src/abi/abi_serialization.c
+    src/abi/abi_spatial.c
 )
 add_library(centroid_gai::abi ALIAS centroid_gai_abi)
 target_compile_features(centroid_gai_abi PUBLIC c_std_11)
@@ -92,6 +93,7 @@ target_include_directories(centroid_gai_abi
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 target_link_libraries(centroid_gai_abi PRIVATE centroid_gai::centroid_gai)
 cgai_enable_warnings(centroid_gai_abi)
@@ -107,8 +109,19 @@ if(CGAI_ENABLE_SANITIZERS AND NOT MSVC)
     target_link_options(centroid_gai PUBLIC -fsanitize=address,undefined)
 endif()
 
-add_executable(cgai src/main.c src/cli.c src/cli_arguments.c src/cli_training.c src/cli_generation.c src/cli_knowledge.c
-    src/cli_neural_arguments.c src/cli_neural_training.c src/cli_neural_generation.c src/cli_neural_evaluation.c)
+add_executable(cgai
+    src/cli/cli.c
+    src/cli/cli_arguments.c
+    src/cli/cli_generation.c
+    src/cli/cli_knowledge.c
+    src/cli/cli_neural_arguments.c
+    src/cli/cli_neural_evaluation.c
+    src/cli/cli_neural_generation.c
+    src/cli/cli_neural_training.c
+    src/cli/cli_training.c
+    src/cli/main.c
+)
+target_include_directories(cgai PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 cgai_enable_warnings(cgai)
 target_link_libraries(cgai PRIVATE centroid_gai::centroid_gai)
 if(WIN32)

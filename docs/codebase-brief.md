@@ -12,7 +12,7 @@ network written in C11. C owns tokenization, embeddings, ordered context encodin
 centroid routing, training, generation and artifact validation. Node TypeScript
 owns HTTP validation, subprocess workers, persistence, repository retrieval,
 public research and owner-scoped memory. There is no browser application or transformer.
-Sources: `README.md`, `docs/architecture.md`, `src/neural_math.c`,
+Sources: `README.md`, `docs/architecture.md`, `src/neural/neural_math.c`,
 `persistence/api/src/server.ts`.
 
 ## Engines and artifact formats
@@ -21,7 +21,7 @@ The count-centroid baseline stores `.cgai` artifacts. The neural continuation
 prototype stores `.cgnn` artifacts. The structured neural conversation engine
 stores `.cgchat` artifacts. These formats are distinct; renaming a file does not
 convert it. Baseline merge operations cannot combine learned neural parameter spaces.
-Sources: `docs/architecture.md`, `src/chat_codec.c`, `src/neural_file.c`,
+Sources: `docs/architecture.md`, `src/chat/chat_codec.c`, `src/neural/neural_file.c`,
 `include/centroid_gai_chat.h`, `include/centroid_gai_neural.h`.
 
 ## Chat data flow and durable state
@@ -43,8 +43,8 @@ role markers cannot become generated words. The fixed prompt preserves the curre
 question; a rolling suffix holds generated answer tokens. Older history enters as
 complete pairs within the prompt budget. Adam moments span one training call but
 are not stored in artifacts, so another call is not exact optimizer resume.
-Sources: `src/chat_model.c`, `src/chat_prompt.c`, `src/chat_evaluation.c`,
-`src/neural_training.c`, `docs/neural-centroid.md`.
+Sources: `src/chat/chat_model.c`, `src/chat/chat_prompt.c`, `src/chat/chat_evaluation.c`,
+`src/neural/neural_training.c`, `docs/neural-centroid.md`.
 
 ## Model quality and operating limits
 

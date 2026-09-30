@@ -8,9 +8,9 @@ fetching and memory admission. There is no browser application or transformer.
 
 | Engine | Sources | Format and interface |
 | --- | --- | --- |
-| Count-centroid baseline | `src/model_*.c` | `.cgai`, baseline HTTP/CLI and count-model composition |
-| Neural continuation prototype | `src/neural_*.c` | `.cgnn`, native C API and neural CLI |
-| Neural conversation engine | `src/chat_*.c`, shared neural math | `.cgchat`, structural dialogue C API and worker-backed HTTP |
+| Count-centroid baseline | `src/model/` | `.cgai`, baseline HTTP/CLI and count-model composition |
+| Neural continuation prototype | `src/neural/` | `.cgnn`, native C API and neural CLI |
+| Neural conversation engine | `src/chat/`, shared neural math | `.cgchat`, structural dialogue C API and worker-backed HTTP |
 
 The formats are distinct. Renaming does not convert them. Neural parameter spaces
 cannot be combined with baseline merge operations. The chat codec uses `CGAICHAT`
@@ -90,6 +90,33 @@ See [chat service](chat-service.md) for routes and measured limitations,
 under `include/`; private ownership/layout helpers remain under `src/internal/`.
 
 ## Native contracts
+
+Native implementations are grouped by responsibility:
+
+| Directory | Responsibility and consumers |
+| --- | --- |
+| `src/core/` | Shared errors, file/JSON helpers, random numbers, tokenization and vocabulary |
+| `src/model/` | Count-centroid baseline, composition and `.cgai` artifacts; used by the ABI, CLI and Node addon |
+| `src/neural/` | Neural math, training, generation and `.cgnn` files; shared with chat and exposed by the C API/CLI |
+| `src/chat/` | Conversation formatting, training/evaluation and `.cgchat` codec; used by the C API and Node addon |
+| `src/spatial/` | Spatial indexing and queries; used by the ABI and Node addon |
+| `src/knowledge/` | Static catalog, category translation units and queries; used by the C API, ABI and CLI |
+| `src/abi/` | Exported shared-library interface and artifact inspection; the Node addon compiles the supported subset |
+| `src/cli/` | Command-line entry point, parsing and commands |
+| `src/internal/` | Shared private headers; never installed |
+| `persistence/api/native/` | Node-API argument conversion, ownership and callbacks; built with the service package |
+
+All of these subsystems remain in use. The baseline and standalone neural file
+codec are still public interfaces even though chat has its own artifact format.
+The static knowledge catalog serves native callers independently of the service's
+repository retrieval. Keep the Node bridge with its package so node-gyp and the
+container build retain the same package boundary.
+
+`CMakeLists.txt` explicitly lists library, ABI and CLI sources;
+`persistence/api/binding.gyp` lists the addon's subset. Update both when adding
+shared implementations. Catalog categories are discovered under
+`src/knowledge/knowledge_catalog/`. Native tests stay under `tests/`, and CMake's
+lint/format targets discover subsystem sources recursively.
 
 Baseline artifact encoding writes numeric arrays in native machine representation;
 it does not convert byte order. Preserve representation compatibility between hosts.
