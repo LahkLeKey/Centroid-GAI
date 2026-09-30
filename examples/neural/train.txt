@@ -1,4 +1,0 @@
-a b left b a right a b left b a right a b left b a right a b left b a right
-a b left b a right a b left b a right a b left b a right a b left b a right
-a b left b a right a b left b a right a b left b a right a b left b a right
-a b left b a right a b left b a right a b left b a right a b left b a right
