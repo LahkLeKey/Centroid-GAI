@@ -183,6 +183,16 @@ static void check_modules(void) {
                "invalid category lookup accepted");
 }
 
+/** Check that manual features never claim learned observations or reserved coordinates. */
+static void check_manual_features(void) {
+    for (size_t row = 0; row < cgai_static_knowledge_centroid_count(); ++row) {
+        const cgai_static_knowledge_centroid *point = cgai_static_knowledge_centroid_at(row);
+        TEST_CHECK(point->observations == 0U, "manual record claims learned observations");
+        for (size_t axis = 8U; axis < CGAI_STATIC_KNOWLEDGE_DIMENSIONS; ++axis)
+            TEST_CHECK(point->vector[axis] == 0.0F, "reserved feature must be zero");
+    }
+}
+
 /** Check the manual baseline's documented feature geometry and result records.
  * @param index Borrowed compiled search context.
  */
@@ -202,12 +212,7 @@ static void check_manual_baseline(cgai_static_knowledge_index *index) {
                "write should be the second database operation");
     TEST_CHECK(strstr(schema->description, "fields, types, and constraints") != NULL,
                "hit must resolve to readable stored data");
-    for (size_t row = 0; row < cgai_static_knowledge_centroid_count(); ++row) {
-        const cgai_static_knowledge_centroid *point = cgai_static_knowledge_centroid_at(row);
-        TEST_CHECK(point->observations == 0U, "manual record claims learned observations");
-        for (size_t axis = 8U; axis < CGAI_STATIC_KNOWLEDGE_DIMENSIONS; ++axis)
-            TEST_CHECK(point->vector[axis] == 0.0F, "reserved feature must be zero");
-    }
+    check_manual_features();
 }
 
 /** Run native query and ABI integration regressions.

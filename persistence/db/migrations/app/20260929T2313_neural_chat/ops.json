@@ -1,0 +1,200 @@
+[
+  {
+    "id": "table.chat_conversation",
+    "label": "Create table \"chat_conversation\"",
+    "summary": "Creates table \"chat_conversation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "chat_conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"chat_conversation\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"chat_conversation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"chat_conversation\"",
+        "sql": "CREATE TABLE \"public\".\"chat_conversation\" (\n  \"document\" text NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"revision\" int4 NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"chat_conversation\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"chat_conversation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.chat_training_job",
+    "label": "Create table \"chat_training_job\"",
+    "summary": "Creates table \"chat_training_job\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "chat_training_job"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"chat_training_job\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"chat_training_job\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"chat_training_job\"",
+        "sql": "CREATE TABLE \"public\".\"chat_training_job\" (\n  \"document\" text NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"chat_training_job\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"chat_training_job\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.neural_chat_artifact",
+    "label": "Create table \"neural_chat_artifact\"",
+    "summary": "Creates table \"neural_chat_artifact\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "neural_chat_artifact"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"neural_chat_artifact\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"neural_chat_artifact\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"neural_chat_artifact\"",
+        "sql": "CREATE TABLE \"public\".\"neural_chat_artifact\" (\n  \"checksumSha256\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"metadataJson\" text NOT NULL,\n  \"payload\" bytea NOT NULL,\n  \"provenanceJson\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"neural_chat_artifact\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"neural_chat_artifact\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.neural_chat_model",
+    "label": "Create table \"neural_chat_model\"",
+    "summary": "Creates table \"neural_chat_model\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "neural_chat_model"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"neural_chat_model\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"neural_chat_model\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"neural_chat_model\"",
+        "sql": "CREATE TABLE \"public\".\"neural_chat_model\" (\n  \"checksumSha256\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"name\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"neural_chat_model\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"neural_chat_model\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.neural_chat_artifact.neural_chat_artifact_checksumSha256_key",
+    "label": "Add unique constraint on \"neural_chat_artifact\" (checksumSha256)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "neural_chat_artifact_checksumSha256_key",
+        "table": "neural_chat_artifact"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"neural_chat_artifact_checksumSha256_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "neural_chat_artifact_checksumSha256_key",
+          "public",
+          "\"public\".\"neural_chat_artifact\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"neural_chat_artifact_checksumSha256_key\"",
+        "sql": "ALTER TABLE \"public\".\"neural_chat_artifact\" ADD CONSTRAINT \"neural_chat_artifact_checksumSha256_key\" UNIQUE (\"checksumSha256\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"neural_chat_artifact_checksumSha256_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "neural_chat_artifact_checksumSha256_key",
+          "public",
+          "\"public\".\"neural_chat_artifact\""
+        ]
+      }
+    ]
+  }
+]

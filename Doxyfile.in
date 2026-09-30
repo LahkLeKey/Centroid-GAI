@@ -1,13 +1,16 @@
 PROJECT_NAME           = "Centroid-GAI"
 PROJECT_NUMBER         = @PROJECT_VERSION@
-PROJECT_BRIEF          = "Centroid-based text generation in C"
+PROJECT_BRIEF          = "Centroid neural network chatbot: C engine and API"
 OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT_DIR@
 INPUT                  = "@DOXYGEN_INPUT_DIR@" \
                          "@CMAKE_CURRENT_SOURCE_DIR@/src" \
                          "@CMAKE_CURRENT_SOURCE_DIR@/tests" \
                          "@CMAKE_CURRENT_SOURCE_DIR@/persistence/api/native" \
-                         "@CMAKE_CURRENT_SOURCE_DIR@/docs/c-reading-guide.md"
-FILE_PATTERNS          = *.h *.c
+                         "@CMAKE_CURRENT_SOURCE_DIR@/docs" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/README.md" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/persistence/api/README.md" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/persistence/db/README.md"
+FILE_PATTERNS          = *.h *.c *.md
 RECURSIVE              = YES
 EXTRACT_ALL            = NO
 EXTRACT_STATIC         = YES
@@ -19,7 +22,7 @@ GENERATE_LATEX         = NO
 QUIET                  = YES
 JAVADOC_AUTOBRIEF      = YES
 MARKDOWN_SUPPORT       = YES
-USE_MDFILE_AS_MAINPAGE  = "@CMAKE_CURRENT_SOURCE_DIR@/docs/c-reading-guide.md"
+USE_MDFILE_AS_MAINPAGE  = "@CMAKE_CURRENT_SOURCE_DIR@/docs/README.md"
 SOURCE_BROWSER         = YES
 INLINE_SOURCES         = YES
 REFERENCES_RELATION    = YES

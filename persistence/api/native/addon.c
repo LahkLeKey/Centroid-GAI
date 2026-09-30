@@ -1,6 +1,7 @@
 /** @file addon.c @brief Node-API module registration and version queries. */
 
 #include "node_callbacks.h"
+#include "node_chat.h"
 #include "node_error.h"
 
 /**
@@ -77,6 +78,10 @@ static napi_value persistence_schema(napi_env env, napi_callback_info info) {
 NAPI_MODULE_INIT() {
     /* Step 1: Describe the six exported methods and their callback function pointers. */
     const napi_property_descriptor properties[] = {
+        {"trainChat", NULL, cgai_node_chat_train, NULL, NULL, NULL, napi_default, NULL},
+        {"inspectChat", NULL, cgai_node_chat_inspect, NULL, NULL, NULL, napi_default, NULL},
+        {"evaluateChat", NULL, cgai_node_chat_evaluate, NULL, NULL, NULL, napi_default, NULL},
+        {"replyChat", NULL, cgai_node_chat_reply, NULL, NULL, NULL, napi_default, NULL},
         {"abiVersion", NULL, abi_version, NULL, NULL, NULL, napi_default, NULL},
         {"libraryVersion", NULL, library_version, NULL, NULL, NULL, napi_default, NULL},
         {"persistenceSchema", NULL, persistence_schema, NULL, NULL, NULL, napi_default, NULL},

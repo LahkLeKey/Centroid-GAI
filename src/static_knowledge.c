@@ -72,9 +72,7 @@ const cgai_static_knowledge_centroid *cgai_static_knowledge_category_centroid_fi
     return NULL;
 }
 
-size_t cgai_static_knowledge_category_count(void) {
-    return cgai_knowledge_catalog_category_count;
-}
+size_t cgai_static_knowledge_category_count(void) { return cgai_knowledge_catalog_category_count; }
 
 const char *cgai_static_knowledge_category_key(size_t category) {
     const cgai_static_knowledge_category *metadata = cgai_static_knowledge_category_at(category);
@@ -126,7 +124,8 @@ static void cgai_static_knowledge_copy_inputs(double *vectors, uint32_t *categor
 cgai_spatial_index *cgai_static_knowledge_create_index(void) {
     size_t vector_bytes = 0U;
     size_t category_bytes = 0U;
-    if (!cgai_static_knowledge_input_sizes(&vector_bytes, &category_bytes)) {
+    if (!cgai_static_knowledge_input_sizes(&vector_bytes, &category_bytes) || vector_bytes == 0U ||
+        category_bytes == 0U) {
         (void)cgai_fail("compiled static knowledge dimensions overflow");
         return NULL;
     }
@@ -140,8 +139,7 @@ cgai_spatial_index *cgai_static_knowledge_create_index(void) {
     }
     cgai_static_knowledge_copy_inputs(vectors, categories);
     cgai_spatial_index *index = cgai_spatial_create(
-        vectors, categories, cgai_knowledge_catalog_row_count,
-        cgai_knowledge_catalog_dimensions);
+        vectors, categories, cgai_knowledge_catalog_row_count, cgai_knowledge_catalog_dimensions);
     free(vectors);
     free(categories);
     return index;

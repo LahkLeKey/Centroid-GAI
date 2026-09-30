@@ -197,7 +197,7 @@ test("API persists, generates, downloads, and deletes a model", {
     };
     assert.equal(trained.name, modelName);
     assert.equal(trained.metadata.formatVersion, 1);
-    assert.equal(trained.metadata.libraryVersion, "0.2.0");
+    assert.equal(trained.metadata.libraryVersion, "0.4.0");
 
     try {
         const metadata = await request(`/api/v1/models/${modelName}/metadata`);

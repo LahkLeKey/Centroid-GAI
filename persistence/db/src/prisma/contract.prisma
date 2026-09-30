@@ -2,7 +2,7 @@
 
 // One row per named model: the complete `.cgai` artifact plus queryable metadata mirrored from
 // the native header, so callers can list/inspect models without downloading the payload. See
-// docs/persistence.md for why this stays a single-table artifact store instead of normalized
+// docs/architecture.md for why this stays an artifact store instead of normalized
 // centroid/vocabulary tables.
 model ModelArtifact {
   id             Uuid              @id
@@ -22,4 +22,48 @@ model ModelArtifact {
 
   @@index([checksumSha256])
   @@map("model_artifact")
+}
+
+// Neural coordinates are never merged with count-centroid artifacts. Keep immutable versions
+// so replacing a model name cannot change conversations already pinned to its checksum.
+model NeuralChatArtifact {
+  id             Uuid @id
+  checksumSha256 String @unique
+  payload        Bytes
+  metadataJson   String
+  provenanceJson String?
+  createdAt      TimestamptzString @default(now())
+  @@map("neural_chat_artifact")
+}
+
+model NeuralChatModel {
+  name           String @id
+  checksumSha256 String
+  updatedAt      TimestamptzString @default(now())
+  @@map("neural_chat_model")
+}
+
+// The complete ordered transcript is committed atomically with its revision. CAS on revision
+// serializes request admission and completion without partially written message pairs.
+model ChatConversation {
+  id         Uuid @id
+  revision   Int
+  document   String
+  updatedAt  TimestamptzString @default(now())
+  @@map("chat_conversation")
+}
+
+model ChatTrainingJob {
+  id         Uuid @id
+  document   String
+  updatedAt  TimestamptzString @default(now())
+  @@map("chat_training_job")
+}
+
+model ChatMemoryState {
+  ownerId String @id
+  revision Int
+  document String
+  updatedAt TimestamptzString @default(now())
+  @@map("chat_memory_state")
 }

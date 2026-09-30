@@ -1,0 +1,10 @@
+{
+  "name": "tiny-chat",
+  "examples": [
+    {"id":"greeting","messages":[{"role":"user","content":"hello"}],"answer":"hello there"},
+    {"id":"help","messages":[{"role":"user","content":"what can you do"}],"answer":"i can return source excerpts"}
+  ],
+  "config": {"embeddingDimensions":8,"hiddenDimensions":16,"centroidCount":16,"promptWindow":48,"responseWindow":8,"seed":"42"},
+  "training": {"epochs":100,"learningRate":0.003},
+  "provenance": {"purpose":"engineering fixture, not a validated assistant"}
+}

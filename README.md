@@ -1,119 +1,53 @@
 # Centroid-GAI
 
-A small, dependency-free C11 implementation of centroid-based text generation.
-It is an experimental, inspectable baseline—not a neural large language model.
+The goal is a chatbot powered by a trainable centroid neural network written in
+C11. Users will train models, send messages, and inspect persistent conversations
+through an HTTP API using curl and Docker Compose. A browser application is
+outside the current scope.
 
-The model hashes tokens into fixed-size embeddings, averages the recent context,
-learns context centroids with online k-means, and records a next-token distribution
-at every centroid. During generation it finds the nearest centroid and samples its
-learned distribution.
+The network learns token embeddings, an ordered context encoder, centroid routing,
+and next-token predictions through backpropagation. The current design does not
+require a transformer. Useful conversation still requires dialogue training,
+service integration, and measured answer quality.
 
-## Build
+## Where the project stands
 
-Requirements: a C11 compiler and CMake 3.20 or newer.
+| Component | Current state |
+| --- | --- |
+| Centroid neural network | Implemented in C; train, evaluate, generate, save and load through the native API and CLI |
+| Neural chatbot | Native structured dialogue engine, bounded workers, immutable artifacts and persistent HTTP conversations |
+| Existing HTTP API | Serves the original count-based centroid engine and `.cgai` artifacts |
+| Docker Compose | API and PostgreSQL with committed chat/memory migrations and restart/reload integration tests |
+| Research and memory | Model-free startup, automatic bounded Wikipedia research, optional SearXNG and scoped memory controls; source results remain separate from neural synthesis |
 
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
-ctest --test-dir build -C Release --output-on-failure
-```
+The neural prototype uses `.cgnn` files. They cannot be served by the existing
+`.cgai` HTTP endpoints. Neither engine currently provides a validated general
+purpose conversational assistant. The fixed six-case chat fixture scored 0 exact
+answers with 6 EOS terminations. Neural replies are experimental; the default chat
+mode returns source excerpts, clarification or abstention. See the
+[chat service guide](docs/chat-service.md) for commands and remaining release gates.
 
-All targets require ISO C11 with compiler extensions disabled. The lint gate
-uses `clang-tidy` to check every owned C source: core, ABI, CLI, tests, and the
-Node addon. It treats compiler, analyzer, and readability warnings as errors
-and enforces a 20-statement function budget:
+## Start here
 
-```sh
-cmake --build build --target cgai_lint
-cmake --build build --target cgai_format_check
-```
+1. [Build and check the project](docs/development.md).
+2. [Train and evaluate the current neural prototype](docs/neural-centroid.md).
+3. [Review the existing API and curl workflow](docs/api-contract.md).
+4. [Train and chat through the API](docs/chat-service.md).
 
-Install `clang-tidy` and `clang-format` (21.1.0 in CI) before configuring. Addon lint also needs
-Node headers, normally downloaded by `bun run native:build` in
-`persistence/api`. CMake discovers headers for the running Node version
-in the node-gyp cache; otherwise configure with
-`-DCGAI_NODE_INCLUDE_DIR=/path/to/include/node`. The full lint target fails if
-those headers are missing. `cgai_lint_core` and `cgai_lint_addon` are available
-for checking either layer independently, including when tests are not built.
+The [chatbot roadmap](docs/chatbot-plan.md) tracks the remaining quality and release gates.
 
-## Try it
+The [documentation index](docs/README.md) connects the architecture, implementation
+status, and research/memory design. Each guide labels planned behavior explicitly.
 
-On Linux/macOS or with a single-config Windows generator:
+## Code map
 
-```sh
-./build/cgai train examples/tiny_corpus.txt tiny.cgai 12
-./build/cgai generate tiny.cgai "centroid models" 30 0.7 42
-```
+- `src/neural_*.c` and `include/centroid_gai_neural.h`: working neural prototype.
+- `include/centroid_gai_chat.h`, `src/chat_*.c`: implemented conversation protocol and codec.
+- `persistence/api/`: HTTP service, native Node bridge, chat workers, research and memory.
+- `persistence/db/`: model storage contracts and database migrations.
+- `persistence/shared/`: versioned service, chat and research contracts.
+- `tests/` and `examples/neural/`: correctness checks and small learning fixtures.
+- `src/knowledge_catalog/` and `persistence/api/src/knowledge/`: supporting catalog
+  and source-retrieval tools, distinct from neural model weights.
 
-With Visual Studio, the executable is normally at `build/Release/cgai.exe`.
-
-```powershell
-.\build\Release\cgai.exe train examples\tiny_corpus.txt tiny.cgai 12
-.\build\Release\cgai.exe generate tiny.cgai "centroid models" 30 0.7 42
-```
-
-CLI arguments after the prompt are optional: maximum tokens, temperature, and
-random seed. Temperature `0` uses deterministic greedy selection.
-
-## Grow a training knowledgebase
-
-The [compiled C knowledge catalog](docs/knowledge-catalog.md) contains nine
-manually authored vectors for build, database, and native C operations. Each
-coordinate has a named feature, and each result returns a readable description.
-The former imported encyclopedia release has been removed.
-
-The [repository training verification](docs/codebase-verification.md) imports the
-project's own committed code and documentation, checks repeatable native training,
-and records held-out prediction quality against simple reference models.
-The [repository source helper](docs/repository-retrieval.md) retrieves quoted
-snapshot passages with commit-pinned citations and evaluates repository questions,
-supporting evidence, and abstention without additional model training.
-The [static codebase release](knowledge/codebase/README.md) deduplicates source
-chunks into categorized native models and provides an exact spatial index and
-cached neighbors for their centroid vectors.
-
-## Library API
-
-The documented public API is in [`include/centroid_gai.h`](include/centroid_gai.h). A typical
-embedding application creates a model, calls `cgai_model_train_text`, then uses
-`cgai_model_generate` or persists the model with `cgai_model_save`.
-
-Implementation boundaries and strong internal identifier types are described in
-[`docs/architecture.md`](docs/architecture.md). New APIs follow the project's
-[`documentation standard`](docs/documentation-standard.md). To build strict HTML
-API and implementation documentation, configure with `-DCGAI_BUILD_DOCS=ON` and
-build the `docs` target (Doxygen is required). The
-[C reading guide](docs/c-reading-guide.md) explains pointers, ownership, status
-codes, and the training/generation call paths for readers new to C. Function
-contracts and numbered walkthrough comments are included in the generated pages.
-
-Durable model storage uses the isolated
-[`Prisma 8 PostgreSQL adapter`](persistence/api/README.md). It stores
-complete model artifacts in PostgreSQL with queryable compatibility metadata and
-a SHA-256 checksum; see the [persistence architecture](docs/persistence.md).
-
-Model files contain native numeric representations and are intended for trusted
-files produced by the same architecture. A production format should define byte
-order, checksums, resource limits, and compatibility guarantees.
-
-## Project layout
-
-- `include/` — stable public C API
-- `src/` — focused library modules, private strongly typed headers, and CLI
-- `tests/` — deterministic API and persistence tests
-- `examples/` — a tiny demonstration corpus
-- `docs/` — architecture and documentation standards
-- `persistence/api/` — HTTP/CLI application boundary: native C bridge and REST service
-- `persistence/db/` — Prisma ORM 8 contract, migrations, and PostgreSQL client
-- `.github/workflows/` — cross-platform build and test checks
-
-## Current scope
-
-This first version is deliberately modest: token hashing, online centroid updates,
-a short context window, and centroid-conditioned token frequencies. Useful next
-experiments include better embeddings, centroid splitting/merging, approximate
-nearest-neighbor search, portable model serialization, and evaluation tooling.
-
-## License
-
-MIT
+Licensed under [MIT](LICENSE).

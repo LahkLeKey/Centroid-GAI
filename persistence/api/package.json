@@ -9,10 +9,11 @@
 	"scripts": {
 		"install": "node-gyp rebuild",
 		"native:build": "node-gyp rebuild",
-		"native:test": "node --test src/native.test.ts src/spatial.test.ts",
-		"api:test": "node --test src/api.test.ts",
+		"native:test": "node --test src/native.test.ts src/spatial.test.ts src/chat-native.test.ts src/chat/*.test.ts",
+		"api:test": "node --test --test-concurrency=1 src/api.test.ts src/chat-api.test.ts",
 		"baseline:test": "node --test src/evaluation/metrics.test.ts",
 		"baseline": "node src/evaluation/benchmark.ts",
+        "chat:evaluate": "node src/evaluation/chat.ts",
 		"codebase:test": "node --test src/evaluation/codebase-data.test.ts",
 		"codebase:verify": "node src/evaluation/codebase.ts",
 		"repository:ask": "node src/knowledge/ask.ts",

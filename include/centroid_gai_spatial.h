@@ -15,10 +15,11 @@ typedef struct cgai_spatial_index cgai_spatial_index;
  * @param categories Nonzero 64-bit membership mask per row; bit N denotes category N.
  * @param count Row count in 1..4096; count-times-dimensions at most 1048576.
  * @param dimensions Components per row in 1..4096.
- * @return Owned immutable copied index, or NULL with diagnostic; destroy with cgai_spatial_destroy().
+ * @return Owned immutable copied index, or NULL with diagnostic; destroy with
+ * cgai_spatial_destroy().
  */
 cgai_spatial_index *cgai_spatial_create_masked(const double *vectors, const uint64_t *categories,
-    size_t count, size_t dimensions);
+                                               size_t count, size_t dimensions);
 #define CGAI_SPATIAL_ALL_CATEGORIES UINT32_MAX /**< Query all categories instead of one ID. */
 #define CGAI_SPATIAL_NO_EXCLUSION SIZE_MAX     /**< Do not exclude a source row. */
 

@@ -2,16 +2,22 @@
  * @file server.ts
  * @brief HTTP entry point for `@centroid-gai/api`: a small hand-rolled router over `node:http`.
  *
- * Deliberately dependency-free (no framework) because the whole surface is nine routes over two
- * resources (models, native schema/health). `model-repository.ts` owns persistence and
- * `native.ts` owns the C bridge; this file only parses requests, calls one of those two modules,
- * and serializes responses. See docs/api-contract.md for the versioned endpoint contract this
- * router implements.
+ * Routes baseline artifacts and persistent neural conversations without a framework.
+ * Domain modules own persistence, the native bridge and bounded worker execution;
+ * this entry point handles HTTP dispatch and coordinates startup and shutdown.
+ * See docs/api-contract.md and docs/chat-service.md for the endpoint contracts.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { artifactRoute } from './artifact-routes.ts';
 import { loadCurrentModelArtifact as loadModelArtifact } from './composed-models.ts';
 import type { CompositionRecipe } from '../../shared/artifacts.ts';
+import { ChatService } from './chat/service.ts';
+import { PostgresChatStore } from './chat/postgres-store.ts';
+import { ProcessChatWorkers } from './chat/workers.ts';
+import { chatRoute } from './chat/routes.ts';
+import { MemoryService } from './chat/memory.ts';
+import { ResearchService } from './chat/research.ts';
+import { configuredResearch } from './chat/search-provider.ts';
 
 import {
     closeModelRepository,
@@ -29,6 +35,21 @@ import {
 
 const port = Number(process.env.PORT ?? "3000");
 const maxRequestBytes = Number(process.env.MAX_REQUEST_BYTES ?? String(64 * 1024 * 1024));
+const chatStore = new PostgresChatStore();
+const chatOwner = process.env.CGAI_CHAT_OWNER_ID ?? 'local-owner';
+const memory = new MemoryService(chatStore, chatOwner);
+const researchConfiguration = configuredResearch();
+const research = new ResearchService(memory, researchConfiguration.provider,
+    process.env.CGAI_REPOSITORY_SNAPSHOT, researchConfiguration.fetchPage);
+const chat = new ChatService(chatStore, new ProcessChatWorkers(), chatOwner, research);
+await chat.recover();
+let retentionTask: Promise<void> | undefined;
+const retentionTimer = setInterval(() => {
+    if (retentionTask) return;
+    retentionTask = chat.prune().catch((error: unknown) => console.error('Chat retention failed', error))
+        .finally(() => { retentionTask = undefined; });
+}, 3600000);
+retentionTimer.unref();
 
 /** Serializes JSON while preserving C/SQL uint64 counters as decimal strings. */
 function jsonValue(value: unknown): string {
@@ -153,6 +174,7 @@ async function route(request: IncomingMessage, response: ServerResponse): Promis
     const method = request.method ?? "GET";
     const url = new URL(request.url ?? "/", "http://localhost");
     const segments = apiSegments(url.pathname);
+    if (await chatRoute(chat, request, response, segments, { readJson, sendJson })) return;
 
     if (method === "GET" && (url.pathname === "/health" || url.pathname === "/api/v1/health")) {
         sendJson(response, 200, {
@@ -273,10 +295,22 @@ server.listen(port, "0.0.0.0", () => {
     console.log(`Centroid-GAI API listening on port ${port}`);
 });
 
-async function shutdown(): Promise<void> {
-    server.close();
+/** Stop admission, settle HTTP/native work, then release the shared database pool. */
+async function stopServer(): Promise<void> {
+    const drained = new Promise<void>((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve());
+    });
+    clearInterval(retentionTimer);
+    await Promise.all([drained, chat.close(), retentionTask]);
     await closeModelRepository();
 }
 
-process.once("SIGINT", () => void shutdown());
-process.once("SIGTERM", () => void shutdown());
+let shutdown: Promise<void> | undefined;
+function requestShutdown(): void {
+    shutdown ??= stopServer().catch((error: unknown) => {
+        console.error('API shutdown failed', error);
+        process.exitCode = 1;
+    });
+}
+process.once("SIGINT", requestShutdown);
+process.once("SIGTERM", requestShutdown);

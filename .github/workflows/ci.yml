@@ -76,6 +76,7 @@ jobs:
         run: |
           bun run baseline:test
           bun run baseline
+          bun run chat:evaluate
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -98,6 +99,7 @@ jobs:
           name: model-baselines
           path: |
             build/evaluation/baseline.json
+            build/evaluation/chat
             build/evaluation/codebase
             build/evaluation/repository.json
             build/knowledge/codebase
@@ -123,12 +125,13 @@ jobs:
           path: build-docs/docs/html
           if-no-files-found: error
 
-  web-and-integration:
+  api-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       CGAI_API_URL: http://127.0.0.1:3000
-      VITE_API_PROXY_TARGET: http://127.0.0.1:3000
+      CGAI_CHAT_API_TOKEN: isolated-ci-test-token
+      CGAI_SEARCH_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -143,28 +146,11 @@ jobs:
       - name: Typecheck persistence packages
         working-directory: persistence
         run: bun run typecheck
-      - name: Lint and build web application
-        working-directory: persistence/web
-        run: |
-          bun run lint
-          bun run build
-      - name: Install browser and system dependencies
-        working-directory: persistence/web
-        run: bunx playwright install --with-deps chromium
       - name: Build and start deployable API with migrated PostgreSQL
         run: docker compose -p centroid-gai-ci up --detach --build --wait --wait-timeout 180
       - name: Test API against PostgreSQL
         working-directory: persistence/api
         run: bun run api:test
-      - name: Test browser workflows against native API
-        working-directory: persistence/web
-        run: bun run test:e2e
-      - name: Save deployable web bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-dist
-          path: persistence/web/dist
-          if-no-files-found: error
       - name: Capture service logs
         if: always()
         run: docker compose -p centroid-gai-ci logs --no-color > compose-ci.log 2>&1
@@ -173,9 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-diagnostics
-          path: |
-            compose-ci.log
-            persistence/web/test-results
+          path: compose-ci.log
           retention-days: 7
       - name: Stop isolated CI services
         if: always()

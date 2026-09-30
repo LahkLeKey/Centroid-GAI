@@ -24,7 +24,7 @@ extern "C" {
 /** @name Library version */
 /** @{ */
 #define CGAI_VERSION_MAJOR 0 /**< SemVer major version. */
-#define CGAI_VERSION_MINOR 3 /**< SemVer minor version. */
+#define CGAI_VERSION_MINOR 4 /**< SemVer minor version. */
 #define CGAI_VERSION_PATCH 0 /**< SemVer patch version. */
 /** @} */
 

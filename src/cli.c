@@ -20,6 +20,11 @@ static void usage(FILE *stream) {
                     "Usage:\n"
                     "  cgai train <corpus.txt> <model.cgai> [centroids]\n"
                     "  cgai generate <model.cgai> <prompt> [max-tokens] [temperature] [seed]\n"
+                    "  cgai neural-train <train.txt> <model.cgnn> [epochs] [learning-rate] "
+                    "[validation.txt]\n"
+                    "  cgai neural-evaluate <model.cgnn> <heldout.txt>\n"
+                    "  cgai neural-generate <model.cgnn> <prompt> [max-tokens] [temperature] "
+                    "[seed]\n"
                     "  cgai knowledge [categories | list <category-key> | find <id> | "
                     "nearest <id> [limit] [category-key]]\n");
 }
@@ -37,17 +42,25 @@ static void usage(FILE *stream) {
  * status.
  */
 int cgai_cli_run(int argc, char **argv) {
+    /* Step 1: Route neural commands only after checking their positional argument counts. */
+    if (argc >= 4 && argc <= 7 && strcmp(argv[1], "neural-train") == 0)
+        return cgai_cli_neural_train(argc, argv);
+    if (argc == 4 && strcmp(argv[1], "neural-evaluate") == 0)
+        return cgai_cli_neural_evaluate(argc, argv);
+    if (argc >= 4 && argc <= 7 && strcmp(argv[1], "neural-generate") == 0)
+        return cgai_cli_neural_generate(argc, argv);
+    /* Step 2: Preserve the existing native knowledge command and baseline model commands. */
     if (argc >= 2 && strcmp(argv[1], "knowledge") == 0)
         return cgai_cli_knowledge(argc, argv);
-    /* Step 1: Recognize training only when its required paths and optional centroid count fit. */
+    /* Step 3: Recognize training only when its required paths and optional centroid count fit. */
     if (argc >= 2 && strcmp(argv[1], "train") == 0 && (argc == 4 || argc == 5)) {
         return cgai_cli_train(argc, argv);
     }
-    /* Step 2: Recognize generation with its required model/prompt and optional numeric values. */
+    /* Step 4: Recognize generation with its required model/prompt and optional numeric values. */
     if (argc >= 4 && strcmp(argv[1], "generate") == 0 && argc <= 7) {
         return cgai_cli_generate(argc, argv);
     }
-    /* Step 3: Print usage to the appropriate stream when no valid command matched. */
+    /* Step 5: Print usage to the appropriate stream when no valid command matched. */
     usage(argc > 1 ? stderr : stdout);
     return argc > 1 ? 2 : 0;
 }

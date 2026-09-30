@@ -1,6 +1,7 @@
-/** @file knowledge_clusters.c @brief Canonical vectors, provenance aggregation, and shared spatial indexing. */
-#include "internal/knowledge_module.h"
+/** @file knowledge_clusters.c @brief Canonical vectors, provenance aggregation, and shared spatial
+ * indexing. */
 #include "internal/error.h"
+#include "internal/knowledge_module.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -13,7 +14,7 @@ size_t cgai_static_knowledge_cluster_count(void) { return cgai_knowledge_catalog
  * @return Nonzero on success, zero on invalid metadata or counter overflow.
  */
 static int add_alias(cgai_static_knowledge_cluster *cluster,
-    const cgai_static_knowledge_centroid *point, size_t row) {
+                     const cgai_static_knowledge_centroid *point, size_t row) {
     if (point->category >= 64U || point->observations > UINT64_MAX - cluster->observations)
         return 0;
     if (cluster->aliases == 0U)
@@ -24,7 +25,8 @@ static int add_alias(cgai_static_knowledge_cluster *cluster,
     return 1;
 }
 
-cgai_status cgai_static_knowledge_cluster_get(size_t cluster, cgai_static_knowledge_cluster *output) {
+cgai_status cgai_static_knowledge_cluster_get(size_t cluster,
+                                              cgai_static_knowledge_cluster *output) {
     if (output)
         memset(output, 0, sizeof(*output));
     if (!output || cluster >= cgai_static_knowledge_cluster_count())
@@ -60,9 +62,11 @@ cgai_static_knowledge_cluster *cgai_knowledge_clusters_create(void) {
  * @param vectors Writable cluster-count-times-dimensions array.
  * @param masks Writable cluster-count array.
  */
-static void copy_clusters(const cgai_static_knowledge_cluster *clusters, double *vectors, uint64_t *masks) {
+static void copy_clusters(const cgai_static_knowledge_cluster *clusters, double *vectors,
+                          uint64_t *masks) {
     for (size_t i = 0U; i < cgai_static_knowledge_cluster_count(); ++i) {
-        const cgai_static_knowledge_centroid *point = cgai_static_knowledge_centroid_at(clusters[i].row);
+        const cgai_static_knowledge_centroid *point =
+            cgai_static_knowledge_centroid_at(clusters[i].row);
         masks[i] = clusters[i].categories;
         for (size_t d = 0U; d < CGAI_STATIC_KNOWLEDGE_DIMENSIONS; ++d)
             vectors[i * CGAI_STATIC_KNOWLEDGE_DIMENSIONS + d] = point->vector[d];

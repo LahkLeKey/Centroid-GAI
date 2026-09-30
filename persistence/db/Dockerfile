@@ -15,7 +15,6 @@ WORKDIR /workspace/persistence
 COPY persistence/package.json persistence/bun.lock ./
 COPY persistence/db/package.json ./db/package.json
 COPY persistence/api/package.json ./api/package.json
-COPY persistence/web/package.json ./web/package.json
 RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY persistence/db/ ./db/

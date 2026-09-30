@@ -196,7 +196,7 @@ static int copy_inputs(cgai_spatial_index *index, const double *vectors,
  * @return Owned index or NULL with a diagnostic; partial allocations are released on failure.
  */
 cgai_spatial_index *cgai_spatial_create_masked(const double *vectors, const uint64_t *categories,
-                                        size_t count, size_t dimensions) {
+                                               size_t count, size_t dimensions) {
     /* Step 1: Bound every allocation product before multiplication or input reads. */
     if (!vectors || !categories || !count || count > 4096U || !dimensions || dimensions > 4096U ||
         count > 1048576U / dimensions) {
@@ -222,7 +222,7 @@ cgai_spatial_index *cgai_spatial_create_masked(const double *vectors, const uint
 }
 
 cgai_spatial_index *cgai_spatial_create(const double *vectors, const uint32_t *categories,
-    size_t count, size_t dimensions) {
+                                        size_t count, size_t dimensions) {
     if (!vectors || !categories || !count || count > 4096U || !dimensions || dimensions > 4096U ||
         count > 1048576U / dimensions) {
         (void)cgai_fail("invalid spatial inputs or size limit");

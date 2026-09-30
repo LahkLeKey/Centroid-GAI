@@ -1,106 +1,56 @@
-# `@centroid-gai/api`
+# Centroid-GAI API
 
-The HTTP and CLI application boundary for Centroid-GAI. This package wraps the
-native C library through a Node-API addon (`native/`, `native.ts`) and
-persists complete model artifacts through the sibling
-[`@centroid-gai/db`](../db/README.md) package. It never talks to PostgreSQL or
-Prisma directly; `model-repository.ts` is the only module that imports
-`@centroid-gai/db`.
+This package owns the HTTP boundary and Node-API bridge to native C. The product
+goal is a centroid neural chatbot accessed through HTTP, curl and Docker Compose.
+The router serves baseline `.cgai` artifacts and the separate neural chat engine.
 
-The application-facing REST domains and versioned endpoint contract are defined
-in [`docs/api-contract.md`](../../docs/api-contract.md). Callers should use the
-TypeScript REST service rather than accessing Prisma, PostgreSQL, or the native
-C ABI directly.
+See the [documentation index](../../docs/README.md),
+[current HTTP contract](../../docs/api-contract.md), and
+[chatbot plan](../../docs/chatbot-plan.md).
 
-## Setup
+## Neural conversations
 
-Use [bun](https://bun.sh) 1.3 or newer. `persistence/` is a bun workspace
-containing both this package and `../db`, so install once from the workspace
-root, then build the native addon explicitly (bun does not run dependency
-lifecycle scripts automatically):
+The native bridge, workers, conversation routes, scoped memory and migrations
+are implemented. See the [chat service guide](../../docs/chat-service.md) for
+authentication, curl fixtures, source-mode behavior and remaining quality gates.
+The fixed six-case neural fixture has not demonstrated usable answer quality.
 
-```sh
-cd .. && bun install
-cd api
-bun run native:build
-bun run typecheck
-```
+## Compose workflow
 
-Copy `.env.example` to `.env` and replace the connection string. Set up the
-database itself from [`persistence/db`](../db/README.md) (`contract:emit`,
-`db:init`) before starting this package.
-
-## Tests
-
-Run the native bridge tests without external services:
+Run from the repository root with Docker running:
 
 ```sh
-bun test
+docker compose up --build --detach --wait
+curl --fail-with-body http://localhost:3000/api/v1/health
+curl --fail-with-body -X POST http://localhost:3000/api/v1/models/demo/train -H "Content-Type: application/json" --data-binary @examples/api/train.json
+curl --fail-with-body -X POST http://localhost:3000/api/v1/models/demo/generate -H "Content-Type: application/json" --data-binary @examples/api/generate.json
 ```
 
-With the Compose stack running, run the full TypeScript, native, and API
-integration suite:
+Use `curl.exe` in Windows PowerShell if `curl` is an alias. The example trains or
+replaces `demo` and returns a baseline continuation. It does not create a neural
+conversation. Compose builds the native addon, runs migrations and schema
+verification, and starts PostgreSQL plus the API. `docker compose down` retains
+the model volume. `API_PORT` and `POSTGRES_PORT` override exposed ports 3000/5432.
 
-```sh
-CGAI_API_URL=http://localhost:3000 bun run test:all
-```
+## Package development
 
-The API tests cover health, native training, PostgreSQL persistence, native
-generation, artifact download, deletion, and malformed request handling.
-
-Contract changes, migrations, and `db:init`/`db:verify` are run from
-[`persistence/db`](../db/README.md), not from this package.
-
-## Compose E2E
-
-Run the complete local deployment from the `persistence/` workspace root:
-
-```sh
-bun run test:e2e
-```
-
-The runner builds and starts `postgres`, `database-init`, and `api`, waits for
-`GET /health`, then executes this package's API tests against
-`http://127.0.0.1:3000`. The tests train a real native model through HTTP,
-verify its PostgreSQL metadata, generate text from the stored artifact,
-download the `.cgai` bytes, and delete the test model. Containers are removed
-afterward; the named `postgres-data` volume is retained for local inspection.
-
-## Seed example models
-
-After a fresh checkout, install and build the persistence workspace, then start
-Compose and seed the committed corpora:
+Use Node 24.11+ and Bun 1.3.9. From the repository root:
 
 ```sh
 cd persistence
-bun install
+bun install --frozen-lockfile --ignore-scripts
 bun run --cwd api native:build
-cd ..
-docker compose up -d
-cd persistence
-bun run seed:models
+bun run --cwd api typecheck
+bun run --cwd api native:test
 ```
 
-The seed command trains these stable names through the same HTTP route used by
-the application: `tiny-contexts`, `generation-patterns`, and
-`persistence-workflow`. It is safe to run repeatedly after code, corpus, or
-database changes because each request replaces the named artifact. The corpus
-sources live in [`examples/model_corpora`](../../examples/model_corpora/);
-generated local files under `examples/models/` are ignored and are never needed
-to recreate the database state.
+The addon build needs a C toolchain, Python and Node headers. For a host API
+process, configure `DATABASE_URL` in `persistence/api/.env`, prepare the database
+through the [database package](../db/README.md), then run `bun run --cwd api start`
+from `persistence/`. Keep credentials out of source control.
 
-## Store and retrieve models
-
-Train a model with the C CLI, then persist it under a stable logical name:
-
-```sh
-../../build/cgai train ../../examples/tiny_corpus.txt tiny.cgai
-bun run model -- put tiny tiny.cgai
-bun run model -- get tiny restored.cgai
-../../build/cgai generate restored.cgai "centroid models"
-```
-
-The adapter verifies the model magic/header before insertion and records a
-SHA-256 checksum. A `put` with an existing name atomically replaces its payload
-and metadata while retaining the database identity and creation timestamp.
-
+`bun run test:e2e` from `persistence/` builds an isolated Compose project and runs
+HTTP integration tests. It defaults to ports 3100/55432, configurable with
+`CGAI_E2E_API_PORT`/`CGAI_E2E_POSTGRES_PORT`, then removes its own containers and
+volumes. It leaves the normal development stack in place. See
+[development](../../docs/development.md) for the complete validation workflow.

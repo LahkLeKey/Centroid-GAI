@@ -8,6 +8,7 @@
  */
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { randomUUID } from 'node:crypto';
 
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const persistenceRoot = fileURLToPath(new URL("..", import.meta.url));
@@ -15,7 +16,10 @@ const apiPort = process.env.CGAI_E2E_API_PORT ?? '3100';
 const databasePort = process.env.CGAI_E2E_POSTGRES_PORT ?? '55432';
 const apiUrl = `http://127.0.0.1:${apiPort}`;
 const composeArgs = ['compose', '-p', `centroid-gai-e2e-${process.pid}`];
-const composeEnvironment = { ...process.env, API_PORT: apiPort, POSTGRES_PORT: databasePort };
+const composeEnvironment = { ...process.env, API_PORT: apiPort, POSTGRES_PORT: databasePort,
+    CGAI_CHAT_API_TOKEN: randomUUID(),
+    CGAI_SEARCH_PROVIDER: process.env.CGAI_E2E_RESEARCH_LIVE === '1' ? 'wikipedia' : 'disabled',
+    CGAI_SEARCH_URL: '' };
 const healthTimeoutMs = 180_000;
 const healthIntervalMs = 1_000;
 
@@ -87,7 +91,7 @@ async function main(): Promise<void> {
         // Step 3: Run the existing API integration suite against the Compose API. The native
         // training endpoint creates a real artifact, persists it in PostgreSQL, generates from it,
         // downloads it, and deletes it again.
-        const environment = { ...process.env, CGAI_API_URL: apiUrl };
+        const environment = { ...composeEnvironment, CGAI_API_URL: apiUrl, CGAI_E2E_PROJECT: `centroid-gai-e2e-${process.pid}` };
         const status = run(
             process.execPath,
             ["run", "--cwd", "api", "api:test"],

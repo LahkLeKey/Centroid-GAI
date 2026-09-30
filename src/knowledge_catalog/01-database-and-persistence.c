@@ -3,7 +3,7 @@
 #include "../knowledge_catalog.h"
 
 /* Immutable search records, sorted by ID. Coordinates rank squared Euclidean
- * distance. See docs/knowledge-catalog.md for feature definitions and results. */
+ * distance. See docs/architecture.md for catalog context and feature axes. */
 static const cgai_static_knowledge_centroid centroids[] = {
     {
         .id = "database:lookup",

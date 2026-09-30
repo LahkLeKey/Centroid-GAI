@@ -1,6 +1,6 @@
 {
   "name": "centroid-codebase",
-  "paths": ["README.md", "CMakeLists.txt", "include", "src", "tests", "docs", "tools/knowledge", "persistence/api/README.md", "persistence/api/src", "persistence/api/native", "persistence/shared", "persistence/db/README.md", "persistence/db/src", "persistence/db/migrations", "persistence/web/README.md", "persistence/web/src"],
+  "paths": ["README.md", "CMakeLists.txt", "include", "src", "tests", "docs", "tools/knowledge", "persistence/api/README.md", "persistence/api/src", "persistence/api/native", "persistence/shared", "persistence/db/README.md", "persistence/db/src", "persistence/db/migrations"],
   "license": "MIT",
   "license_path": "LICENSE",
   "extensions": [".txt", ".md", ".c", ".h", ".ts", ".tsx", ".py", ".json", ".sql", ".prisma", ".css"],

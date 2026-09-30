@@ -1,0 +1,6 @@
+{
+  "prompt": "centroid models",
+  "maxTokens": 30,
+  "temperature": 0,
+  "seed": "42"
+}

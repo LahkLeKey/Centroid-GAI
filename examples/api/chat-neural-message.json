@@ -1,0 +1,9 @@
+{
+  "requestId": "example-turn-1",
+  "revision": 0,
+  "content": "hello",
+  "answerMode": "neural",
+  "maxTokens": 64,
+  "temperature": 0,
+  "seed": "42"
+}

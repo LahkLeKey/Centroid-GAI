@@ -32,11 +32,11 @@ typedef struct cgai_knowledge_span {
 } cgai_knowledge_span;
 
 extern const cgai_knowledge_provider
-    cgai_knowledge_catalog_modules[]; /**< Category implementations. */
+    cgai_knowledge_catalog_modules[];                            /**< Category implementations. */
 extern const cgai_knowledge_span cgai_knowledge_catalog_spans[]; /**< Sorted global row spans. */
-extern const size_t cgai_knowledge_catalog_span_count; /**< Number of spans. */
-extern const size_t cgai_knowledge_catalog_category_count; /**< Number of modules. */
-extern const size_t cgai_knowledge_catalog_row_count; /**< Total compiled rows. */
-extern const size_t cgai_knowledge_catalog_dimensions; /**< Dimensions per vector. */
-extern const char cgai_knowledge_catalog_release_sha256[]; /**< Source release fingerprint. */
+extern const size_t cgai_knowledge_catalog_span_count;           /**< Number of spans. */
+extern const size_t cgai_knowledge_catalog_category_count;       /**< Number of modules. */
+extern const size_t cgai_knowledge_catalog_row_count;            /**< Total compiled rows. */
+extern const size_t cgai_knowledge_catalog_dimensions;           /**< Dimensions per vector. */
+extern const char cgai_knowledge_catalog_release_sha256[];       /**< Source release fingerprint. */
 #endif

@@ -25,7 +25,6 @@ WORKDIR /workspace/persistence
 COPY persistence/package.json persistence/bun.lock ./
 COPY persistence/db/package.json ./db/package.json
 COPY persistence/api/package.json ./api/package.json
-COPY persistence/web/package.json ./web/package.json
 RUN bun install --frozen-lockfile --ignore-scripts
 
 # Step 3: Regenerate the `db` package's generated contract types, then bring in the native addon

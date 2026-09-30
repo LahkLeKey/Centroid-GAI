@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(centroid_gai VERSION 0.3.0 LANGUAGES C)
+project(centroid_gai VERSION 0.4.0 LANGUAGES C)
 
 option(CGAI_BUILD_TESTS "Build the test suite" ON)
 option(CGAI_BUILD_DOCS "Build API documentation with Doxygen" OFF)
@@ -47,6 +47,17 @@ add_library(centroid_gai
     src/model_random.c
     src/model_sampling.c
     src/model_training.c
+    src/neural_model.c
+    src/neural_vocabulary.c
+    src/neural_math.c
+    src/neural_training.c
+    src/neural_evaluation.c
+    src/neural_generation.c
+    src/neural_file.c
+    src/chat_model.c
+    src/chat_prompt.c
+    src/chat_evaluation.c
+    src/chat_codec.c
     src/model_composition.c
     src/tokenizer.c
     src/vocabulary.c
@@ -96,7 +107,8 @@ if(CGAI_ENABLE_SANITIZERS AND NOT MSVC)
     target_link_options(centroid_gai PUBLIC -fsanitize=address,undefined)
 endif()
 
-add_executable(cgai src/main.c src/cli.c src/cli_arguments.c src/cli_training.c src/cli_generation.c src/cli_knowledge.c)
+add_executable(cgai src/main.c src/cli.c src/cli_arguments.c src/cli_training.c src/cli_generation.c src/cli_knowledge.c
+    src/cli_neural_arguments.c src/cli_neural_training.c src/cli_neural_generation.c src/cli_neural_evaluation.c)
 cgai_enable_warnings(cgai)
 target_link_libraries(cgai PRIVATE centroid_gai::centroid_gai)
 if(WIN32)
@@ -150,6 +162,18 @@ endif()
 
 if(CGAI_BUILD_TESTS)
     enable_testing()
+    add_executable(centroid_gai_chat_tests tests/test_chat.c tests/test_utils.c)
+    target_link_libraries(centroid_gai_chat_tests PRIVATE centroid_gai::centroid_gai)
+    cgai_enable_warnings(centroid_gai_chat_tests)
+    add_test(NAME centroid_gai_chat COMMAND centroid_gai_chat_tests)
+    add_executable(centroid_gai_neural_tests tests/test_neural.c tests/test_neural_math.c
+        tests/test_neural_training.c tests/test_neural_io.c tests/test_utils.c)
+    target_include_directories(centroid_gai_neural_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(centroid_gai_neural_tests PRIVATE centroid_gai::centroid_gai)
+    cgai_enable_warnings(centroid_gai_neural_tests)
+    add_test(NAME centroid_gai_neural_tests COMMAND centroid_gai_neural_tests)
+    add_test(NAME centroid_gai_neural_cli_tests COMMAND ${CMAKE_COMMAND}
+        -DCGAI_EXE=$<TARGET_FILE:cgai> -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_neural_cli.cmake)
     add_executable(centroid_gai_tests tests/test_centroid_gai.c tests/test_utils.c)
     target_link_libraries(centroid_gai_tests PRIVATE centroid_gai::centroid_gai)
     cgai_enable_warnings(centroid_gai_tests)

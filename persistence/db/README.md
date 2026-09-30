@@ -1,68 +1,54 @@
-# `@centroid-gai/db`
+# Centroid-GAI database package
 
-Owns every PostgreSQL and Prisma ORM 8 concern: the contract (schema) source,
-generated contract types, migrations, and the shared `db` client. It has no
-knowledge of HTTP, the native C addon, or Node-API bindings — those live in
-[`persistence/api`](../api/README.md), which depends on this package.
+This package owns PostgreSQL connections, the Prisma contract, generated types
+and migrations. Product clients use the [HTTP API](../../docs/api-contract.md).
+The API imports the shared client through `@centroid-gai/db`.
 
-Prisma ORM 8 is currently a release candidate. Package versions are pinned so
-an upstream release cannot silently change the contract or query API.
+See the [architecture](../../docs/architecture.md) for storage boundaries and the
+[chatbot plan](../../docs/chatbot-plan.md) for the neural conversation goal.
 
-## Setup
+## Current storage status
 
-Use [bun](https://bun.sh) 1.3 or newer. `persistence/` is a bun workspace
-containing both this package and `../api`; install once from the workspace
-root. Copy `.env.example` to `.env`, replace the connection string, then run:
+Committed migrations create `model_artifact` and its optional `compositionJson`
+column. Each named baseline model stores complete native `.cgai` bytes, a SHA-256
+checksum, native metadata and timestamps. Training/upload replaces the artifact;
+composition recipes preserve source identities separately from model bytes.
+
+The contract and migration graph also include `NeuralChatArtifact`,
+`NeuralChatModel`, `ChatConversation`, `ChatTrainingJob` and `ChatMemoryState`.
+The `neural_chat` and `chat_memory` migrations extend the existing baseline schema.
+Chat artifact bytes are immutable by checksum; conversation and memory documents
+use compare-and-swap revisions. See the [chat service](../../docs/chat-service.md).
+
+## Schema development
+
+From `persistence/`, install the locked workspace dependencies once. Configure
+`DATABASE_URL` in `persistence/db/.env` using `.env.example` as a template, then:
 
 ```sh
-cd .. && bun install
+bun install --frozen-lockfile --ignore-scripts
 cd db
 bun run contract:emit
-bun run db:init
 bun run typecheck
 ```
 
-## Changing the schema
-
-After editing `src/prisma/contract.prisma`, regenerate types, plan a migration,
-review it, then apply it:
+Edit `src/prisma/contract.prisma` as the schema source. Regenerate the contract,
+plan and review a migration, then apply it to the intended development database:
 
 ```sh
 bun run contract:emit
 bun run migration:plan -- --name describe_the_change
 bun run db:migrate
+bun run db:verify
 ```
 
-`db:init` is for an empty database only; use the migration flow above for an
-existing one.
+`db:init` is reserved for initializing an empty database; existing databases use
+the migration graph. Generated types alone do not install tables. The repository
+pins Prisma ORM/CLI release-candidate versions through package manifests and the
+workspace lockfile.
 
-Committed migrations now include the initial artifact schema and the additive
-`compositionJson` column for immutable superset recipes. `docker compose up -d`
-runs the migration graph and verifies the schema through `database-init`; it
-works from an empty database or the prior initialized artifact contract. Existing
-model payloads remain unchanged. `compositionJson` is null for ordinary models.
-
-## Consuming this package from `persistence/api`
-
-`persistence/api` depends on this package as a bun workspace dependency
-(`workspace:*` in package.json) and imports the shared client as
-`@centroid-gai/db`:
-
-```ts
-import { db } from "@centroid-gai/db";
-```
-
-Run `bun install` from `persistence/` (the workspace root) after cloning or
-after changing either package's dependencies, so the workspace link and both
-packages' `node_modules` stay consistent.
-
-The database package is exercised by the Compose E2E flow documented in
-[`persistence/api`](../api/README.md#compose-e2e). It is started as the
-`database-init` service, verifies or initializes the contract against the local
-PostgreSQL container, and then remains available to the API container for the
-real training/persistence requests.
-
-The reproducible example-model seed also uses this database boundary indirectly
-through the API. This keeps model initialization independent of Prisma CLI
-details: a fresh database only needs `database-init` to complete before
-`bun run seed:models` trains the committed corpora into PostgreSQL.
+Compose's `database-init` service executes `db:migrate` followed by `db:verify`;
+the API waits for successful completion. Its PostgreSQL data lives in a named
+volume retained by `docker compose down`. The isolated E2E test runner removes
+its own test volume. See [development](../../docs/development.md) for startup,
+test commands and the current API build blocker.

@@ -334,6 +334,7 @@ function describeCategories(categories: string[], topics: Map<string, string[]>)
             name : 'Developer and Knowledge Tools',
             description : 'Knowledge builders, evaluation, and repository tools'
         },
+        // Historical snapshots still use this category; keep their generated metadata stable.
         web : {name : 'Web Application', description : 'Browser interface and web application code'}
     };
     return categories.map(category => {
@@ -553,7 +554,7 @@ const categoryFiles = categories.map((category, index) => {
         '#include "../knowledge_catalog.h"',
         '',
         '/* Immutable search records, sorted by ID. Coordinates rank squared Euclidean',
-        ' * distance. See docs/knowledge-catalog.md for feature definitions and results. */',
+        ' * distance. See docs/architecture.md for catalog context and feature axes. */',
         'static const cgai_static_knowledge_centroid centroids[] = {',
         ...members.flatMap((point, row) => {
             rowReferences.set(point.id, {category : index, row});

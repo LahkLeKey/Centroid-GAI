@@ -6,6 +6,7 @@
 		"resolveJsonModule": true,
 		"allowImportingTsExtensions": true,
 		"strict": true,
+        "erasableSyntaxOnly": true,
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
 		"noEmit": true

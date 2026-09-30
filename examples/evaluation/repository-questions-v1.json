@@ -3,8 +3,8 @@
   "description": "Hand-authored development questions. Gold excerpts are checked against the supplied snapshot before scoring; this is not a held-out generalization benchmark.",
   "questions": [
     {
-      "id": "cli-training", "question": "How do I train a model using the CLI?",
-      "evidence": [{ "path": "README.md", "quote": "./build/cgai train examples/tiny_corpus.txt tiny.cgai 12" }]
+      "id": "cli-training", "question": "How do I train the centroid neural network using the CLI?",
+      "evidence": [{ "path": "docs/neural-centroid.md", "quote": "./build/dev/cgai neural-train examples/neural/train.txt build/dev/order.cgnn 60 0.015 examples/neural/heldout.txt" }]
     },
     {
       "id": "tokenizer-location", "question": "Where is the tokenizer implemented?",
@@ -24,23 +24,23 @@
     },
     {
       "id": "artifact-portability", "question": "Are saved model artifacts portable across byte order and floating-point representations?",
-      "evidence": [{ "path": "docs/persistence.md", "quote": "producer and consumer must use compatible byte\norder and floating-point representations." }]
+      "evidence": [{ "path": "docs/architecture.md", "quote": "Baseline artifact encoding writes numeric arrays in native machine representation;\nit does not convert byte order." }]
     },
     {
       "id": "matching-source-passages", "question": "Can native centroid matching retrieve original source passages?",
-      "evidence": [{ "path": "docs/api-contract.md", "quote": "aggregate centroids cannot retrieve original passages." }]
+      "evidence": [{ "path": "docs/api-contract.md", "quote": "Aggregate centroids cannot retrieve original source passages." }]
     },
     {
       "id": "matching-limit", "question": "What is the UTF-8 text size limit for pattern matching?",
-      "evidence": [{ "path": "docs/api-contract.md", "quote": "over 16,384 UTF-8 bytes returns\n413." }]
+      "evidence": [{ "path": "docs/api-contract.md", "quote": "Text must be nonempty, contain no NUL, and fit 16,384 UTF-8 bytes." }]
     },
     {
       "id": "installed-headers", "question": "Which public headers are installed and which internal headers may change?",
-      "evidence": [{ "path": "docs/architecture.md", "quote": "headers under `include/` are installed: `centroid_gai.h` and `centroid_gai_abi.h`.\nHeaders under `src/internal/` may change\nwithout compatibility guarantees." }]
+      "evidence": [{ "path": "docs/architecture.md", "quote": "Only headers under `include/` are installed. Headers under `src/internal/` are\nprivate implementation details without compatibility guarantees." }]
     },
     {
       "id": "typed-identifiers", "question": "Why are token identifiers and centroid identifiers different struct types?",
-      "evidence": [{ "path": "docs/architecture.md", "quote": "the compiler rejects accidentally passing one where the other is expected." }]
+      "evidence": [{ "path": "docs/architecture.md", "quote": "and centroid identifiers are distinct struct types, `cgai_token_id` and\n`cgai_centroid_id`, so the compiler rejects mixing them accidentally." }]
     },
     {
       "id": "git-dirty-files", "question": "Does the Git snapshot importer include staged dirty or untracked files?",

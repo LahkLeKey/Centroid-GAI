@@ -8,7 +8,8 @@
 /** Owns the spatial index whose rows refer exclusively to compiled knowledge. */
 struct cgai_static_knowledge_index {
     cgai_spatial_index *spatial; /**< Owned immutable spatial search tree. */
-    cgai_static_knowledge_cluster *clusters; /**< Owned canonical metadata, indexed by cluster ID. */
+    cgai_static_knowledge_cluster
+        *clusters; /**< Owned canonical metadata, indexed by cluster ID. */
 };
 
 cgai_static_knowledge_index *cgai_static_knowledge_open(void) {
@@ -52,6 +53,20 @@ size_t cgai_static_knowledge_find(const char *id) {
     return SIZE_MAX;
 }
 
+/** @brief Translate spatial cluster hits to their canonical catalog rows.
+ *
+ * A successful spatial query uses cluster IDs internally; consumers expect rows
+ * that can be resolved through the public catalog accessor.
+ * @param index Borrowed prepared knowledge index.
+ * @param hits Borrowed mutable array containing count successful query hits.
+ * @param count Number of initialized hits. */
+static void resolve_catalog_hits(const cgai_static_knowledge_index *index, cgai_spatial_hit *hits,
+                                 size_t count) {
+    /* Step 1: Replace every internal cluster row with its canonical catalog row. */
+    for (size_t i = 0U; i < count; ++i)
+        hits[i].row = index->clusters[hits[i].row].row;
+}
+
 cgai_status cgai_static_knowledge_neighbors(const cgai_static_knowledge_index *index,
                                             const char *id, size_t limit, uint32_t category,
                                             cgai_spatial_hit *hits, cgai_spatial_stats *stats) {
@@ -69,7 +84,6 @@ cgai_status cgai_static_knowledge_neighbors(const cgai_static_knowledge_index *i
     const cgai_spatial_request request = {vector, limit, category, point->cluster};
     const cgai_status status = cgai_spatial_query(index->spatial, &request, hits, stats);
     if (status == CGAI_STATUS_OK)
-        for (size_t i = 0U; i < stats->count; ++i)
-            hits[i].row = index->clusters[hits[i].row].row;
+        resolve_catalog_hits(index, hits, stats->count);
     return status;
 }

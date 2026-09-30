@@ -3,6 +3,36 @@
 #define CGAI_CLI_COMMANDS_H
 #include <stddef.h>
 /**
+ * @brief Run neural training with strict numeric options and optional held-out reporting.
+ *
+ * The command owns both corpus buffers. Failed validation-file loading stops training before
+ * any model is created; omitting validation leaves its pointer NULL deliberately.
+ * @param argc Dispatcher-validated count between four and seven.
+ * @param argv Borrowed train/model paths and optional epochs, rate, and held-out path.
+ * @return Zero for success, two for invalid options, or one for execution failure.
+ */
+int cgai_cli_neural_train(int argc, char **argv);
+/**
+ * @brief Load a neural artifact and evaluate a separate sequence with its frozen vocabulary.
+ *
+ * The dispatcher has already validated two path arguments. This command owns its model and
+ * text buffer and releases both even when reading or evaluation fails.
+ * @param argc Validated argument count of four; retained for the shared CLI handler shape.
+ * @param argv Borrowed arguments with model path at two and held-out text path at three.
+ * @return Zero for success or one after a runtime diagnostic.
+ */
+int cgai_cli_neural_evaluate(int argc, char **argv);
+/**
+ * @brief Generate from a neural artifact with optional count, temperature, and seed.
+ *
+ * Command syntax is checked before opening the artifact. The loaded model is immutable during
+ * generation and is destroyed on the single completion path.
+ * @param argc Dispatcher-validated count between four and seven.
+ * @param argv Borrowed model path, prompt, and optional generation arguments.
+ * @return Zero for success, two for invalid options, or one for runtime failure.
+ */
+int cgai_cli_neural_generate(int argc, char **argv);
+/**
  * @brief Execute native compiled-knowledge discovery and lookup commands.
  * @param argc Process argument count, at least two.
  * @param argv Borrowed arguments with knowledge at index one.

@@ -18,6 +18,7 @@ export function sourceCategory(path: string): string {
     if (path.startsWith('persistence/api/native/')) return 'native-bridge';
     if (path.startsWith('persistence/api/') || path.startsWith('persistence/shared/')) return 'service';
     if (path.startsWith('persistence/db/')) return 'database';
+    // Preserve category identity when reading snapshots from before the frontend was removed.
     if (path.startsWith('persistence/web/')) return 'web';
     if (path.startsWith('tools/')) return 'tooling';
     return 'build';
