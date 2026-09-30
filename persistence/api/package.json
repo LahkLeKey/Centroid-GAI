@@ -17,8 +17,9 @@
 		"codebase:test": "node --test src/evaluation/codebase-data.test.ts",
 		"codebase:verify": "node src/evaluation/codebase.ts",
 		"repository:ask": "node src/knowledge/ask.ts",
-		"repository:test": "node --test src/knowledge/retrieval.test.ts",
+		"repository:test": "node --test src/knowledge/retrieval.test.ts src/evaluation/repository-chat-metrics.test.ts src/evaluation/repository-chat-followups.test.ts src/evaluation/repository-chat-research.test.ts",
 		"repository:evaluate": "node src/evaluation/repository.ts",
+        "repository:chat:evaluate": "node src/evaluation/repository-chat.ts",
 		"codebase:centroids": "node src/knowledge/codebase-centroids.ts",
 		"codebase:centroids:test": "node --test src/knowledge/codebase-centroids.test.ts",
 		"knowledge:compile:test": "node --test src/knowledge/compile-native-knowledge.test.ts",
@@ -29,11 +30,11 @@
 		"start": "node src/server.ts"
 	},
 	"dependencies": {
-		"@centroid-gai/db": "workspace:*"
+		"@centroid-gai/db": "workspace:*",
+		"typescript": "5.9.3"
 	},
 	"devDependencies": {
 		"@types/node": "24.10.1",
-		"node-gyp": "11.4.2",
-		"typescript": "5.9.3"
+		"node-gyp": "11.4.2"
 	}
 }

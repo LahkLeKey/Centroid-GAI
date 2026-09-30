@@ -146,21 +146,26 @@ jobs:
       - name: Typecheck persistence packages
         working-directory: persistence
         run: bun run typecheck
-      - name: Build and start deployable API with migrated PostgreSQL
-        run: docker compose -p centroid-gai-ci up --detach --build --wait --wait-timeout 180
-      - name: Test API against PostgreSQL
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Test repository scenario assertions
         working-directory: persistence/api
-        run: bun run api:test
-      - name: Capture service logs
+        run: bun run repository:test
+      - name: Test API and all repository conversations against isolated Compose
+        working-directory: persistence
+        shell: bash
+        run: |
+          set -o pipefail
+          bun run test:repository 2>&1 | tee ../compose-ci.log
+      - name: Save repository transcripts and diagnostics
         if: always()
-        run: docker compose -p centroid-gai-ci logs --no-color > compose-ci.log 2>&1
-      - name: Save failure diagnostics
-        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-diagnostics
-          path: compose-ci.log
+          name: repository-chat-integration
+          path: |
+            compose-ci.log
+            build/evaluation/repository-chat
+            build/knowledge/repository-e2e-*/fixture.json
+            build/knowledge/repository-e2e-*/provenance.json
           retention-days: 7
-      - name: Stop isolated CI services
-        if: always()
-        run: docker compose -p centroid-gai-ci down --volumes --remove-orphans

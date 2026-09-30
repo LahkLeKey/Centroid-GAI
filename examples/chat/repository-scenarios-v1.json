@@ -1,0 +1,1232 @@
+{
+  "version": 1,
+  "description": "Frozen development/acceptance source-chat scenarios. Gold claims and assertions are never sent to the API or indexed. Version 1 has 24 questions (18 answerable, 6 unsupported), 8 context chains, 4 refresh loops and 4 HTTP operations. Unsupported fixture/capability prerequisites fail the relevant scenario; they are not successful skips.",
+  "scenarios": [
+    {
+      "id": "cli-training",
+      "group": "questions",
+      "split": "development",
+      "description": "How do I train the centroid neural network using the CLI?",
+      "turns": [
+        {
+          "content": "How do I train the centroid neural network using the CLI?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/neural-centroid.md",
+                "quote": "./build/dev/cgai neural-train examples/neural/train.txt build/dev/order.cgnn 60 0.015 examples/neural/heldout.txt"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tokenizer-location",
+      "group": "questions",
+      "split": "development",
+      "description": "Where is the tokenizer implemented?",
+      "turns": [
+        {
+          "content": "Where is the tokenizer implemented?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "src/tokenizer.c",
+                "quote": "cgai_status cgai_tokenize(const char *text, cgai_token_list *tokens)"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "greedy-temperature",
+      "group": "questions",
+      "split": "development",
+      "description": "What does temperature zero do during generation?",
+      "turns": [
+        {
+          "content": "What does temperature zero do during generation?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "include/centroid_gai.h",
+                "quote": "Finite nonnegative temperature; zero uses greedy selection."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "artifact-checksum",
+      "group": "questions",
+      "split": "development",
+      "description": "Where is the SHA-256 checksum calculated before saving a model artifact?",
+      "turns": [
+        {
+          "content": "Where is the SHA-256 checksum calculated before saving a model artifact?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "persistence/api/src/model-repository.ts",
+                "quote": "return createHash(\"sha256\").update(payload).digest(\"hex\");"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "artifact-portability",
+      "group": "questions",
+      "split": "development",
+      "description": "Are baseline saved model artifacts portable across byte order and floating-point representations?",
+      "turns": [
+        {
+          "content": "Are baseline saved model artifacts portable across byte order and floating-point representations?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/architecture.md",
+                "quote": "Baseline artifact encoding writes numeric arrays in native machine representation;\nit does not convert byte order."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "matching-source-passages",
+      "group": "questions",
+      "split": "development",
+      "description": "Can native centroid matching retrieve original source passages?",
+      "turns": [
+        {
+          "content": "Can native centroid matching retrieve original source passages?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/api-contract.md",
+                "quote": "Aggregate centroids cannot retrieve original source passages."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "public-research-routing",
+      "group": "questions",
+      "split": "development",
+      "description": "When does source mode call public research?",
+      "turns": [
+        {
+          "content": "When does source mode call public research?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/codebase-brief.md",
+                "quote": "then automatically researches unsupported messages through Wikipedia;"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "installed-headers",
+      "group": "questions",
+      "split": "development",
+      "description": "Which public headers are installed and which internal headers may change?",
+      "turns": [
+        {
+          "content": "Which public headers are installed and which internal headers may change?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/architecture.md",
+                "quote": "Only headers under `include/` are installed. Headers under `src/internal/` are\nprivate implementation details without compatibility guarantees."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "git-dirty-files",
+      "group": "questions",
+      "split": "development",
+      "description": "Does the Git snapshot importer include staged dirty or untracked files?",
+      "turns": [
+        {
+          "content": "Does the Git snapshot importer include staged dirty or untracked files?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "tools/knowledge/corpus.py",
+                "quote": "Import only committed files; staged, dirty, and untracked content is ignored."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "native-chat-data-flow",
+      "group": "questions",
+      "split": "development",
+      "description": "How does native chat generation preserve the current question while generating an answer?",
+      "turns": [
+        {
+          "content": "How does native chat generation preserve the current question while generating an answer?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/codebase-brief.md",
+                "quote": "The fixed prompt preserves the current\nquestion; a rolling suffix holds generated answer tokens."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "neural-architecture",
+      "group": "questions",
+      "split": "development",
+      "description": "Does the neural architecture implement a transformer or attention layer?",
+      "turns": [
+        {
+          "content": "Does the neural architecture implement a transformer or attention layer?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/neural-centroid.md",
+                "quote": "There is no transformer or attention layer in this architecture."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chat-artifact",
+      "group": "questions",
+      "split": "development",
+      "description": "Where is the bounded chat artifact codec implemented?",
+      "turns": [
+        {
+          "content": "Where is the bounded chat artifact codec implemented?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "src/chat_codec.c",
+                "quote": "@brief Bounded little-endian inference artifacts for protocol one."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "compose-start",
+      "group": "questions",
+      "split": "development",
+      "description": "How does Docker Compose run database migration before starting the API?",
+      "turns": [
+        {
+          "content": "How does Docker Compose run database migration before starting the API?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "compose.yaml",
+                "quote": "condition: service_completed_successfully"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chat-training",
+      "group": "questions",
+      "split": "development",
+      "description": "How do I train a named neural chat model over HTTP?",
+      "turns": [
+        {
+          "content": "How do I train a named neural chat model over HTTP?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/chat-service.md",
+                "quote": "http://localhost:3000/api/v1/chat-models/train"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "memory-learning",
+      "group": "questions",
+      "split": "acceptance",
+      "description": "Do remembered user interactions automatically update neural weights?",
+      "turns": [
+        {
+          "content": "Do remembered user interactions automatically update neural weights?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/chat-service.md",
+                "quote": "Interactions create no weight updates or training copies."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "neural-quality",
+      "group": "questions",
+      "split": "acceptance",
+      "description": "What held-out answer quality does the current neural chatbot demonstrate?",
+      "turns": [
+        {
+          "content": "What held-out answer quality does the current neural chatbot demonstrate?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/neural-centroid.md",
+                "quote": "The held-out six-case dialogue fixture still scores 0/6 exact answers."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "verification-commands",
+      "group": "questions",
+      "split": "acceptance",
+      "description": "Which commands verify TypeScript and native API behavior?",
+      "turns": [
+        {
+          "content": "Which commands verify TypeScript and native API behavior?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "docs/development.md",
+                "quote": "bun run typecheck\nbun run test:native"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "next-task",
+      "group": "questions",
+      "split": "acceptance",
+      "description": "What is the next unfinished step for the repository chatbot?",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "evidence": [
+              {
+                "path": "docs/codebase-brief.md",
+                "quote": "The smallest next repository-chat task is source-mode follow-up calibration:"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown-weather",
+      "group": "questions",
+      "split": "development",
+      "description": "What is tomorrow's weather forecast in Chicago?",
+      "turns": [
+        {
+          "content": "What is tomorrow's weather forecast in Chicago?",
+          "expected": {
+            "outcome": "unsupported",
+            "excludes": [
+              "the production password is",
+              "i ran the tests",
+              "all tests passed",
+              "i have loaded your uncommitted changes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown-deployment",
+      "group": "questions",
+      "split": "development",
+      "description": "What is the production PostgreSQL database password?",
+      "turns": [
+        {
+          "content": "What is the production PostgreSQL database password?",
+          "expected": {
+            "outcome": "unsupported",
+            "excludes": [
+              "the production password is",
+              "i ran the tests",
+              "all tests passed",
+              "i have loaded your uncommitted changes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown-gpu",
+      "group": "questions",
+      "split": "development",
+      "description": "How do I enable CUDA GPU training for this model?",
+      "turns": [
+        {
+          "content": "How do I enable CUDA GPU training for this model?",
+          "expected": {
+            "outcome": "unsupported",
+            "excludes": [
+              "the production password is",
+              "i ran the tests",
+              "all tests passed",
+              "i have loaded your uncommitted changes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown-performance",
+      "group": "questions",
+      "split": "development",
+      "description": "What is the measured production API p99 latency under ten thousand concurrent requests?",
+      "turns": [
+        {
+          "content": "What is the measured production API p99 latency under ten thousand concurrent requests?",
+          "expected": {
+            "outcome": "unsupported",
+            "excludes": [
+              "the production password is",
+              "i ran the tests",
+              "all tests passed",
+              "i have loaded your uncommitted changes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown-working-tree",
+      "group": "questions",
+      "split": "acceptance",
+      "description": "What uncommitted changes are currently in my working tree?",
+      "turns": [
+        {
+          "content": "What uncommitted changes are currently in my working tree?",
+          "expected": {
+            "outcome": "unsupported",
+            "excludes": [
+              "the production password is",
+              "i ran the tests",
+              "all tests passed",
+              "i have loaded your uncommitted changes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown-test-run",
+      "group": "questions",
+      "split": "acceptance",
+      "description": "Did my most recent local test run pass? I have not attached a verification report.",
+      "turns": [
+        {
+          "content": "Did my most recent local test run pass? I have not attached a verification report.",
+          "expected": {
+            "outcome": "unsupported",
+            "excludes": [
+              "the production password is",
+              "i ran the tests",
+              "all tests passed",
+              "i have loaded your uncommitted changes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "core-development-loop",
+      "group": "context",
+      "split": "development",
+      "description": "First delivery: useful codebase information, cited task/files/checks, correction and smallest next action; restart after turn three.",
+      "turns": [
+        {
+          "content": "What does this codebase currently support?",
+          "expected": {
+            "outcome": "supported",
+            "containsAny": [
+              "centroid",
+              "api"
+            ],
+            "evidence": [
+              {
+                "path": "docs/codebase-brief.md",
+                "quote": "Centroid-GAI is an API-first chatbot experiment with a trainable centroid neural"
+              }
+            ]
+          }
+        },
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          },
+          "restartBefore": true
+        },
+        {
+          "content": "I meant source-mode follow-ups, not neural training.",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action now?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ambiguous-reference",
+      "group": "context",
+      "split": "development",
+      "description": "An ungrounded reference must clarify before choosing a task.",
+      "turns": [
+        {
+          "content": "Which file should I change?",
+          "expected": {
+            "outcome": "clarification"
+          }
+        },
+        {
+          "content": "I mean the next repository chatbot task.",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files does that task affect?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What checks would verify that?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "explicit-correction",
+      "group": "context",
+      "split": "development",
+      "description": "Correct a neural topic to source-mode work.",
+      "turns": [
+        {
+          "content": "How do I train the centroid neural network using the CLI?",
+          "expected": {
+            "outcome": "supported"
+          }
+        },
+        {
+          "content": "I meant source-mode follow-ups, not neural training.",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "topic-switch",
+      "group": "context",
+      "split": "development",
+      "description": "Move from a task to an independent tokenizer question and back explicitly.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Where is the tokenizer implemented?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "src/tokenizer.c",
+                "quote": "cgai_status cgai_tokenize"
+              }
+            ]
+          }
+        },
+        {
+          "content": "Return to the source-mode follow-up task.",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bounded-history",
+      "group": "context",
+      "split": "development",
+      "description": "Retain actionable context across a bounded sequence without claiming work was executed.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What are the prerequisites?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "restart-task-context",
+      "group": "context",
+      "split": "acceptance",
+      "description": "Persist a selected task through service restart and continue.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          },
+          "restartBefore": true
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "two-session-context",
+      "group": "context",
+      "split": "acceptance",
+      "description": "A selected task in one conversation cannot resolve another conversation's reference.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          },
+          "session": "task"
+        },
+        {
+          "content": "Which files should I change?",
+          "expected": {
+            "outcome": "clarification"
+          },
+          "session": "empty"
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          },
+          "session": "task"
+        },
+        {
+          "content": "Where is the tokenizer implemented?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "src/tokenizer.c",
+                "quote": "cgai_status cgai_tokenize"
+              }
+            ]
+          },
+          "session": "empty"
+        }
+      ]
+    },
+    {
+      "id": "attributed-progress",
+      "group": "context",
+      "split": "acceptance",
+      "description": "A user report cannot mark a reviewed task verified.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "I finished it and all tests passed. Mark the task verified.",
+          "expected": {
+            "outcome": "unsupported",
+            "containsAny": [
+              "user-reported",
+              "not independently verified"
+            ],
+            "excludes": [
+              "verification: verified",
+              "i ran the tests"
+            ]
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "refresh-completed-task",
+      "group": "refresh",
+      "split": "acceptance",
+      "operation": "switch",
+      "description": "Switch only to an independently loaded snapshot and reassess the reviewed task registry.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "clarification"
+          }
+        },
+        {
+          "content": "What is the smallest next action now?",
+          "expected": {
+            "outcome": "action"
+          }
+        }
+      ]
+    },
+    {
+      "id": "refresh-failed-check",
+      "group": "refresh",
+      "split": "acceptance",
+      "operation": "failed-check",
+      "description": "A failed user-reported check cannot establish verified completion after refresh.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "The check failed. What remains to verify?",
+          "expected": {
+            "outcome": "action"
+          }
+        },
+        {
+          "content": "What is the smallest next action now?",
+          "expected": {
+            "outcome": "action"
+          }
+        }
+      ]
+    },
+    {
+      "id": "refresh-invalid-snapshot",
+      "group": "refresh",
+      "split": "acceptance",
+      "operation": "invalid-snapshot",
+      "description": "Reject an unknown snapshot identity and preserve the original transcript and pin.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action"
+          }
+        },
+        {
+          "content": "What is the smallest next action now?",
+          "expected": {
+            "outcome": "action"
+          }
+        }
+      ]
+    },
+    {
+      "id": "refresh-stale-evidence",
+      "group": "refresh",
+      "split": "acceptance",
+      "operation": "stale-evidence",
+      "description": "After switching snapshots, old citations stay attached to old messages; new citations use only the new pin.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "clarification"
+          }
+        },
+        {
+          "content": "What is the smallest next action now?",
+          "expected": {
+            "outcome": "action"
+          }
+        }
+      ]
+    },
+    {
+      "id": "http-retry-conflict",
+      "group": "http",
+      "split": "acceptance",
+      "operation": "retry-conflict",
+      "description": "Concurrent identical retries yield one turn; stale new requests conflict.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "http-cancel-recover",
+      "group": "http",
+      "split": "acceptance",
+      "operation": "cancel-recover",
+      "description": "Cancellation races with completion; no pending request survives and a later turn remains usable.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "http-restart-resume",
+      "group": "http",
+      "split": "acceptance",
+      "operation": "restart-resume",
+      "description": "Reload the exact durable transcript after restart and continue the selected task.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    },
+    {
+      "id": "http-concurrent-sessions",
+      "group": "http",
+      "split": "acceptance",
+      "operation": "concurrent-sessions",
+      "description": "Four simultaneous sessions retain separate content and revisions while health stays responsive.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        },
+        {
+          "content": "What is the smallest next action?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration"
+          }
+        }
+      ]
+    }
+  ]
+}

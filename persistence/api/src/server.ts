@@ -18,6 +18,7 @@ import { chatRoute } from './chat/routes.ts';
 import { MemoryService } from './chat/memory.ts';
 import { ResearchService } from './chat/research.ts';
 import { configuredResearch } from './chat/search-provider.ts';
+import { RepositoryService } from './chat/repository.ts';
 
 import {
     closeModelRepository,
@@ -40,8 +41,12 @@ const chatOwner = process.env.CGAI_CHAT_OWNER_ID ?? 'local-owner';
 const memory = new MemoryService(chatStore, chatOwner);
 const researchConfiguration = configuredResearch();
 const research = new ResearchService(memory, researchConfiguration.provider,
-    process.env.CGAI_REPOSITORY_SNAPSHOT, researchConfiguration.fetchPage);
-const chat = new ChatService(chatStore, new ProcessChatWorkers(), chatOwner, research);
+    undefined, researchConfiguration.fetchPage);
+const additionalSnapshots: unknown = JSON.parse(process.env.CGAI_REPOSITORY_ADDITIONAL_SNAPSHOTS ?? '[]');
+if (!Array.isArray(additionalSnapshots) || additionalSnapshots.length > 8 || additionalSnapshots.some((path) => typeof path !== 'string'))
+    throw new Error('CGAI_REPOSITORY_ADDITIONAL_SNAPSHOTS must be a JSON array of at most eight snapshot directories');
+const repository = new RepositoryService(process.env.CGAI_REPOSITORY_SNAPSHOT, additionalSnapshots);
+const chat = new ChatService(chatStore, new ProcessChatWorkers(), chatOwner, research, repository);
 await chat.recover();
 let retentionTask: Promise<void> | undefined;
 const retentionTimer = setInterval(() => {

@@ -55,6 +55,11 @@ export interface ChatSource {
     readonly fetchedAt?: string;
     readonly publishedAt?: string;
     readonly contentHash?: string;
+    readonly blob?: string;
+    readonly documentSha256?: string;
+    readonly passageSha256?: string;
+    readonly coordinateSystem?: 'snapshot-normalized-lines';
+    readonly manifestSha256?: string;
 }
 export interface ChatMessage extends ChatDialogueMessage {
     readonly requestFingerprint?: string;
@@ -69,6 +74,10 @@ export interface ChatMessage extends ChatDialogueMessage {
     readonly usage?: ChatUsage;
     readonly research?: import('./research.ts').ResearchTrace;
     readonly memoryIds?: readonly string[];
+    readonly repositoryState?: import('./repository.ts').RepositoryState;
+    readonly action?: import('./repository.ts').RepositoryAction;
+    readonly verification?: import('./repository.ts').RepositoryVerificationReport;
+    readonly investigation?: import('./repository.ts').RepositoryInvestigation;
 }
 export interface ChatUsage {
     readonly generatedTokens: number;
@@ -87,9 +96,19 @@ export interface ConversationSummary {
     readonly revision: number;
     readonly createdAt: string;
     readonly updatedAt: string;
+    /** Missing on older transcripts means public/research scope. */
+    readonly scope?: 'public' | 'repository';
+    readonly repositorySnapshot?: import('./repository.ts').RepositorySnapshotIdentity;
+    readonly repositoryState?: import('./repository.ts').RepositoryState;
+    readonly repositoryTransitions?: readonly import('./repository.ts').RepositoryTransition[];
 }
 export interface Conversation extends ConversationSummary { readonly messages: readonly ChatMessage[] }
-export interface ChatCreateRequest { readonly modelName?: string; readonly title?: string }
+export interface ChatCreateRequest {
+    readonly modelName?: string;
+    readonly title?: string;
+    readonly scope?: 'public' | 'repository';
+    readonly snapshot?: import('./repository.ts').RepositorySnapshotIdentity;
+}
 export interface ChatSendRequest {
     readonly requestId: string;
     readonly revision: number;
@@ -104,6 +123,8 @@ export interface ChatSendRequest {
     readonly publicQuery?: string;
     readonly applicability?: string;
     readonly answerMode?: 'sources' | 'neural';
+    /** Inspect pinned repository dependencies or exact symbol occurrences. Repository scope only. */
+    readonly repositoryResearch?: import('./repository.ts').RepositoryResearchRequest;
 }
 /** POST messages returns the complete authoritative session, including error/cancelled replies. */
 export interface ChatSendResponse { readonly conversation: Conversation; readonly requestId: string }

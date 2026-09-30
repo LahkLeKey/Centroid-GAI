@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "source-followup-calibration",
+      "title": "Calibrate source-mode follow-ups for ambiguous references",
+      "status": "implemented",
+      "priority": 10,
+      "dependsOn": [],
+      "summary": "Explicit file/task resolution, ambiguity before active-task reuse, and durable reference state are implemented. Next review the eight development chains, commit the source, and capture the reviewed checks against that snapshot before marking this task verified.",
+      "paths": ["persistence/api/src/chat/repository-context.ts", "persistence/api/src/chat/repository.ts", "persistence/api/src/chat/service.ts", "persistence/api/src/knowledge/retrieval.ts"],
+      "checks": [
+        {"command": "bun run typecheck", "cwd": "persistence"},
+        {"command": "bun run test:native", "cwd": "persistence"},
+        {"command": "bun run test:repository", "cwd": "persistence"},
+        {"command": "bun run test:e2e", "cwd": "persistence"}
+      ],
+      "evidence": [
+        {"path": "docs/codebase-brief.md", "quote": "The smallest next repository-chat task is source-mode follow-up calibration:"},
+        {"path": "docs/codebase-brief.md", "quote": "Explicit task IDs and file paths are resolved before an active task is reused."},
+        {"path": "docs/codebase-brief.md", "quote": "A deterministic initial\nconversation loop does not establish robust follow-up behavior for arbitrary prose."},
+        {"path": "docs/architecture.md", "quote": "Failed/cancelled message pairs never become completed conditioning context."}
+      ],
+      "doneWhen": "Reviewed development cases distinguish a single active task from competing file/topic references, completed history survives restart, unsupported references ask for clarification, and a captured verification report records the checks for the same source commit.",
+      "keywords": ["source", "sources", "follow-up", "followups", "context", "ambiguity", "files", "repository", "next", "smallest"]
+    },
+    {
+      "id": "repository-support-review",
+      "title": "Review source support across broader repository question families",
+      "status": "planned",
+      "priority": 20,
+      "dependsOn": ["source-followup-calibration"],
+      "summary": "Review whether selected excerpts support the claims asked about, including unsupported questions and paraphrases. Freeze acceptance families before making retrieval changes.",
+      "paths": ["persistence/api/src/knowledge/retrieval.ts", "persistence/api/src/chat/repository.ts", "docs/codebase-brief.md"],
+      "checks": [
+        {"command": "node --test persistence/api/src/knowledge/retrieval.test.ts", "cwd": "."},
+        {"command": "bun run test:repository", "cwd": "persistence"},
+        {"command": "bun run test:e2e", "cwd": "persistence"}
+      ],
+      "evidence": [
+        {"path": "docs/codebase-brief.md", "quote": "Lexical similarity, centroid distance and token\nprobability are not factual confidence."},
+        {"path": "docs/codebase-brief.md", "quote": "Keep development examples separate from frozen acceptance families and keep all\ngold assertions outside the searchable snapshot."}
+      ],
+      "doneWhen": "A reviewed report identifies question-family coverage, numerator and denominator for support and abstention, failed IDs, pinned snapshot identity and independent acceptance results.",
+      "keywords": ["evidence", "support", "quality", "evaluation", "retrieval", "citations"]
+    },
+    {
+      "id": "native-memory-budget",
+      "title": "Enforce and measure total worker process memory",
+      "status": "planned",
+      "priority": 30,
+      "dependsOn": [],
+      "summary": "Measure native and JavaScript worker allocations together and define an enforceable total-process limit before larger training workloads.",
+      "paths": ["persistence/api/src/chat/workers.ts", "persistence/api/src/chat/worker.ts", "compose.yaml"],
+      "checks": [
+        {"command": "bun run test:native", "cwd": "persistence"},
+        {"command": "bun run test:e2e", "cwd": "persistence"}
+      ],
+      "evidence": [
+        {"path": "docs/codebase-brief.md", "quote": "The 512 MiB\nchild JavaScript heap limit does not enforce total process or native memory usage."}
+      ],
+      "doneWhen": "A bounded stress workload records peak total process memory, limit enforcement, cancellation cleanup and API responsiveness on named hardware.",
+      "keywords": ["memory", "workers", "heap", "limits", "resources"]
+    },
+    {
+      "id": "reviewed-dialogue-corpus",
+      "title": "Develop a reviewed centroid dialogue training corpus",
+      "status": "planned",
+      "priority": 40,
+      "dependsOn": [],
+      "summary": "Collect licensed, reviewed dialogue examples with source-separated training and evaluation families. Preserve the existing frozen neural evaluation and report generalization separately from training fit.",
+      "paths": ["src/chat_model.c", "src/chat_prompt.c", "src/neural_training.c", "docs/neural-centroid.md"],
+      "checks": [
+        {"command": "ctest --test-dir build/dev -C Release --output-on-failure", "cwd": "."},
+        {"command": "bun run typecheck", "cwd": "persistence"},
+        {"command": "bun run test:native", "cwd": "persistence"}
+      ],
+      "evidence": [
+        {"path": "docs/codebase-brief.md", "quote": "The documented fixed six-case neural dialogue evaluation scores 0/6 exact answers."},
+        {"path": "docs/codebase-brief.md", "quote": "Learning the two demo answers checks training fit, not conversational generalization."}
+      ],
+      "doneWhen": "Corpus provenance, review decisions and family boundaries are recorded, training converges on development examples, and untouched acceptance results are reported without claiming generalization from training fit.",
+      "keywords": ["neural", "training", "data", "dialogue", "corpus", "centroid", "generalization"]
+    }
+  ]
+}

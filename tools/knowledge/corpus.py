@@ -11,7 +11,6 @@ from urllib.parse import urlsplit
 import uuid
 
 from . import git_source
-from .config import CODE_EXTENSIONS
 from .lock import acquire
 
 
@@ -59,8 +58,8 @@ def references(repo, commit, config):
     return value, digest(raw)
 
 
-def inventory(repo, commit, config):
-    entries = git_source.entries(repo, commit, config)
+def inventory(repo, commit, config, skipped=None):
+    entries = git_source.entries(repo, commit, config, skipped)
     license_data = git_source.metadata_blob(repo, commit, config.license_path, config.max_file_bytes)
     if not license_data.strip():
         raise ValueError("source license is empty")
@@ -75,12 +74,13 @@ def snapshot(repo: Path, ref: str, config, output: Path) -> dict:
         if output.exists():
             raise ValueError("snapshot output must be a new directory")
         commit = git_source.resolve(repo, ref)
-        entries, license_data, citations, references_hash = inventory(repo, commit, config)
+        skipped = []
+        entries, license_data, citations, references_hash = inventory(repo, commit, config, skipped)
         documents, rejected = {}, []
         for entry in entries:
             try:
                 text = normalize(git_source.blob(repo, entry.oid, config.max_file_bytes), config.min_words,
-                                 code=Path(entry.path).suffix.lower() in CODE_EXTENSIONS)
+                                 code=config.is_code(entry.path))
             except (ValueError, UnicodeError) as exc:
                 rejected.append({"path": entry.path, "reason": str(exc)})
                 continue
@@ -90,6 +90,13 @@ def snapshot(repo: Path, ref: str, config, output: Path) -> dict:
                                     "license": config.license, "references": citations.get(entry.path, [])})
         if not documents:
             raise ValueError("no usable encyclopedia documents in this commit")
+        included_paths = sorted(source["path"] for item in documents.values() for source in item["sources"])
+        missing = sorted(set(config.required_paths) - set(included_paths))
+        if missing:
+            raise ValueError("required committed content missing or rejected: " + ", ".join(missing))
+        leaked = [path for path in included_paths if Path(path).name in config.excluded_filenames]
+        if leaked:
+            raise ValueError("excluded benchmark file in snapshot: " + ", ".join(leaked))
         staging = output.with_name(output.name + ".partial-" + uuid.uuid4().hex)
         staging.mkdir()
         counts = {"train": 0, "validation": 0}
@@ -112,6 +119,9 @@ def snapshot(repo: Path, ref: str, config, output: Path) -> dict:
                        "license_sha256": digest(license_data), "references_sha256": references_hash},
             "config": asdict(config), "config_sha256": config.fingerprint(),
             "entries": [asdict(entry) for entry in entries], "rejected": rejected,
+            "coverage": {"included_paths": included_paths, "required_paths": config.required_paths,
+                         "missing_required_paths": missing, "skipped": skipped,
+                         "excluded_filenames": config.excluded_filenames},
             "documents": counts, "files": files,
             "normalization": "utf8-nfc-line-endings-v1", "deduplication": "normalized-text-sha256",
             "split": "first-32-hash-bits-modulo-100"}

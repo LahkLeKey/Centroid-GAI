@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { ChatCreateRequest, ChatSendRequest, ChatTrainRequest } from '../../../shared/chat.ts';
+import type { RepositorySwitchRequest } from '../../../shared/repository.ts';
 import { ChatService, ChatServiceError, chatErrorStatus, chatText } from './service.ts';
 
 interface HttpHelpers {
@@ -10,7 +11,7 @@ interface HttpHelpers {
 export async function chatRoute(service: ChatService, request: IncomingMessage, response: ServerResponse,
     segments: readonly string[], helpers: HttpHelpers): Promise<boolean> {
     const resource = segments[0];
-    if (!['chat-models', 'chat-jobs', 'conversations', 'memory'].includes(resource ?? '')) return false;
+    if (!['chat-models', 'chat-jobs', 'conversations', 'memory', 'knowledge'].includes(resource ?? '')) return false;
     try {
         const token = process.env.CGAI_CHAT_API_TOKEN;
         if (token && request.headers.authorization !== `Bearer ${token}`) throw new ChatServiceError('unauthorized', 401);
@@ -20,7 +21,9 @@ export async function chatRoute(service: ChatService, request: IncomingMessage, 
         let value: unknown;
         let status = 200;
         const id = segments[1];
-        if (resource === 'memory') {
+        if (resource === 'knowledge' && id === 'repository' && segments.length === 2 && method === 'GET')
+            value = service.repositoryKnowledge();
+        else if (resource === 'memory') {
             const memory = service.research?.memory;
             if (!memory) throw new ChatServiceError('memory unavailable', 503);
             if (segments.length === 1 && method === 'GET') value = await memory.read();
@@ -46,13 +49,15 @@ export async function chatRoute(service: ChatService, request: IncomingMessage, 
         } else if (resource === 'conversations' && segments.length === 1 && method === 'POST') {
             const input = await helpers.readJson<ChatCreateRequest>(request);
             if (!input || typeof input !== 'object' || Array.isArray(input)) throw new ChatServiceError('conversation request must be an object');
-            value = await service.create(input.modelName, input.title); status = 201;
+            value = await service.create(input.modelName, input.title, input); status = 201;
         } else if (resource === 'conversations' && id && segments.length === 2 && method === 'GET') value = await service.conversation(id);
         else if (resource === 'conversations' && id && segments.length === 2 && method === 'DELETE') {
             const input = await helpers.readJson<{ revision: number; forgetMemory?: boolean }>(request);
             await service.remove(id, input.revision, input.forgetMemory === true); value = { deleted: true };
         } else if (resource === 'conversations' && id && segments.length === 3 && segments[2] === 'messages' && method === 'POST')
             value = await service.send(id, await helpers.readJson<ChatSendRequest>(request));
+        else if (resource === 'conversations' && id && segments.length === 3 && segments[2] === 'repository' && method === 'POST')
+            value = await service.switchRepository(id, await helpers.readJson<RepositorySwitchRequest>(request));
         else if (resource === 'conversations' && id && segments.length === 3 && segments[2] === 'cancel' && method === 'POST') {
             const input = await helpers.readJson<{ requestId: string }>(request);
             value = await service.cancel(id, chatText(input.requestId, 'requestId', 200));

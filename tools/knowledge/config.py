@@ -8,6 +8,9 @@ from urllib.parse import urlsplit
 
 PROSE_EXTENSIONS = {".txt", ".md", ".rst"}
 CODE_EXTENSIONS = {".c", ".h", ".ts", ".tsx", ".js", ".py", ".json", ".sql", ".prisma", ".css"}
+CODE_EXTENSIONS |= {".yaml", ".yml"}
+EXACT_FILENAMES = {"Dockerfile", "CMakeLists.txt", "binding.gyp", ".env.example", "compose.env.example"}
+IGNORED_DIRECTORIES = {"node_modules", "build", "out", "__pycache__", ".git", ".venv", ".ssh", ".agents", ".codex"}
 
 
 def relative_path(value: str) -> str:
@@ -29,6 +32,10 @@ class Config:
     remote_url: str | None = None
     branch: str = "main"
     extensions: list[str] = field(default_factory=lambda: [".txt", ".md", ".rst"])
+    filenames: list[str] = field(default_factory=list)
+    exclude_paths: list[str] = field(default_factory=list)
+    excluded_filenames: list[str] = field(default_factory=list)
+    required_paths: list[str] = field(default_factory=list)
     references_path: str | None = None
     min_words: int = 20
     max_files: int = 10000
@@ -43,6 +50,16 @@ class Config:
             raise ValueError("paths must contain at least one content file or directory")
         for path in self.paths + [self.license_path]:
             relative_path(path)
+        for name in ("filenames", "exclude_paths", "excluded_filenames", "required_paths"):
+            values = getattr(self, name)
+            if not isinstance(values, list):
+                raise ValueError(f"{name} must be a list of literal paths")
+            for value in values:
+                relative_path(value)
+        if any(PurePosixPath(path).name not in EXACT_FILENAMES for path in self.filenames):
+            raise ValueError("unsupported exact source filename")
+        if any("/" in name for name in self.excluded_filenames):
+            raise ValueError("excluded_filenames must contain exact basenames")
         if self.references_path is not None:
             relative_path(self.references_path)
         if not self.extensions or any(ext not in PROSE_EXTENSIONS | CODE_EXTENSIONS for ext in self.extensions):
@@ -63,9 +80,34 @@ class Config:
                 raise ValueError("remote_url must be public HTTPS without credentials, query, or fragment")
 
     def includes(self, path: str) -> bool:
-        return (any(path == prefix or path.startswith(prefix + "/") for prefix in self.paths)
-                and PurePosixPath(path).suffix.lower() in self.extensions
-                and path not in {self.license_path, self.references_path})
+        return self.exclusion_reason(path) is None
+
+    def exclusion_reason(self, path: str) -> str | None:
+        """Admit operational files only through explicit roots and opt-in formats."""
+        relative_path(path)
+        parts = PurePosixPath(path).parts
+        if any(part in IGNORED_DIRECTORIES for part in parts[:-1]):
+            return "generated-or-private-directory"
+        if parts[-1] == ".env" or (parts[-1].startswith(".env.") and path not in self.filenames):
+            return "environment-secret-file"
+        if parts[-1] in self.excluded_filenames:
+            return "excluded-filename"
+        if any(path == prefix or path.startswith(prefix + "/") for prefix in self.exclude_paths):
+            return "excluded-path"
+        if path in {self.license_path, self.references_path}:
+            return "metadata-only"
+        if not any(path == prefix or path.startswith(prefix + "/") for prefix in self.paths):
+            return "outside-configured-paths"
+        for index, part in enumerate(parts):
+            prefix = "/".join(parts[:index + 1])
+            if part.startswith(".") and path not in self.filenames and not any(root == prefix or root.startswith(prefix + "/") for root in self.paths):
+                return "hidden-path-not-explicitly-admitted"
+        if path not in self.filenames and PurePosixPath(path).suffix.lower() not in self.extensions:
+            return "unsupported-extension"
+        return None
+
+    def is_code(self, path: str) -> bool:
+        return path in self.filenames or PurePosixPath(path).suffix.lower() in CODE_EXTENSIONS
 
     def fingerprint(self) -> str:
         return hashlib.sha256(json.dumps(asdict(self), sort_keys=True).encode()).hexdigest()

@@ -70,6 +70,7 @@ The Docker build supplies Python and the native compiler.
 | HTTP/persistence behavior | Typecheck, native tests, API tests against migrated PostgreSQL |
 | Knowledge compiler | `node --test persistence/api/src/knowledge/compile-native-knowledge.test.ts` |
 | Repository retrieval | `node --test persistence/api/src/knowledge/retrieval.test.ts` |
+| Repository conversations | `bun run test:repository` from `persistence/`; captured HTTP transcripts, exact citations, follow-ups and snapshot transitions |
 | Documentation | Local links, source/command accuracy, Doxygen build |
 
 From `persistence/`, `bun run test:e2e` builds an isolated Compose project, tests
@@ -80,6 +81,11 @@ The suite includes exact answers from the two-example training fixture, health d
 revision conflicts, isolated sessions, memory controls and service restart/reload.
 It runs test files sequentially so the restart test cannot interrupt baseline tests.
 The normal runner and CI disable external research and verify its disabled status.
+`bun run test:repository` adds the repository Compose overlay and all 40 codebase
+scenarios after the API tests. It creates independent A/B fixture commits from
+allowlisted current files, records their origin and removes its isolated services.
+See [repository chat](repository-chat.md) for reports and production snapshot
+preparation. Those test fixture commits do not modify the developer branch.
 Set `CGAI_E2E_RESEARCH_LIVE=1` to additionally exercise a real Wikipedia lookup for
 `hello world` from a conversation with no model, then verify memory reuse. This
 opt-in check requires Internet access and provider availability.

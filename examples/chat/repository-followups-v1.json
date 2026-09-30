@@ -1,0 +1,608 @@
+{
+  "version": 1,
+  "purpose": "repository-followup-development",
+  "description": "Eight development-only calibration chains for source-mode references. These scenarios may guide implementation changes; they are not held-out acceptance data. They run and score separately from the unchanged forty-scenario repository regression suite.",
+  "scenarios": [
+    {
+      "id": "followup-active-file-choice",
+      "description": "A singular reference to several task files must be resolved before proposing a file-specific change.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which one of those files should I edit?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          }
+        },
+        {
+          "content": "I mean persistence/api/src/chat/repository.ts.",
+          "expected": {
+            "outcome": "supported",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "focusPath": "persistence/api/src/chat/repository.ts",
+              "candidates": "none",
+              "taskCandidates": "none"
+            },
+            "sourcePaths": [
+              "persistence/api/src/chat/repository.ts"
+            ]
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": "persistence/api/src/chat/repository.ts"
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-module-comparison",
+      "description": "Comparing two active modules preserves the task but requires a choice before resolving a singular reference.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Choose persistence/api/src/chat/repository.ts.",
+          "expected": {
+            "outcome": "supported",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "focusPath": "persistence/api/src/chat/repository.ts",
+              "candidates": "none",
+              "taskCandidates": "none"
+            },
+            "sourcePaths": [
+              "persistence/api/src/chat/repository.ts"
+            ]
+          }
+        },
+        {
+          "content": "Compare persistence/api/src/chat/repository.ts and persistence/api/src/chat/service.ts.",
+          "expected": {
+            "outcome": "supported",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          }
+        },
+        {
+          "content": "Which one should I edit?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          }
+        },
+        {
+          "content": "Choose persistence/api/src/chat/service.ts.",
+          "expected": {
+            "outcome": "supported",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "focusPath": "persistence/api/src/chat/service.ts",
+              "candidates": "none",
+              "taskCandidates": "none"
+            },
+            "sourcePaths": [
+              "persistence/api/src/chat/service.ts"
+            ]
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": "persistence/api/src/chat/service.ts"
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-competing-tasks",
+      "description": "Competing reviewed task IDs remain unresolved until the user explicitly selects one.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Should I work on source-followup-calibration or native-memory-budget?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "taskCandidates": "multiple",
+              "taskCandidateIncludes": [
+                "source-followup-calibration",
+                "native-memory-budget"
+              ]
+            }
+          }
+        },
+        {
+          "content": "Which files belong to that?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "taskCandidates": "multiple",
+              "taskCandidateIncludes": [
+                "source-followup-calibration",
+                "native-memory-budget"
+              ]
+            }
+          }
+        },
+        {
+          "content": "Choose native-memory-budget.",
+          "expected": {
+            "outcome": "action",
+            "task": "native-memory-budget",
+            "state": {
+              "taskId": "native-memory-budget",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "native-memory-budget",
+            "state": {
+              "taskId": "native-memory-budget",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-progress-checks",
+      "description": "User-reported completion remains attributed and does not erase the active task needed to answer remaining-check questions.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "I finished it and all tests passed. Mark the task verified.",
+          "expected": {
+            "outcome": "unsupported",
+            "containsAny": [
+              "user-reported",
+              "not independently verified"
+            ],
+            "state": {
+              "taskId": "source-followup-calibration",
+              "reportedProgressContains": "I finished it"
+            }
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which files are affected?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-topic-pronoun",
+      "description": "A pronoun after a clear new factual topic follows that topic and cannot silently resume the older task.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Where is the tokenizer implemented?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "src/tokenizer.c",
+                "quote": "cgai_status cgai_tokenize"
+              }
+            ],
+            "noAction": true,
+            "state": {
+              "taskId": null
+            }
+          }
+        },
+        {
+          "content": "Which function implements it?",
+          "expected": {
+            "outcome": "supported",
+            "evidence": [
+              {
+                "path": "src/tokenizer.c",
+                "quote": "cgai_status cgai_tokenize"
+              }
+            ],
+            "noAction": true,
+            "state": {
+              "taskId": null
+            }
+          }
+        },
+        {
+          "content": "Return to source-followup-calibration.",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-explicit-correction",
+      "description": "A corrected task clears neural topic state and supports subsequent file and verification follow-ups.",
+      "turns": [
+        {
+          "content": "What is the next action for the reviewed-dialogue-corpus task?",
+          "expected": {
+            "outcome": "action",
+            "task": "reviewed-dialogue-corpus",
+            "state": {
+              "taskId": "reviewed-dialogue-corpus",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "I meant source-mode follow-ups, not neural training.",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which files should I change first?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-restart-choice",
+      "description": "Pending file candidates survive a real API restart and resolve only after an explicit existing-file choice.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which one of those files should I edit?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          }
+        },
+        {
+          "content": "Which one did you mean?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          },
+          "restartBefore": true
+        },
+        {
+          "content": "Choose persistence/api/src/chat/repository.ts.",
+          "expected": {
+            "outcome": "supported",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "focusPath": "persistence/api/src/chat/repository.ts",
+              "candidates": "none",
+              "taskCandidates": "none"
+            },
+            "sourcePaths": [
+              "persistence/api/src/chat/repository.ts"
+            ]
+          }
+        },
+        {
+          "content": "How should I verify that change?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": "persistence/api/src/chat/repository.ts"
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    },
+    {
+      "id": "followup-unknown-file-choice",
+      "description": "A missing candidate never becomes the selected path; the user must choose a real indexed candidate.",
+      "turns": [
+        {
+          "content": "What is the next unfinished step for the repository chatbot?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": null
+            }
+          }
+        },
+        {
+          "content": "Which one of those files should I edit?",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          }
+        },
+        {
+          "content": "Choose persistence/api/src/chat/imaginary-resolver.ts.",
+          "expected": {
+            "outcome": "clarification",
+            "finishReason": "clarification",
+            "noAction": true,
+            "state": {
+              "focusPath": null,
+              "candidates": "multiple",
+              "candidateIncludes": [
+                "persistence/api/src/chat/repository.ts",
+                "persistence/api/src/chat/service.ts"
+              ]
+            }
+          }
+        },
+        {
+          "content": "I mean persistence/api/src/chat/repository.ts.",
+          "expected": {
+            "outcome": "supported",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "focusPath": "persistence/api/src/chat/repository.ts",
+              "candidates": "none",
+              "taskCandidates": "none"
+            },
+            "sourcePaths": [
+              "persistence/api/src/chat/repository.ts"
+            ]
+          }
+        },
+        {
+          "content": "Which checks are still needed?",
+          "expected": {
+            "outcome": "action",
+            "task": "source-followup-calibration",
+            "state": {
+              "taskId": "source-followup-calibration",
+              "candidates": "none",
+              "taskCandidates": "none",
+              "focusPath": "persistence/api/src/chat/repository.ts"
+            }
+          }
+        }
+      ],
+      "group": "context",
+      "split": "development"
+    }
+  ]
+}

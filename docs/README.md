@@ -11,6 +11,8 @@ below the release goal.
 | --- | --- |
 | [Architecture](architecture.md) | Understand the current components and intended conversation path |
 | [Chat service](chat-service.md) | Train chat models, use persistent conversations, configure research and memory, and review measured limitations |
+| [Repository chat](repository-chat.md) | Prepare committed codebase evidence, ask for next steps through curl, and run the HTTP scenario suite |
+| [Repository chat plan](repository-chat-plan.md) | Deliver codebase answers, a repeated next-step conversation loop, and a 40-scenario API suite |
 | [Neural network](neural-centroid.md) | Train and evaluate the implemented model; understand its mathematics and limits |
 | [HTTP API](api-contract.md) | Use the existing baseline endpoints and Compose workflow |
 | [Development](development.md) | Build, test, document, and work on the native and service code |

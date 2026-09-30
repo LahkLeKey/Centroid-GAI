@@ -18,7 +18,7 @@ def git(repo: Path | None, *args: str, limit=10_000_000) -> bytes:
                "-c", "http.followRedirects=false", "-c", "submodule.recurse=false",
                "-c", "protocol.allow=never", "-c", "protocol.https.allow=always"]
     if repo is not None:
-        command += ["-C", str(repo)]
+        command += ["-c", f"safe.directory={repo.resolve().as_posix()}", "-C", str(repo)]
     env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     env.update(GIT_TERMINAL_PROMPT="0", GIT_CONFIG_NOSYSTEM="1",
                GIT_CONFIG_GLOBAL=os.devnull, GIT_ATTR_NOSYSTEM="1", GIT_NO_REPLACE_OBJECTS="1",
@@ -49,7 +49,7 @@ class Entry:
     size: int
 
 
-def entries(repo: Path, commit: str, config) -> list[Entry]:
+def entries(repo: Path, commit: str, config, skipped: list | None = None) -> list[Entry]:
     """List only regular committed content files, never symlinks or submodules."""
     result = []
     listing = git(repo, "ls-tree", "-rlz", "--full-tree", commit, "--", *config.paths,
@@ -60,7 +60,10 @@ def entries(repo: Path, commit: str, config) -> list[Entry]:
         info, raw_path = line.split(b"\t", 1)
         mode, kind, oid, size = info.split()
         path = raw_path.decode("utf-8", errors="strict")
-        if not config.includes(path):
+        reason = config.exclusion_reason(path)
+        if reason:
+            if skipped is not None:
+                skipped.append({"path": path, "reason": reason})
             continue
         if mode not in {b"100644", b"100755"} or kind != b"blob":
             raise GitError(f"content must be a regular Git blob: {path}")

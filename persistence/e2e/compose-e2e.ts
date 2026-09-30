@@ -9,14 +9,18 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const persistenceRoot = fileURLToPath(new URL("..", import.meta.url));
 const apiPort = process.env.CGAI_E2E_API_PORT ?? '3100';
 const databasePort = process.env.CGAI_E2E_POSTGRES_PORT ?? '55432';
 const apiUrl = `http://127.0.0.1:${apiPort}`;
-const composeArgs = ['compose', '-p', `centroid-gai-e2e-${process.pid}`];
-const composeEnvironment = { ...process.env, API_PORT: apiPort, POSTGRES_PORT: databasePort,
+const repositorySuite = process.argv.includes('--repository');
+const fixtureDirectory = resolve(repositoryRoot, `build/knowledge/repository-e2e-${process.pid}`);
+const composeArgs = ['compose', ...(repositorySuite ? ['-f', 'compose.yaml', '-f', 'compose.repository.yaml'] : []), '-p', `centroid-gai-e2e-${process.pid}`];
+const composeEnvironment: NodeJS.ProcessEnv = { ...process.env, API_PORT: apiPort, POSTGRES_PORT: databasePort,
     CGAI_CHAT_API_TOKEN: randomUUID(),
     CGAI_SEARCH_PROVIDER: process.env.CGAI_E2E_RESEARCH_LIVE === '1' ? 'wikipedia' : 'disabled',
     CGAI_SEARCH_URL: '' };
@@ -68,6 +72,17 @@ async function main(): Promise<void> {
     let composeStarted = false;
 
     try {
+        if (repositorySuite) {
+            if (run(process.env.CGAI_PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3'),
+                ['-m', 'tools.knowledge.e2e_repository', '--repo', repositoryRoot, '--output', fixtureDirectory]) !== 0)
+                throw new Error('repository fixture preparation failed');
+            const fixture = JSON.parse(readFileSync(resolve(fixtureDirectory, 'fixture.json'), 'utf8')) as { root: string };
+            composeEnvironment.CGAI_REPOSITORY_ROOT_HOST = fixture.root;
+            composeEnvironment.CGAI_REPOSITORY_REF = 'a';
+            composeEnvironment.CGAI_REPOSITORY_ADDITIONAL_SNAPSHOTS = '["/app/knowledge/snapshots/b"]';
+            composeEnvironment.CGAI_SEARCH_PROVIDER = 'disabled';
+            composeEnvironment.CGAI_E2E_RESEARCH_LIVE = '0';
+        }
         // Step 1: Build and start every service so the test covers PostgreSQL, schema setup, the
         // native addon, and HTTP routing as one local deployment rather than a mocked process.
         composeStarted = true;
@@ -101,6 +116,14 @@ async function main(): Promise<void> {
         if (status !== 0) {
             throw new Error(`Compose API E2E tests failed with exit code ${status}`);
         }
+        if (repositorySuite && run('node', ['src/evaluation/repository-chat.ts',
+            '--snapshot', resolve(fixtureDirectory, 'snapshots/a'),
+            '--additional-snapshot', resolve(fixtureDirectory, 'snapshots/b'), '--lane', 'full',
+            '--followups', resolve(repositoryRoot, 'examples/chat/repository-followups-v1.json'),
+            '--research', resolve(repositoryRoot, 'examples/chat/repository-research-v1.json'),
+            '--output', resolve(repositoryRoot, `build/evaluation/repository-chat/${process.pid}`)],
+            environment, resolve(persistenceRoot, 'api')) !== 0)
+            throw new Error('repository chat scenario suite failed; inspect build/evaluation/repository-chat');
     } finally {
         // Step 4: This process owns a unique project, so cleanup cannot stop the developer stack.
         if (composeStarted) {

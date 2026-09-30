@@ -70,15 +70,20 @@ function passages(documents: Document[]): Passage[] {
 function compare(left: string, right: string) { return left < right ? -1 : left > right ? 1 : 0; }
 
 /** Deterministic BM25 baseline. Both snapshot splits are searchable; this does not train a model. */
-export function createRetriever(documents: Document[]) {
+export function createRetriever(documents: Document[], options: {
+    terms?: (text: string) => string[]; minimumCoverage?: number; pathWeight?: number;
+} = {}) {
     if (!documents.length) throw new Error('Need source documents');
+    const termsFor = options.terms ?? retrievalTerms;
+    const minimumCoverage = options.minimumCoverage ?? retrievalPolicy.minimumCoverage;
+    const pathWeight = options.pathWeight ?? retrievalPolicy.pathWeight;
     const rows = passages(documents).map(passage => {
-        const content = retrievalTerms(passage.text);
-        const path = [...new Set(passage.citations.flatMap(citation => retrievalTerms(citation.path)))];
+        const content = termsFor(passage.text);
+        const path = [...new Set(passage.citations.flatMap(citation => termsFor(citation.path)))];
         const counts = new Map<string, number>();
         for (const term of content) counts.set(term, (counts.get(term) ?? 0) + 1);
-        for (const term of path) counts.set(term, (counts.get(term) ?? 0) + retrievalPolicy.pathWeight);
-        return { passage, counts, length: content.length + path.length * retrievalPolicy.pathWeight };
+        for (const term of path) counts.set(term, (counts.get(term) ?? 0) + pathWeight);
+        return { passage, counts, length: content.length + path.length * pathWeight };
     });
     const frequencies = new Map<string, number>();
     for (const row of rows) for (const term of row.counts.keys()) frequencies.set(term, (frequencies.get(term) ?? 0) + 1);
@@ -90,12 +95,12 @@ export function createRetriever(documents: Document[]) {
                 throw new Error('Question must contain text without NUL and fit 16384 UTF-8 bytes');
             }
             if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error('Limit must be an integer from 1 to 20');
-            const terms = [...new Set(retrievalTerms(question))];
+            const terms = [...new Set(termsFor(question))];
             const ranked: Hit[] = [];
             for (const row of rows) {
                 const matchedTerms = terms.filter(term => row.counts.has(term));
                 const coverage = terms.length ? matchedTerms.length / terms.length : 0;
-                if (coverage < retrievalPolicy.minimumCoverage || matchedTerms.length < Math.min(2, terms.length) || !terms.length) continue;
+                if (coverage < minimumCoverage || matchedTerms.length < Math.min(2, terms.length) || !terms.length) continue;
                 const score = matchedTerms.reduce((sum, term) => {
                     const tf = row.counts.get(term)!;
                     const df = frequencies.get(term)!;

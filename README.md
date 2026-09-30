@@ -19,6 +19,7 @@ service integration, and measured answer quality.
 | Existing HTTP API | Serves the original count-based centroid engine and `.cgai` artifacts |
 | Docker Compose | API and PostgreSQL with committed chat/memory migrations and restart/reload integration tests |
 | Research and memory | Model-free startup, automatic bounded Wikipedia research, optional SearXNG and scoped memory controls; source results remain separate from neural synthesis |
+| Repository conversations | Offline commit-pinned excerpts, reviewed next-step actions, durable follow-up context and explicit snapshot switching |
 
 The neural prototype uses `.cgnn` files. They cannot be served by the existing
 `.cgai` HTTP endpoints. Neither engine currently provides a validated general
@@ -33,6 +34,7 @@ mode returns source excerpts, clarification or abstention. See the
 2. [Train and evaluate the current neural prototype](docs/neural-centroid.md).
 3. [Review the existing API and curl workflow](docs/api-contract.md).
 4. [Train and chat through the API](docs/chat-service.md).
+5. [Ask about this codebase and continue a next-step loop](docs/repository-chat.md).
 
 The [chatbot roadmap](docs/chatbot-plan.md) tracks the remaining quality and release gates.
 

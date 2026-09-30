@@ -7,6 +7,11 @@ through HTTP/JSON with curl and Docker Compose. Start with short questions and
 follow-ups about this repository so that answers and evidence can be checked.
 Broader conversation is a later quality milestone.
 
+The [repository chat workflow](repository-chat.md) implements commit-pinned codebase
+information, cited next-step actions and durable follow-ups, with a 40-scenario
+HTTP suite. The [delivery plan](repository-chat-plan.md) records its acceptance
+gates and remaining extensions; the milestones below retain the broader roadmap.
+
 ## First useful release
 
 A user can select a trained neural chat model, create a conversation, ask a
@@ -27,8 +32,10 @@ Evaluate the centroid design on this task before choosing a different encoder.
   HTTP lifecycle, chat/memory migrations, split-validated dialogue fixture and
   fixed evaluation report; repository/source results and owner-scoped memory.
 - **Implemented with restrictions:** source conversations without training, automatic
-  research after a memory/repository miss, default Wikipedia and configurable SearXNG.
+  public research after a memory miss, default Wikipedia and configurable SearXNG.
   Requests can disable automatic research or override the public query.
+- **Implemented:** a separate offline repository scope with verified snapshots,
+  exact citation metadata, reviewed task selection and explicit revision switching.
 - **Unmet release gates:** robust dialogue quality, human-rated claim support,
   calibrated support routing, broad datasets, multi-owner authentication,
   reviewed training-candidate workflows and agreed hardware quality/latency targets.

@@ -1,9 +1,43 @@
 {
   "name": "centroid-codebase",
-  "paths": ["README.md", "CMakeLists.txt", "include", "src", "tests", "docs", "tools/knowledge", "persistence/api/README.md", "persistence/api/src", "persistence/api/native", "persistence/shared", "persistence/db/README.md", "persistence/db/src", "persistence/db/migrations"],
+  "paths": [
+    "README.md", "CMakeLists.txt", "compose.yaml", "compose.repository.yaml", "compose.env.example", ".github/workflows/ci.yml",
+    "include", "src", "tests", "docs", "tools/knowledge", "examples/api", "examples/neural", "examples/knowledge/codebase.json",
+    "persistence/package.json", "persistence/api/README.md", "persistence/api/package.json", "persistence/api/Dockerfile", "persistence/api/binding.gyp",
+    "persistence/api/.env.example", "persistence/api/src", "persistence/api/native", "persistence/shared", "persistence/e2e/compose-e2e.ts",
+    "persistence/db/README.md", "persistence/db/package.json", "persistence/db/Dockerfile", "persistence/db/.env.example",
+    "persistence/db/prisma.config.ts", "persistence/db/src", "persistence/db/migrations"
+  ],
   "license": "MIT",
   "license_path": "LICENSE",
-  "extensions": [".txt", ".md", ".c", ".h", ".ts", ".tsx", ".py", ".json", ".sql", ".prisma", ".css"],
+  "extensions": [".txt", ".md", ".c", ".h", ".ts", ".tsx", ".py", ".json", ".sql", ".prisma", ".css", ".yaml", ".yml"],
+  "filenames": ["CMakeLists.txt", "compose.env.example", "persistence/api/Dockerfile", "persistence/api/binding.gyp", "persistence/api/.env.example", "persistence/db/Dockerfile", "persistence/db/.env.example"],
+  "exclude_paths": [
+    "examples/evaluation", "examples/chat", "docs/repository-chat-plan.md", "docs/chatbot-plan.md",
+    "docs/generated", "docs/reports", "docs/transcripts", "src/knowledge_catalog",
+    "persistence/api/src/evaluation", "persistence/db/migrations/snapshots",
+    "persistence/db/src/prisma/contract.json", "persistence/db/src/prisma/contract.d.ts"
+  ],
+  "excluded_filenames": [
+    "repository-questions-v1.json", "repository-scenarios-v1.json", "repository-followups-v1.json", "repository-research-v1.json", "pattern-baseline-v1.json", "dialogues-v1.json", "heldout.txt",
+    "repository-chat-plan.md", "repository-chat-examples.md", "repository-chat-transcript.md",
+    "repository-chat.ts", "repository-chat-runner.ts", "repository-chat-fixtures.ts", "repository-chat-scenarios.ts", "repository-chat-metrics.ts", "repository-chat-metrics.test.ts", "repository-chat-api.test.ts",
+    "repository-chat.test.ts", "repository-service.test.ts", "repository.test.ts", "repository-fixture.ts", "repository-context.test.ts", "repository-retrieval.test.ts", "repository-reference.test.ts",
+    "repository-chat-followups.ts", "repository-chat-followups.test.ts", "repository-chat-research.test.ts",
+    "repository-code-index.test.ts", "repository-investigation.test.ts", "repository-research.test.ts",
+    "codebase-data.test.ts", "metrics.test.ts", "chat-api.test.ts",
+    "e2e_repository.py"
+  ],
+  "required_paths": [
+    "README.md", "CMakeLists.txt", "compose.yaml", "compose.repository.yaml", "compose.env.example", ".github/workflows/ci.yml",
+    "docs/codebase-brief.md", "docs/codebase-tasks.json", "docs/development.md", "docs/architecture.md", "docs/chat-service.md",
+    "include/centroid_gai_chat.h", "src/chat_model.c", "src/neural_math.c", "tests/test_chat.c",
+    "persistence/package.json", "persistence/api/package.json", "persistence/api/Dockerfile", "persistence/api/binding.gyp",
+    "persistence/api/src/server.ts", "persistence/api/src/chat/service.ts", "persistence/api/src/chat/research.ts",
+    "persistence/api/src/knowledge/retrieval.ts", "persistence/shared/chat.ts", "persistence/e2e/compose-e2e.ts",
+    "persistence/db/package.json", "persistence/db/Dockerfile", "persistence/db/src/prisma/db.ts", "persistence/db/src/prisma/contract.prisma",
+    "examples/api/chat-create.json", "examples/api/chat-message.json", "examples/api/chat-train.json"
+  ],
   "min_words": 1,
   "max_files": 2000,
   "max_file_bytes": 2000000,

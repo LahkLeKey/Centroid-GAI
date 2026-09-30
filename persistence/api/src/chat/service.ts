@@ -1,9 +1,12 @@
 import { createHash, randomUUID } from 'node:crypto';
-import type { ChatMessage, ChatReply, ChatSendRequest, ChatSendResponse, ChatTrainRequest, ChatTrainingJob, Conversation } from '../../../shared/chat.ts';
+import type { ChatCreateRequest, ChatMessage, ChatReply, ChatSendRequest, ChatSendResponse, ChatTrainRequest, ChatTrainingJob, Conversation } from '../../../shared/chat.ts';
 import type { ChatTrainResult } from '../chat-native.ts';
 import type { ChatStore } from './store.ts';
 import { ChatWorkerError, type ChatWorkers } from './workers.ts';
 import type { ResearchService } from './research.ts';
+import type { RepositoryService } from './repository.ts';
+import { validRepositoryResearch } from './repository-investigation.ts';
+import type { RepositoryKnowledgeInfo, RepositorySnapshotIdentity, RepositorySwitchRequest } from '../../../shared/repository.ts';
 
 export class ChatServiceError extends Error {
     readonly status: number;
@@ -45,8 +48,9 @@ export class ChatService {
     private readonly workers: ChatWorkers;
     readonly ownerId: string;
     readonly research: ResearchService | undefined;
-    constructor(store: ChatStore, workers: ChatWorkers, ownerId: string, research?: ResearchService) {
-        this.store = store; this.workers = workers; this.ownerId = ownerId; this.research = research;
+    readonly repository: RepositoryService | undefined;
+    constructor(store: ChatStore, workers: ChatWorkers, ownerId: string, research?: ResearchService, repository?: RepositoryService) {
+        this.store = store; this.workers = workers; this.ownerId = ownerId; this.research = research; this.repository = repository;
         chatText(ownerId, 'configured owner', 256);
     }
     private assertOpen(): void {
@@ -94,10 +98,31 @@ export class ChatService {
         if (!value || value.ownerId !== this.ownerId) throw new ChatServiceError('conversation not found', 404);
         return value;
     }
-    create(modelName?: string, title = 'Conversation'): Promise<Conversation> {
-        return this.operation(() => this.createConversation(modelName, title));
+    repositoryKnowledge(): RepositoryKnowledgeInfo {
+        return this.repository?.info() ?? { ready: false, error: 'repository snapshot not configured', snapshots: [], documentCount: 0, passageCount: 0, paths: [] };
     }
-    private async createConversation(modelName: string | undefined, title: string): Promise<Conversation> {
+    private repositoryIdentity(requested?: RepositorySnapshotIdentity): RepositorySnapshotIdentity {
+        if (requested !== undefined && (!requested || typeof requested !== 'object' || Array.isArray(requested) ||
+            typeof requested.repository !== 'string' || !requested.repository || requested.repository.length > 256 ||
+            typeof requested.commit !== 'string' || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(requested.commit) ||
+            typeof requested.manifestSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(requested.manifestSha256)))
+            throw new ChatServiceError('invalid repository snapshot identity');
+        const knowledge = this.repositoryKnowledge();
+        if (!knowledge.ready || !this.repository) throw new ChatServiceError(knowledge.error ?? 'repository knowledge unavailable', 503);
+        if (requested && !knowledge.snapshots.some((snapshot) => snapshot.repository === requested.repository &&
+            snapshot.commit === requested.commit && snapshot.manifestSha256 === requested.manifestSha256))
+            throw new ChatServiceError('repository snapshot is not loaded', 404);
+        return this.repository.identity(requested);
+    }
+    create(modelName?: string, title = 'Conversation', options: Pick<ChatCreateRequest, 'scope' | 'snapshot'> = {}): Promise<Conversation> {
+        return this.operation(() => this.createConversation(modelName, title, options));
+    }
+    private async createConversation(modelName: string | undefined, title: string, options: Pick<ChatCreateRequest, 'scope' | 'snapshot'>): Promise<Conversation> {
+        if (options.scope !== undefined && !['public', 'repository'].includes(options.scope)) throw new ChatServiceError('invalid conversation scope');
+        const scope = options.scope ?? 'public';
+        if (scope !== 'repository' && options.snapshot !== undefined) throw new ChatServiceError('snapshot requires repository scope');
+        if (scope === 'repository' && modelName !== undefined) throw new ChatServiceError('repository scope uses source evidence, not a neural modelName');
+        const snapshot = scope === 'repository' ? this.repositoryIdentity(options.snapshot) : undefined;
         if (modelName !== undefined) chatText(modelName, 'modelName', 200);
         chatText(title, 'title', 200);
         const model = modelName === undefined ? null : await this.store.findModel(modelName);
@@ -107,7 +132,8 @@ export class ChatService {
         const timestamp = now();
         const conversation: Conversation = { id: randomUUID(), ownerId: this.ownerId, title, modelName: modelName ?? null,
             modelChecksum: model?.checksumSha256 ?? null, protocolVersion: model?.metadata.protocolVersion ?? 1,
-            revision: 0, createdAt: timestamp, updatedAt: timestamp, messages: [] };
+            revision: 0, createdAt: timestamp, updatedAt: timestamp, messages: [], scope,
+            ...(snapshot ? { repositorySnapshot: snapshot, repositoryState: { snapshot } } : {}) };
         await this.store.createConversation(conversation);
         return conversation;
     }
@@ -126,13 +152,39 @@ export class ChatService {
             if (input[option] !== undefined && typeof input[option] !== 'boolean') throw new ChatServiceError(`${option} must be a boolean`);
         if (input.publicQuery !== undefined) chatText(input.publicQuery, 'publicQuery', 512);
         if (input.applicability !== undefined) chatText(input.applicability, 'applicability', 512);
-        return fingerprint([input.content, input.maxTokens ?? 128, input.temperature ?? 0, input.seed ?? '0', input.autoSearch ?? true,
-            input.rememberSources ?? false, input.publicQuery ?? '', input.applicability ?? '', input.answerMode ?? 'sources']);
+        if (input.repositoryResearch !== undefined && !validRepositoryResearch(input.repositoryResearch))
+            throw new ChatServiceError('repositoryResearch requires kind impact or symbol and a valid source path or identifier target');
+        const identity: unknown[] = [input.content, input.maxTokens ?? 128, input.temperature ?? 0, input.seed ?? '0', input.autoSearch ?? true,
+            input.rememberSources ?? false, input.publicQuery ?? '', input.applicability ?? '', input.answerMode ?? 'sources'];
+        // Preserve fingerprints of old requests without this option.
+        if (input.repositoryResearch) identity.push([input.repositoryResearch.kind, input.repositoryResearch.target]);
+        return fingerprint(identity);
     }
-    private async commit(previous: Conversation, messages: readonly ChatMessage[]): Promise<Conversation> {
-        const next = { ...previous, messages, revision: previous.revision + 1, updatedAt: now() };
+    private async commit(previous: Conversation, messages: readonly ChatMessage[],
+        patch: Pick<Conversation, 'repositorySnapshot' | 'repositoryState' | 'repositoryTransitions'> = {}): Promise<Conversation> {
+        const next = { ...previous, ...patch, messages, revision: previous.revision + 1, updatedAt: now() };
         if (!await this.store.saveConversation(next, previous.revision)) throw new ChatServiceError('stale conversation revision', 409);
         return next;
+    }
+    switchRepository(id: string, input: RepositorySwitchRequest): Promise<Conversation> {
+        return this.operation(async () => {
+            if (!input || !Number.isSafeInteger(input.revision) || input.revision < 0 || !input.snapshot)
+                throw new ChatServiceError('revision and snapshot are required');
+            const conversation = await this.conversation(id);
+            this.assertOpen();
+            if (conversation.scope !== 'repository' || !conversation.repositorySnapshot)
+                throw new ChatServiceError('conversation is not repository scoped');
+            if (conversation.revision !== input.revision) throw new ChatServiceError('stale conversation revision', 409);
+            if (this.active.has(id) || conversation.messages.some((message) => message.status === 'pending'))
+                throw new ChatServiceError('cancel active request before switching repository snapshot', 409);
+            const snapshot = this.repositoryIdentity(input.snapshot);
+            if (snapshot.manifestSha256 === conversation.repositorySnapshot.manifestSha256) return conversation;
+            const transitions = conversation.repositoryTransitions ?? [];
+            if (transitions.length >= 100) throw new ChatServiceError('repository transition limit reached', 413);
+            return this.commit(conversation, conversation.messages, { repositorySnapshot: snapshot,
+                repositoryState: { snapshot }, repositoryTransitions: [...transitions, { from: conversation.repositorySnapshot,
+                    to: snapshot, revision: conversation.revision + 1, createdAt: now() }] });
+        });
     }
     send(id: string, input: ChatSendRequest): Promise<ChatSendResponse> {
         return this.operation(() => this.sendMessage(id, input));
@@ -152,7 +204,15 @@ export class ChatService {
             const active = this.active.get(id);
             return active?.requestId === input.requestId ? active.promise : { conversation, requestId: input.requestId };
         }
-        if (!conversation.modelChecksum && (input.answerMode === 'neural' || !this.research))
+        if (conversation.scope === 'repository') {
+            if (!conversation.repositorySnapshot) throw new ChatServiceError('repository conversation has no pinned snapshot', 503);
+            this.repositoryIdentity(conversation.repositorySnapshot);
+            if (input.answerMode === 'neural' || input.publicQuery !== undefined)
+                throw new ChatServiceError('repository scope accepts source answers and never public queries');
+        }
+        if (conversation.scope !== 'repository' && input.repositoryResearch !== undefined)
+            throw new ChatServiceError('repositoryResearch requires repository scope');
+        if (conversation.scope !== 'repository' && !conversation.modelChecksum && (input.answerMode === 'neural' || !this.research))
             throw new ChatServiceError(input.answerMode === 'neural'
                 ? 'neural answers require a conversation created with a trained modelName'
                 : 'research is unavailable for this conversation', input.answerMode === 'neural' ? 400 : 503);
@@ -189,7 +249,12 @@ export class ChatService {
         let completed: ChatMessage;
         try {
             signal.throwIfAborted();
-            if (input.answerMode !== 'neural' && this.research) {
+            if (conversation.scope === 'repository' && this.repository) {
+                const answer = await this.repository.answer(input, conversation, signal);
+                signal.throwIfAborted();
+                completed = { ...assistant, ...answer, status: 'complete',
+                    usage: { generatedTokens: 0, promptTokens: 0, droppedMessages: 0, unknownTokens: 0 } };
+            } else if (input.answerMode !== 'neural' && this.research) {
                 const answer = await this.research.answer(input, conversation.id, signal);
                 signal.throwIfAborted();
                 completed = { ...assistant, ...answer, status: 'complete', finishReason: answer.research.mode === 'clarification' ? 'clarification' :
@@ -215,7 +280,8 @@ export class ChatService {
                 error: error instanceof Error ? error.message : 'chat request failed' };
         }
         const result = await this.commit(pending, [...conversation.messages,
-            { ...user, status: completed.status }, completed]);
+            { ...user, status: completed.status }, completed],
+            completed.status === 'complete' && completed.repositoryState ? { repositoryState: completed.repositoryState } : {});
         return { conversation: result, requestId: input.requestId };
     }
     async cancel(id: string, requestId: string): Promise<Conversation> {

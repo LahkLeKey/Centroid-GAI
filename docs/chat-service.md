@@ -1,9 +1,14 @@
 # Neural conversations, research and memory
 
 The service supports persistent conversations before any model has been trained.
-By default it checks memory and repository excerpts, then researches an unsupported
+Public conversations check reusable memory, then research an unsupported
 message using Wikipedia. A fresh `hello world` message therefore triggers research.
 Responses contain fetched excerpts and citations; they are not neural synthesis.
+
+Use `scope: "repository"` for offline codebase questions and next-step follow-ups.
+That scope pins verified source material, persists task context and never searches
+the Internet. See [Repository chat](repository-chat.md) for snapshot preparation,
+Compose startup, curl examples and the conversation scenario suite.
 
 The C centroid network remains experimental: the fixed six-case dialogue fixture currently scores **0/6
 exact answers and 6/6 EOS terminations**. The count-centroid baseline also scores
@@ -90,9 +95,11 @@ non-loopback requests. This is a single-owner pilot, not multi-user authenticati
 | GET | `/chat-models` | Named model heads and checksums |
 | POST | `/chat-models/train` | `name`, structured `examples`, optional `config`, `training`, `provenance`; returns job |
 | GET | `/chat-jobs/:id` | Status, metrics, model identity or error |
-| POST | `/conversations` | Optional `modelName` and `title`; `{}` starts without a model; supplied model is pinned |
+| GET | `/knowledge/repository` | Snapshot readiness, identities and included source paths |
+| POST | `/conversations` | Optional `title`, `scope`, `snapshot` or public `modelName`; `{}` starts public research without a model |
 | GET | `/conversations/:id` | Authoritative transcript and revision |
 | POST | `/conversations/:id/messages` | `requestId`, `revision`, `content`, optional generation/source settings |
+| POST | `/conversations/:id/repository` | `revision`, verified `snapshot`; explicitly switches a repository conversation |
 | POST | `/conversations/:id/cancel` | `requestId`; terminates matching active computation |
 | DELETE | `/conversations/:id` | `revision`, optional `forgetMemory: true` |
 | GET | `/memory` | Owner's records and settings |
@@ -113,7 +120,8 @@ Streaming is not implemented.
 ## Evidence and research
 
 Set `CGAI_REPOSITORY_SNAPSHOT` to a verified source snapshot directory in the API
-process/container. Mount it read-only when using Compose. Passages cite
+process/container and create a repository-scoped conversation to use it. The
+`compose.repository.yaml` overlay mounts prepared snapshots read-only. Passages cite
 snapshot-normalized lines and commits, not mutable working-tree coordinates.
 
 The default provider searches English Wikipedia and fetches article text separately
@@ -124,7 +132,7 @@ It needs no key and covers encyclopedia content. For broader web search, set
 endpoint with [JSON output enabled](https://docs.searxng.org/dev/search_api.html).
 An existing `CGAI_SEARCH_URL` also selects SearXNG when no provider is specified.
 
-`autoSearch` defaults to true. After a memory/repository miss, the current message
+In public scope, `autoSearch` defaults to true. After a memory miss, the current message
 becomes the public query, with whitespace normalized. History, stored preferences
 and repository passages are never appended. Automatic queries over 512 UTF-8 bytes
 or containing recognized credential patterns prompt for a separate `publicQuery`.

@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 from .config import Config
+from .bootstrap import bootstrap
 from .corpus import monitor, snapshot
 from .git_source import GitError, sync
 from .lock import acquire
@@ -13,7 +14,7 @@ from .lock import acquire
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["snapshot", "monitor", "sync"])
+    parser.add_argument("command", choices=["snapshot", "bootstrap", "monitor", "sync"])
     parser.add_argument("--config", type=Path, default=Path("examples/knowledge/encyclopedia.json"))
     parser.add_argument("--repo", type=Path, default=Path("."), help="local source checkout (snapshot/local monitor)")
     parser.add_argument("--ref", default="HEAD", help="local commit, tag, or branch to read")
@@ -21,14 +22,16 @@ def main() -> int:
     parser.add_argument("--output", type=Path, help="new corpus directory (snapshot/sync)")
     parser.add_argument("--manifest", type=Path, help="previous corpus manifest (monitor)")
     args = parser.parse_args()
-    if args.command in {"snapshot", "sync"} and args.output is None:
-        parser.error("snapshot/sync requires --output")
+    if args.command in {"snapshot", "bootstrap", "sync"} and args.output is None:
+        parser.error("snapshot/bootstrap/sync requires --output")
     if args.command == "monitor" and args.manifest is None:
         parser.error("monitor requires --manifest")
     try:
         config = Config.read(args.config)
         if args.command == "snapshot":
             result = snapshot(args.repo, args.ref, config, args.output)
+        elif args.command == "bootstrap":
+            result = bootstrap(args.repo, args.ref, config, args.output)
         elif args.command == "monitor":
             result = monitor(args.repo, args.ref, config, args.manifest)
         else:
