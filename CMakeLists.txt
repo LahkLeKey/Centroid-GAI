@@ -226,11 +226,24 @@ install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/centroid_gai)
 
 if(CGAI_BUILD_DOCS)
     find_package(Doxygen REQUIRED)
+    find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+    set(DOXYGEN_INPUT_FILTER
+        "\\\"${Python3_EXECUTABLE}\\\" \\\"${CMAKE_CURRENT_SOURCE_DIR}/tools/docs/doxygen_filter.py\\\"")
+    if(WIN32)
+        # cmd.exe needs a command before a quoted executable passed through popen.
+        string(PREPEND DOXYGEN_INPUT_FILTER "call ")
+    endif()
     set(DOXYGEN_INPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
     set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/docs)
     configure_file(Doxyfile.in Doxyfile @ONLY)
     add_custom_target(docs
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        COMMAND "${CMAKE_COMMAND}"
+            "-DDOXYGEN_EXECUTABLE=${DOXYGEN_EXECUTABLE}"
+            "-DDOXYGEN_CONFIG=${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
+            "-DPython3_EXECUTABLE=${Python3_EXECUTABLE}"
+            "-DDOXYGEN_INPUT_DIR=${DOXYGEN_INPUT_DIR}"
+            "-DDOXYGEN_XML_DIR=${DOXYGEN_OUTPUT_DIR}/xml"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DoxygenRun.cmake"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating Centroid-GAI API documentation"
         VERBATIM

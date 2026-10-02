@@ -20,7 +20,7 @@ static uint64_t bark_test_vocabulary(const bark_fixture_case *scenario) {
 
 /** @brief Check one family assignment and compare its prompt with all preceding prompts.
  * @param scenario Borrowed generated scenario.
- * @return No value; an invariant violation terminates the executable. */
+ * @note No value; an invariant violation terminates the executable. */
 static void bark_test_case(const bark_fixture_case *scenario) {
     /* Step 1: Bind stable IDs, rule labels and versioned request defaults. */
     TEST_CHECK(scenario->family_id == scenario->id / 2U, "unstable family ID");
@@ -46,7 +46,7 @@ static void bark_test_case(const bark_fixture_case *scenario) {
  * @param counts Borrowed three-entry scenario counts.
  * @param family_settings Borrowed thirty-six-entry setting-presence masks.
  * @param vocabulary Training-only state/target vocabulary mask.
- * @return No value; an invariant violation terminates the executable. */
+ * @note No value; an invariant violation terminates the executable. */
 static void bark_test_coverage(const size_t counts[3],
                                const unsigned family_settings[BARK_FIXTURE_FAMILY_COUNT],
                                uint64_t vocabulary) {
@@ -61,7 +61,7 @@ static void bark_test_coverage(const size_t counts[3],
 }
 
 /** @brief Verify split counts, indivisible families and training-only vocabulary coverage.
- * @return No value; an invariant violation terminates the executable. */
+ * @note No value; an invariant violation terminates the executable. */
 static void bark_test_splits(void) {
     /* Step 1: Inspect every independent scenario without consulting held-out text for vocabulary.
      */
@@ -83,7 +83,7 @@ static void bark_test_splits(void) {
 }
 
 /** @brief Reject invalid enum values, missing pointers and unsupported split values.
- * @return No value; an invariant violation terminates the executable. */
+ * @note No value; an invariant violation terminates the executable. */
 static void bark_test_invalid(void) {
     /* Step 1: Check each independent state dimension and missing state before oracle lookup. */
     cgai_bark_state bad_states[4] = {0};
@@ -122,7 +122,7 @@ static FILE *bark_test_open(const char *directory, const char *filename) {
 /** @brief Compare one authored LF-terminated row against deterministic serialization.
  * @param file Borrowed open stream.
  * @param expected Borrowed NUL-terminated expected row.
- * @return No value; mismatch or truncation terminates the executable. */
+ * @note No value; mismatch or truncation terminates the executable. */
 static void bark_test_line(FILE *file, const char *expected) {
     /* Step 1: Reject missing, oversized and differently serialized source rows. */
     char line[1024];
@@ -132,7 +132,7 @@ static void bark_test_line(FILE *file, const char *expected) {
 
 /** @brief Require exact EOF after all expected rows and close an owned stream.
  * @param file Owned open stream, invalid after this call.
- * @return No value; trailing data or I/O failure terminates the executable. */
+ * @note No value; trailing data or I/O failure terminates the executable. */
 static void bark_test_close(FILE *file) {
     /* Step 1: Reject unexpected rows and read errors before releasing the stream. */
     char line[1024];
@@ -143,7 +143,7 @@ static void bark_test_close(FILE *file) {
 
 /** @brief Match every checked-in scenario against the C11 enumerator and frozen labels.
  * @param directory Borrowed source fixture directory.
- * @return No value; any source/runtime mismatch terminates the executable. */
+ * @note No value; any source/runtime mismatch terminates the executable. */
 static void bark_test_scenarios(const char *directory) {
     /* Step 1: Require the authored schema and reconstruct every stable source row. */
     FILE *file = bark_test_open(directory, "scenarios.tsv");
@@ -170,7 +170,7 @@ static void bark_test_scenarios(const char *directory) {
 
 /** @brief Match authored stable catalog IDs, target spellings and resolved game content.
  * @param directory Borrowed source fixture directory.
- * @return No value; any source/runtime mismatch terminates the executable. */
+ * @note No value; any source/runtime mismatch terminates the executable. */
 static void bark_test_catalog(const char *directory) {
     /* Step 1: Resolve all catalog content through the public gameplay runtime. */
     FILE *file = bark_test_open(directory, "catalog.tsv");

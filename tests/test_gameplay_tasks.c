@@ -175,7 +175,7 @@ static void check_split_totals(const size_t counts[GAMEPLAY_TASK_COUNT][3],
 }
 
 /** @brief Verify all exact frozen split counts and training-only output coverage.
- * @return No value; failed invariants terminate the test. */
+ * @note No value; failed invariants terminate the test. */
 static void check_splits(void) {
     /* Step 1: Inspect every independent record before considering any balanced training repetition.
      */
@@ -213,7 +213,7 @@ static size_t training_origin(const cgai_gameplay_example *example) {
 }
 
 /** @brief Verify the explicit384-record balanced recipe and its exact repetition counts.
- * @return No value; a changed recipe terminates the test. */
+ * @note No value; a changed recipe terminates the test. */
 static void check_training(void) {
     /* Step 1: Training schedule contains192 records per task and no held-out family. */
     cgai_gameplay_example examples[GAMEPLAY_TRAINING_COUNT];
@@ -238,7 +238,7 @@ static void check_training(void) {
 }
 
 /** @brief Ensure every authored teacher is executable and survives the finite transition world.
- * @return No value; a bad authored target terminates the test. */
+ * @note No value; a bad authored target terminates the test. */
 static void check_teacher_simulation(void) {
     /* Step 1: Independent simulator rules must admit every frozen intent teacher target. */
     for (size_t i = 72U; i < GAMEPLAY_FIXTURE_CASE_COUNT; ++i) {
@@ -254,7 +254,7 @@ static void check_teacher_simulation(void) {
 }
 
 /** @brief Demonstrate independent legality, survival and objective checks for nonteacher actions.
- * @return No value; failed independent-world distinctions terminate the test. */
+ * @note No value; failed independent-world distinctions terminate the test. */
 static void check_simulation_failures(void) {
     /* Step 1: A safe alternative retreat can execute even when the teacher prefers nearby cover. */
     cgai_gameplay_state state = {{2U, 1U, 1U, 0U, 1U, 0U, 1U, 1U, 1U}};
@@ -278,7 +278,7 @@ static void check_simulation_failures(void) {
 }
 
 /** @brief Reject malformed fields and preserve result owners on invalid fixture requests.
- * @return No value; failed validation terminates the test. */
+ * @note No value; failed validation terminates the test. */
 static void check_invalid(void) {
     /* Step 1: Every category and unused trailing field remains validated under task feature masks.
      */

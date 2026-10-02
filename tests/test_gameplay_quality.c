@@ -172,7 +172,7 @@ static void check_composition(uint32_t task, size_t module) {
 }
 
 /** @brief Reject each missing host validation, unsafe execution or broken invariant counter.
- * @return No value; failed gates terminate the test. */
+ * @note No value; failed gates terminate the test. */
 static void check_execution(void) {
     /* Step 1: Independently exercise every complete execution or constraint requirement. */
     const gameplay_quality before = full_fixture(0);
@@ -202,7 +202,7 @@ static void check_execution(void) {
 }
 
 /** @brief Reject resident resource overruns and invalid or optimizer-bearing inference reports.
- * @return No value; failed resource gates terminate the test. */
+ * @note No value; failed resource gates terminate the test. */
 static void check_resources(void) {
     /* Step 1: Exact requested heap caps remain accepted. */
     const gameplay_quality before = full_fixture(0);
@@ -259,7 +259,7 @@ static void check_timings(size_t workload) {
 }
 
 /** @brief Execute each task's split and composition rejection cases independently.
- * @return No value; failed gates terminate the test. */
+ * @note No value; failed gates terminate the test. */
 static void check_all_tasks(void) {
     /* Step 1: Every task's training and held-out splits are validated independently. */
     for (uint32_t task = 0U; task < GAMEPLAY_TASK_COUNT; ++task) {
