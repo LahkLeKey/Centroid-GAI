@@ -37,6 +37,7 @@
         "../../src/neural/neural_generation.c",
         "../../src/neural/neural_math.c",
         "../../src/neural/neural_model.c",
+        "../../src/neural/neural_resources.c",
         "../../src/neural/neural_training.c",
         "../../src/neural/neural_vocabulary.c",
         "../../src/spatial/spatial_index.c",

@@ -2,6 +2,36 @@
 #ifndef CGAI_CLI_COMMANDS_H
 #define CGAI_CLI_COMMANDS_H
 #include <stddef.h>
+/** @brief Initialize a default neural training checkpoint.
+ * @param argc Validated argument count of four.
+ * @param argv Borrowed corpus and checkpoint paths.
+ * @return Zero on success, otherwise one. */
+int cgai_cli_neural_init(int argc, char **argv);
+/** @brief Continue a checkpoint and publish only a held-out loss improvement.
+ * @param argc Validated argument count of six through eight.
+ * @param argv Borrowed parent, corpora, candidate path and optional epochs/rate.
+ * @return Zero for acceptance, two for invalid options, otherwise one. */
+int cgai_cli_neural_step(int argc, char **argv);
+/** @brief Continue a checkpoint and emit JSON measurements without applying promotion policy.
+ * @param argc Validated argument count of six through eight.
+ * @param argv Borrowed parent, training, development, destination and optional epochs/rate.
+ * @return Zero on success, two for invalid options, otherwise one. */
+int cgai_cli_neural_candidate(int argc, char **argv);
+/** @brief Emit finite JSON metrics for a checkpoint with unknown evaluation words permitted.
+ * @param argc Validated argument count of four.
+ * @param argv Borrowed checkpoint and nonempty corpus paths.
+ * @return Zero on success, otherwise one. */
+int cgai_cli_neural_score(int argc, char **argv);
+/** @brief Rebuild and verify an exact checkpoint from its fixed training recipe.
+ * @param argc Validated argument count of five or six.
+ * @param argv Borrowed reference, corpus, destination and optional learning rate.
+ * @return Zero for equality, two for invalid options, otherwise one. */
+int cgai_cli_neural_replay(int argc, char **argv);
+/** @brief Export checkpoint weights to a standalone inference artifact.
+ * @param argc Validated argument count of four.
+ * @param argv Borrowed checkpoint and binary destination paths.
+ * @return Zero on success, otherwise one. */
+int cgai_cli_neural_export(int argc, char **argv);
 /**
  * @brief Run neural training with strict numeric options and optional held-out reporting.
  *

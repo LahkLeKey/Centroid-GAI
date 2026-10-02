@@ -25,6 +25,12 @@ export function publicUrl(value: string): URL {
     return url;
 }
 export interface PublicPage { url: string; text: string; contentType: string }
+/** Explicit acquisition policies; existing research callers keep their original media policy. */
+export interface PublicFetchOptions {
+    readonly allowXml?: boolean;
+    /** Runs before DNS and again before every redirected destination is contacted. */
+    readonly validateUrl?: (url: URL) => void;
+}
 /** Injectable transport for deterministic tests; production keeps the system resolver and HTTP clients. */
 export interface PublicFetchDependencies {
     lookup: (hostname: string) => Promise<readonly { address: string }[]>;
@@ -43,11 +49,12 @@ export async function abortable<T>(operation: Promise<T>, signal: AbortSignal): 
 }
 /** Resolve then pin the selected address to the socket, validating every redirect independently. */
 export async function fetchPublic(value: string, signal: AbortSignal, maximum = 524288,
-    dependencies: Partial<PublicFetchDependencies> = {}): Promise<PublicPage> {
+    dependencies: Partial<PublicFetchDependencies> = {}, options: PublicFetchOptions = {}): Promise<PublicPage> {
     if (!Number.isSafeInteger(maximum) || maximum < 1 || maximum > 524288)
         throw new Error('research byte limit must be between 1 and 524288');
     let url = publicUrl(value);
     for (let redirect = 0; redirect <= 4; redirect++) {
+        options.validateUrl?.(url);
         signal.throwIfAborted();
         const records = await abortable((dependencies.lookup ?? ((hostname) => lookup(hostname, { all: true, family: 4 })))(url.hostname), signal);
         signal.throwIfAborted();
@@ -57,7 +64,7 @@ export async function fetchPublic(value: string, signal: AbortSignal, maximum = 
             const send = url.protocol === 'https:' ? dependencies.httpsRequest ?? httpsRequest : dependencies.httpRequest ?? httpRequest;
             const request = send(url, { signal, agent: false, family: 4,
                 lookup: (_hostname, _options, callback) => callback(null, address, 4),
-                headers: { accept: 'text/html, text/plain, application/json', 'accept-encoding': 'identity', 'user-agent': 'Centroid-GAI-research/1' } }, (response) => {
+                headers: { accept: options.allowXml ? 'application/json, application/xml, text/xml' : 'text/html, text/plain, application/json', 'accept-encoding': 'identity', 'user-agent': 'Centroid-GAI-research/1' } }, (response) => {
                 const status = response.statusCode ?? 0;
                 if ([301, 302, 303, 307, 308].includes(status) && response.headers.location) {
                     response.destroy(); resolve({ redirect: response.headers.location }); return;
@@ -66,7 +73,8 @@ export async function fetchPublic(value: string, signal: AbortSignal, maximum = 
                     response.destroy(); reject(new Error(`research page unavailable (${status}) or encoded`)); return;
                 }
                 const contentType = response.headers['content-type'] ?? '';
-                if (!/^(text\/(plain|html)|application\/json)(;|$)/i.test(contentType)) {
+                if (!/^(text\/(plain|html)|application\/json)(;|$)/i.test(contentType) &&
+                    !(options.allowXml && /^(application\/xml|text\/xml)(;|$)/i.test(contentType))) {
                     response.destroy(); reject(new Error('unsupported research media type')); return;
                 }
                 const chunks: Buffer[] = [];

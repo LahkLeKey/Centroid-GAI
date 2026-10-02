@@ -1,0 +1,14 @@
+Baseline: order-v1, two successful continuation epochs, 194 target updates.
+Model: D=8 H=16 K=16 W=4 seed=42 routing_temperature=1.0.
+Optimizer: Adam beta1=0.9 beta2=0.999 epsilon=1e-8 learning_rate=0.015 clip=5.0.
+Corpus: train.txt only; heldout.txt is evaluated without updating weights/vocabulary.
+Platform: Windows x64, Windows SDK 10.0.22621.0, Microsoft C runtime.
+Compiler: MSVC 19.38.33145.0, VC tools 14.38.33130 (Visual Studio 2022 Community).
+Generator: Visual Studio 17 2022, x64, Release.
+Language: ISO C11, extensions disabled; default MSVC precise floating-point mode.
+Release C flags: /DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG, target /W4, /std:c11.
+Configure: cmake -S . -B build/deterministic -G "Visual Studio 17 2022" -A x64
+Build: cmake --build build/deterministic --config Release
+Replay: cmake --build build/deterministic --config Release --target model_verify model_reproduce
+Exact replay additionally requires the same neural implementation and math library.
+Other toolchains can load, evaluate and continue the checkpoint; final bits may differ.

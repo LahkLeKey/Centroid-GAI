@@ -36,6 +36,21 @@ Evaluate the centroid design on this task before choosing a different encoder.
   Requests can disable automatic research or override the public query.
 - **Implemented:** a separate offline repository scope with verified snapshots,
   exact citation metadata, reviewed task selection and explicit revision switching.
+- **Implemented:** protocol-two evidence budgets, complete-quotation checks for
+  neural HTTP replies, candidate quality gates, source freshness policies and a new
+  versioned synthetic extraction dataset under `data/chat/`. Development selects
+  candidate restarts; final tests remain separate. Current native exact responses
+  remain 0/6, so these controls do not establish conversational quality.
+- **Implemented:** repository dataset version three with 200 authored examples,
+  source/split-bound review, immutable offline releases and generated API training
+  requests. The initial release declares agent review only. A vocabulary experiment
+  measures held-out unknown tokens, byte expansion and source-copy representability;
+  it does not change the production tokenizer or establish model accuracy.
+- **Implemented:** a closed-vocabulary native learning sanity suite, free-running
+  training diagnostics, separate refusal/clarification decision metrics, scorer
+  positive controls and development-only evaluation. The source baseline now ranks
+  complete evidence units; exact factual support and the HTTP publication gate remain
+  strict. Sanity memorization success does not establish held-out conversation quality.
 - **Unmet release gates:** robust dialogue quality, human-rated claim support,
   calibrated support routing, broad datasets, multi-owner authentication,
   reviewed training-candidate workflows and agreed hardware quality/latency targets.
@@ -69,6 +84,19 @@ split identities, tokenizer version and source commit with the training report.
 **Acceptance:** input validation and duplicate/leakage checks pass. A fixed suite
 scores direct answers, multi-turn behavior, clarification, abstention and citation
 support. Tiny next-token fixtures remain correctness tests, not chatbot benchmarks.
+
+The [repository data workflow](chat-service.md#repository-training-data-and-releases)
+now implements ingestion, explicit review, approved-only export and release
+verification. The first 120/40/40 split uses 50 families with four variants each;
+shared templates still limit the strength of generalization claims. The next data
+gate is independent human review and broader examples driven by measured failures.
+Production tokenizer changes, optimizer-state checkpoints and candidate promotion
+review remain separate implementation work.
+
+Use the [learning sanity checks](chat-service.md#learning-sanity-checks) to establish
+basic reproduction before scaling experiments. During iteration, keep final-test
+prediction/scoring disabled with `--development-only`. Review rubric-action conflicts
+and corpus audit findings before publishing a new dataset version.
 
 ## 3. Implement conversation conditioning and training
 

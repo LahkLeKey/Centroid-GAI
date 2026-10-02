@@ -47,7 +47,7 @@ int cgai_node_chat_seed(napi_env env, napi_value value, uint64_t *seed) {
 }
 
 /** @brief Check integer shape and epoch entries before narrowing to size_t.
- * @param values Borrowed nine finite settings.
+ * @param values Borrowed ten finite settings.
  * @return Nonzero when every shape and epoch integer is within a safe preliminary bound. */
 static int bounded_settings(const double *values) {
     /* Step 1: Reject negative, fractional or excessive shape values. */
@@ -55,12 +55,13 @@ static int bounded_settings(const double *values) {
         if (values[i] < 1.0 || values[i] > 256.0 || floor(values[i]) != values[i])
             return 0;
     /* Step 2: Full shape relationships and optimizer domains are checked again by C. */
-    return values[6] >= 1.0 && values[6] <= 10000.0 && floor(values[6]) == values[6];
+    return values[6] >= 1.0 && values[6] <= 10000.0 && floor(values[6]) == values[6] &&
+           values[9] >= 0.0 && values[9] <= 256.0 && floor(values[9]) == values[9];
 }
 
 /** @brief Read validated numeric configuration and optimizer settings.
  * @param env Borrowed runtime.
- * @param value Float64Array of D,H,K,prompt,response,routing,epochs,rate,clip.
+ * @param value Float64Array of D,H,K,prompt,response,routing,epochs,rate,clip,evidence.
  * @param seed Borrowed BigInt initialization seed.
  * @param config Writable model shape.
  * @param training Writable optimizer settings.
@@ -68,15 +69,15 @@ static int bounded_settings(const double *values) {
 int cgai_node_chat_settings(napi_env env, napi_value value, napi_value seed,
                             cgai_chat_config *config, cgai_neural_training *training) {
     /* Step 1: Validate representation and integer conversion domains. */
-    double values[9];
-    if (!cgai_node_chat_numbers(env, value, values, 9U) || !bounded_settings(values)) {
+    double values[10];
+    if (!cgai_node_chat_numbers(env, value, values, 10U) || !bounded_settings(values)) {
         cgai_node_chat_error(env, "invalid chat shape or epoch count");
         return 0;
     }
     /* Step 2: Publish exact narrowed settings, retaining separate routing/sampling scales. */
     *config = (cgai_chat_config){(size_t)values[0], (size_t)values[1], (size_t)values[2],
                                  (size_t)values[3], (size_t)values[4], 0U,
-                                 values[5]};
+                                 values[5],         (size_t)values[9]};
     *training = (cgai_neural_training){(size_t)values[6], values[7], values[8]};
     return cgai_node_chat_seed(env, seed, &config->seed);
 }

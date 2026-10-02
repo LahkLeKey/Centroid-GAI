@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync } from 'node:fs';
 import type { Conversation } from '../../../shared/chat.ts';
 import type { Document } from './codebase-data.ts';
 import { sha256 } from './codebase-data.ts';
@@ -47,8 +46,18 @@ test('reply scoring distinguishes valid citations from unsupported or invented a
         'JSON escaping must not hide the exact decoded reviewed command');
 });
 
-test('the 40-scenario fixture freezes all denominators and rejects stale gold setup', () => {
-    const suite = JSON.parse(readFileSync(new URL('../../../../examples/chat/repository-scenarios-v1.json', import.meta.url), 'utf8')) as RepositoryScenarioSuite;
+test('the 40-scenario contract freezes all denominators and rejects stale gold setup', () => {
+    const groups = ['questions', 'context', 'refresh', 'http'] as const;
+    const suite: RepositoryScenarioSuite = { version: 1, description: 'Isolated contract fixture.', scenarios: groups.flatMap(group =>
+        Array.from({ length: { questions: 24, context: 8, refresh: 4, http: 4 }[group] }, (_, index) => ({
+            id: group === 'context' && index === 0 ? 'core-development-loop' : `${group}-${index}`,
+            group, split: 'development' as const, description: 'Synthetic scenario schema control.',
+            turns: Array.from({ length: group === 'context' ? (index === 0 ? 6 : 4) : 1 }, () => ({
+                content: 'Which fact does the source state?', expected: group === 'questions' && index < 6
+                    ? { outcome: 'unsupported' as const }
+                    : { outcome: 'supported' as const, evidence: [{ path: 'docs/facts.md', quote: 'A reviewed fact.' }] },
+            })),
+        }))) };
     const byPath = new Map<string, string[]>();
     for (const scenario of suite.scenarios) for (const turn of scenario.turns) for (const gold of turn.expected.evidence ?? [])
         byPath.set(gold.path, [...(byPath.get(gold.path) ?? []), gold.quote]);

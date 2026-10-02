@@ -22,6 +22,15 @@ static void usage(FILE *stream) {
                     "  cgai generate <model.cgai> <prompt> [max-tokens] [temperature] [seed]\n"
                     "  cgai neural-train <train.txt> <model.cgnn> [epochs] [learning-rate] "
                     "[validation.txt]\n"
+                    "  cgai neural-init <train.txt> <checkpoint.txt>\n"
+                    "  cgai neural-step <checkpoint.txt> <train.txt> <heldout.txt> "
+                    "<candidate.txt> [epochs] [learning-rate]\n"
+                    "  cgai neural-candidate <checkpoint.txt> <train.txt> <development.txt> "
+                    "<candidate.txt> [epochs] [learning-rate]\n"
+                    "  cgai neural-score <checkpoint.txt> <corpus.txt>\n"
+                    "  cgai neural-replay <checkpoint.txt> <train.txt> <replay.txt> "
+                    "[learning-rate]\n"
+                    "  cgai neural-export <checkpoint.txt> <model.cgnn>\n"
                     "  cgai neural-evaluate <model.cgnn> <heldout.txt>\n"
                     "  cgai neural-generate <model.cgnn> <prompt> [max-tokens] [temperature] "
                     "[seed]\n"
@@ -29,19 +38,32 @@ static void usage(FILE *stream) {
                     "nearest <id> [limit] [category-key]]\n");
 }
 
-/**
- * @brief Validate the command shape and dispatch to training or generation.
- *
- * argc includes the executable name at argv[0], so the first command word is argv[1]. Argument
- * counts are checked before handlers index positional values. This layer checks command syntax;
- * command-specific parsers and the core validate numeric/model constraints.
- *
+/** @brief Route checkpoint workflow commands after validating their argument counts.
  * @param argc Process argument count, including the executable name.
- * @param argv Borrowed process argument vector containing argc NUL-terminated strings.
- * @return Zero for success/help, two for command syntax errors, or a handler's runtime-failure
- * status.
- */
-int cgai_cli_run(int argc, char **argv) {
+ * @param argv Borrowed argument vector; index one is read only when counts permit it.
+ * @return The handler status, or minus one when no checkpoint command shape matches. */
+static int checkpoint_command(int argc, char **argv) {
+    /* Step 1: Route the source-controlled full-epoch training workflow. */
+    if (argc == 4 && strcmp(argv[1], "neural-init") == 0)
+        return cgai_cli_neural_init(argc, argv);
+    if (argc >= 6 && argc <= 8 && strcmp(argv[1], "neural-step") == 0)
+        return cgai_cli_neural_step(argc, argv);
+    if (argc >= 6 && argc <= 8 && strcmp(argv[1], "neural-candidate") == 0)
+        return cgai_cli_neural_candidate(argc, argv);
+    if (argc == 4 && strcmp(argv[1], "neural-score") == 0)
+        return cgai_cli_neural_score(argc, argv);
+    if (argc >= 5 && argc <= 6 && strcmp(argv[1], "neural-replay") == 0)
+        return cgai_cli_neural_replay(argc, argv);
+    if (argc == 4 && strcmp(argv[1], "neural-export") == 0)
+        return cgai_cli_neural_export(argc, argv);
+    return -1;
+}
+
+/** @brief Route existing model and knowledge commands with bounded positional arguments.
+ * @param argc Process argument count, including the executable name.
+ * @param argv Borrowed argument vector; index one is read only when counts permit it.
+ * @return The handler status, or minus one when no existing command shape matches. */
+static int model_command(int argc, char **argv) {
     /* Step 1: Route neural commands only after checking their positional argument counts. */
     if (argc >= 4 && argc <= 7 && strcmp(argv[1], "neural-train") == 0)
         return cgai_cli_neural_train(argc, argv);
@@ -60,7 +82,30 @@ int cgai_cli_run(int argc, char **argv) {
     if (argc >= 4 && strcmp(argv[1], "generate") == 0 && argc <= 7) {
         return cgai_cli_generate(argc, argv);
     }
-    /* Step 5: Print usage to the appropriate stream when no valid command matched. */
+    return -1;
+}
+
+/**
+ * @brief Validate the command shape and dispatch to training or generation.
+ *
+ * argc includes the executable name at argv[0], so the first command word is argv[1]. Argument
+ * counts are checked before handlers index positional values. This layer checks command syntax;
+ * command-specific parsers and the core validate numeric/model constraints.
+ *
+ * @param argc Process argument count, including the executable name.
+ * @param argv Borrowed process argument vector containing argc NUL-terminated strings.
+ * @return Zero for success/help, two for command syntax errors, or a handler's runtime-failure
+ * status.
+ */
+int cgai_cli_run(int argc, char **argv) {
+    /* Step 1: Delegate independently bounded command families before reporting invalid syntax. */
+    int status = checkpoint_command(argc, argv);
+    if (status >= 0)
+        return status;
+    status = model_command(argc, argv);
+    if (status >= 0)
+        return status;
+    /* Step 2: Print usage to the appropriate stream when no valid command matched. */
     usage(argc > 1 ? stderr : stdout);
     return argc > 1 ? 2 : 0;
 }

@@ -4,6 +4,12 @@ import type { MemoryDocument, MemoryRecord } from '../../../shared/research.ts';
 import type { ChatStore } from './store.ts';
 import { ChatServiceError, chatText } from './service.ts';
 
+/** Conservative cache policy, not learned confidence or a guarantee that the source is current. */
+export function sourceFreshness(query: string): { policy: 'volatile-v1' | 'daily-v1'; ttlMs: number } {
+    return /\b(current|latest|today|now|price|prices|weather|stock|exchange rate|president|ceo|release|releases)\b/i.test(query)
+        ? { policy: 'volatile-v1', ttlMs: 300000 } : { policy: 'daily-v1', ttlMs: 86400000 };
+}
+
 /** Owner-scoped authoritative records. No live weights or public cache are mutated. */
 export class MemoryService {
     private readonly store: Pick<ChatStore, 'getMemory' | 'saveMemory'>;
@@ -20,7 +26,7 @@ export class MemoryService {
         const now = this.clock();
         return { ...document, records: document.records.filter((record) => record.ownerId === this.ownerId &&
             Date.parse(record.createdAt) + document.retentionDays * 86400000 > now).map((record) =>
-            record.kind === 'source' && record.state === 'supported' &&
+            record.kind === 'source' && ['supported', 'sourced'].includes(record.state) &&
                 (!record.expiresAt || !(Date.parse(record.expiresAt) > now))
                 ? { ...record, state: 'stale' } : record) };
     }
@@ -55,23 +61,31 @@ export class MemoryService {
         });
         return record;
     }
-    async sources(queryKey: string, applicability: string, sources: readonly ChatSource[], conversationId: string, signal?: AbortSignal): Promise<MemoryRecord[]> {
+    async sources(queryKey: string, applicability: string, sources: readonly ChatSource[], conversationId: string,
+        signal?: AbortSignal, freshnessQuery = queryKey): Promise<MemoryRecord[]> {
         const timestamp = new Date(this.clock()).toISOString();
+        const freshness = sourceFreshness(freshnessQuery);
         const seen = new Set<string>();
         const records = sources.filter((source) => {
             if (!source.contentHash || !/^[a-f0-9]{64}$/i.test(source.contentHash) || seen.has(source.contentHash) ||
-                !source.fetchedAt || !Number.isFinite(Date.parse(source.fetchedAt)) || !source.excerpt || !(source.url || source.commit)) return false;
+                !source.fetchedAt || !Number.isFinite(Date.parse(source.fetchedAt)) ||
+                Date.parse(source.fetchedAt) > this.clock() || Date.parse(source.fetchedAt) + freshness.ttlMs <= this.clock() ||
+                !source.excerpt || !(source.url || source.commit)) return false;
             seen.add(source.contentHash);
             return true;
         })
             .map((source): MemoryRecord => ({ id: randomUUID(), ownerId: this.ownerId, kind: 'source', content: source.excerpt,
-                sources: [source], state: 'supported', queryKey, applicability, conversationId, createdAt: timestamp,
-                verifiedAt: timestamp, expiresAt: new Date(this.clock() + 86400000).toISOString() }));
+                sources: [source], state: 'sourced', queryKey, applicability, conversationId, createdAt: timestamp,
+                verifiedAt: timestamp, freshnessPolicy: freshness.policy,
+                expiresAt: new Date(Date.parse(source.fetchedAt!) + freshness.ttlMs).toISOString() }));
         await this.update((value) => {
             if (!value.enabled) throw new ChatServiceError('memory is disabled', 409);
             const hashes = new Set(records.map((record) => record.sources[0]!.contentHash));
+            const identities = new Set(records.flatMap(record => record.sources.map(source => source.url ??
+                `${source.path}@${source.commit ?? ''}`)));
             const retained = value.records.filter((record) => !(record.queryKey === queryKey && record.applicability === applicability &&
-                record.sources.some((source) => hashes.has(source.contentHash))));
+                record.sources.some((source) => hashes.has(source.contentHash) || identities.has(source.url ??
+                    `${source.path}@${source.commit ?? ''}`))));
             return { ...value, records: [...retained, ...records] };
         }, signal);
         return records;
@@ -79,8 +93,11 @@ export class MemoryService {
     async retrieve(queryKey: string, applicability: string): Promise<MemoryRecord[]> {
         const document = await this.read();
         if (!document.enabled) return [];
-        return document.records.filter((record) => record.kind === 'source' && record.state === 'supported' &&
-            record.queryKey === queryKey && record.applicability === applicability);
+        const ttl = sourceFreshness(queryKey).ttlMs;
+        return document.records.filter((record) => record.kind === 'source' && ['supported', 'sourced'].includes(record.state) &&
+            record.queryKey === queryKey && record.applicability === applicability &&
+            record.sources.length > 0 && record.sources.every(source => source.fetchedAt &&
+                Date.parse(source.fetchedAt) <= this.clock() && Date.parse(source.fetchedAt) + ttl > this.clock()));
     }
     async reserveQuery(day: string, limit: number, signal?: AbortSignal): Promise<boolean> {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isSafeInteger(limit) || limit < 0)

@@ -4,7 +4,8 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { FileChatStore } from './file-store.ts';
-import { ChatService, fingerprintBytes } from './service.ts';
+import { fingerprintBytes } from './service.ts';
+import { NeuralFixtureService as ChatService } from './service-fixture.ts';
 import type { ChatWorkers, ChatWorkerTask } from './workers.ts';
 import type { ChatReply } from '../../../shared/chat.ts';
 import { MemoryService } from './memory.ts';
@@ -33,7 +34,7 @@ async function setup() {
     const store = await FileChatStore.open(path);
     const payload = Buffer.from('test artifact');
     await store.publishModel('test', { checksumSha256: fingerprintBytes(payload), payload,
-        metadata: { engineKind: 'neural-centroid-chat', formatVersion: 1, protocolVersion: 1, tokenizerVersion: 1,
+        metadata: { engineKind: 'neural-centroid-chat', formatVersion: 2, protocolVersion: 2, tokenizerVersion: 1,
             config: {}, vocabularySize: 10, parameterCount: 100 }, provenance: null, createdAt: new Date().toISOString() });
     return { directory, path, store };
 }
@@ -66,7 +67,7 @@ test('durable lifecycle pins artifacts, handles retries/revisions, isolates sess
         assert.equal(continued.conversation.messages.length, 4);
         const task = workers.calls.at(-1)!;
         assert.equal(task.kind, 'reply');
-        if (task.kind === 'reply') assert.equal(task.messages.length, 3);
+        if (task.kind === 'reply') assert.equal(task.messages.length, 4);
         await service.remove(first.id, 4);
         await assert.rejects(service.conversation(first.id), /not found/);
     } finally { await service.close(); await store.close(); await rm(fixture.directory, { recursive: true, force: true }); }
@@ -90,7 +91,7 @@ test('worker failure and cancellation persist terminal states and do not contami
         await running; workers.pause = false;
         await service.send(conversation.id, { requestId: 'last', revision: 4, content: 'fourth question' });
         const task = workers.calls.at(-1)!;
-        if (task.kind === 'reply') assert.equal(task.messages.length, 1);
+        if (task.kind === 'reply') assert.equal(task.messages.length, 2);
         const originalSave = store.saveConversation.bind(store);
         store.saveConversation = async () => { throw new Error('database failure'); };
         await assert.rejects(service.send(conversation.id, { requestId: 'db', revision: 6, content: 'fifth question' }), /database/);

@@ -46,7 +46,7 @@ export class PostgresChatStore implements ChatStore {
         const models = await Promise.all(heads.map((row) => this.findModel(row.name)));
         return models.filter((row): row is ChatModelSummary => row !== null);
     }
-    async publishModel(name: string, artifact: StoredChatArtifact): Promise<ChatModelSummary> {
+    async saveArtifact(artifact: StoredChatArtifact): Promise<void> {
         // An artifact insert precedes publication. A crash may leave an unreferenced immutable
         // artifact, but can never leave a named model pointing at incomplete bytes.
         await db.orm.public.NeuralChatArtifact.upsert({
@@ -59,6 +59,9 @@ export class PostgresChatStore implements ChatStore {
             },
             update: { checksumSha256: artifact.checksumSha256 },
         });
+    }
+    async publishModel(name: string, artifact: StoredChatArtifact): Promise<ChatModelSummary> {
+        await this.saveArtifact(artifact);
         await db.orm.public.NeuralChatModel.upsert({
             conflictOn: { name },
             create: { name, checksumSha256: artifact.checksumSha256 },

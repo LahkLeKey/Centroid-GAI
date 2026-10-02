@@ -5,12 +5,21 @@ Status: the initial source-result implementation is connected to the
 explicit support routing, Wikipedia/SearXNG providers and a bounded public fetcher.
 This document retains the broader design and release gates; not every policy
 below is implemented. Current restrictions include one configured owner, IPv4-only
-fetching, exact-query/applicability cache reuse and a one-day source TTL. Unsupported
+fetching, exact-query/applicability cache reuse and heuristic source TTLs. Unsupported
 messages automatically research their current text; `autoSearch: false` opts out,
 and `publicQuery` supplies a separate public query. No trained model is needed.
 Generated factual synthesis, automatic claim
 verification, fact-specific TTL calibration and reviewed training-candidate queues
 remain future work. Internet research runs in the backend without a browser.
+
+The reimplemented chat path now admits current evidence to protocol-two models
+and permits only complete, source-matched quotations, falling back to excerpts on
+unknown words, omitted evidence or unsupported output. New source records are
+`sourced` rather than semantically verified. Versioned cache policies use five
+minutes for volatile queries and one day otherwise, measured from fetch time.
+Offline training requires independent development checks before promotion;
+per-job reports preserve rejected candidates. Free-form semantic verification,
+human-reviewed corpora and calibrated domain-specific freshness remain open.
 
 ## Answer support comes first
 

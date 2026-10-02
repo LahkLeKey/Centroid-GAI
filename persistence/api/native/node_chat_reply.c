@@ -39,7 +39,9 @@ static napi_value reply_result(napi_env env, const char *content, const cgai_cha
         !cgai_node_chat_number(env, result, "generatedTokens", (double)usage->generated_tokens) ||
         !cgai_node_chat_number(env, result, "promptTokens", (double)usage->prompt_tokens) ||
         !cgai_node_chat_number(env, result, "droppedMessages", (double)usage->dropped_messages) ||
-        !cgai_node_chat_number(env, result, "unknownTokens", (double)usage->unknown_tokens))
+        !cgai_node_chat_number(env, result, "unknownTokens", (double)usage->unknown_tokens) ||
+        !cgai_node_chat_number(env, result, "evidenceTokens", (double)usage->evidence_tokens) ||
+        !cgai_node_chat_number(env, result, "droppedEvidence", (double)usage->dropped_evidence))
         return NULL;
     return result;
 }

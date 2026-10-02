@@ -1,0 +1,17 @@
+Seed release: 2d577255d0929a35fc4f5b7d2b0c9df97d762ca3be6ebda362361d266b3fdd76.
+Acquired: 2026-10-02; official Europe PMC XML and Crossref publication/reference metadata.
+Corpus: 13 verified journal articles, 360 complete attributed passages.
+Training: train.txt only; 1 Adam epoch, 15809 target updates, learning rate 0.005, clip 5.0.
+Model: native defaults D=8 H=16 K=16 W=4 seed=42 routing_temperature=1.0.
+Platform: Windows x64, Windows SDK 10.0.22621.0, Microsoft C runtime.
+Compiler: MSVC 19.38.33145.0 (Visual Studio 2022), CMake 4.1.1.
+Generator: Visual Studio 17 2022, x64, Release; ISO C11, extensions disabled.
+Native executable SHA256: 89d874372c23ad22dfb613f6068635b3a5548fca84a2a0166eded282f38beeb6.
+Acquisition/orchestration runtime: Node v25.2.1; supported Node 24.11 or newer.
+Configure: cmake -S . -B build/deterministic -G "Visual Studio 17 2022" -A x64
+Build: cmake --build build/deterministic --config Release
+Replay: cgai neural-replay <release>/checkpoint.txt <release>/train.txt <output-checkpoint> 0.005
+Promotion passed development/test loss and accuracy/coverage gates and bit-for-bit native replay.
+A second continuation epoch failed the loss gates and preserved this accepted release.
+Scientific truth and scientific answer quality are not assessed by these next-token metrics.
+Exact replay requires the same neural implementation, compiler and math library.

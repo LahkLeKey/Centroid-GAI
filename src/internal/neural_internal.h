@@ -19,15 +19,27 @@ struct cgai_neural_model {
     cgai_neural_config config; /**< Fixed copied architecture. */
     char **vocabulary;         /**< Owned unique normalized spellings, controls first. */
     size_t vocabulary_size;    /**< Initialized vocabulary entries. */
-    size_t output_size;     /**< Predictable prefix; trailing dialogue controls are input-only. */
-    size_t parameter_count; /**< Scalar doubles in parameters. */
-    double *parameters;     /**< Owned contiguous trainable parameter block. */
-    double *embeddings;     /**< V by D slice. */
-    double *encoder;        /**< H by (W*D) slice. */
-    double *bias;           /**< H slice. */
-    double *centroids;      /**< K by H slice. */
-    double *logits;         /**< K by V slice, BOS output masked. */
+    size_t output_size;       /**< Predictable prefix; trailing dialogue controls are input-only. */
+    size_t parameter_count;   /**< Scalar doubles in parameters. */
+    double *parameters;       /**< Owned contiguous trainable parameter block. */
+    double *embeddings;       /**< V by D slice. */
+    double *encoder;          /**< H by (W*D) slice. */
+    double *bias;             /**< H slice. */
+    double *centroids;        /**< K by H slice. */
+    double *logits;           /**< K by V slice, BOS output masked. */
+    double *adam_first;       /**< Owned continuation first moments, or NULL before training. */
+    double *adam_second;      /**< Owned continuation second moments, or NULL before training. */
+    uint64_t training_step;   /**< Completed continuation optimizer updates. */
+    uint64_t training_epochs; /**< Completed continuation full passes. */
+    uint64_t training_shuffle; /**< Continuation RNG state, initialized from config.seed. */
 };
+/** @brief Clear continuation moments and counters before fresh optimization.
+ * @param model Borrowed mutable initialized model; weights remain unchanged. */
+void cgai_neural_reset_training(cgai_neural_model *model);
+/** @brief Count requested reusable generation heap bytes without allocating.
+ * @param model Borrowed initialized model, or NULL.
+ * @return Session and workspace bytes, or zero on invalid shape/overflow. */
+size_t cgai_neural_session_bytes(const cgai_neural_model *model);
 /** @brief Bound every dimension before computing allocation sizes.
  * @param config Borrowed non-NULL configuration.
  * @return OK on supported dimensions and routing scale, ERROR otherwise. */

@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import type { ChatTrainingJob, Conversation, ChatSendResponse, ChatTrainRequest } from '../../shared/chat.ts';
 
 const base = process.env.CGAI_API_URL;
@@ -48,49 +47,67 @@ test('cold-start HTTP conversation researches hello world without a trained mode
         await call(`conversations/${conversation.id}`, 'DELETE', { revision: current.revision, forgetMemory: true });
     }
 });
-test('neural HTTP lifecycle with real PostgreSQL and bounded workers', { skip: !base }, async () => {
+test('HTTP training rejects an inadequate candidate and keeps its measured quality report', { skip: !base }, async () => {
     const name = `chat-${randomUUID()}`;
-    const fixture = JSON.parse(readFileSync(new URL('../../../examples/api/chat-train.json', import.meta.url), 'utf8')) as ChatTrainRequest;
-    const job = await call<ChatTrainingJob>('chat-models/train', 'POST', { ...fixture, name }, 202);
+    const fixture: ChatTrainRequest = { name,
+        examples: [{ id: 'train', messages: [{ role: 'user', content: 'hello' }], answer: 'hello there' }],
+        config: { promptWindow: 128, evidenceWindow: 64, responseWindow: 8 }, training: { epochs: 1 },
+        validation: { version: 1, cases: [
+            { id: 'heldout-answer', messages: [{ role: 'user', content: 'What is the deployment setting?' }],
+                expected: 'answer', acceptedAnswers: ['The deployment setting is disabled.'],
+                evidence: [{ id: 'unseen-source', excerpt: 'The deployment setting is disabled.' }] },
+            { id: 'heldout-abstain', messages: [{ role: 'user', content: 'What is the unknown temperature?' }],
+                expected: 'abstain', acceptedAnswers: ['I do not have evidence.'] },
+        ] } };
+    const { validation: _validation, ...withoutValidation } = fixture;
+    await call('chat-models/train', 'POST', withoutValidation, 400);
+    const job = await call<ChatTrainingJob>('chat-models/train', 'POST', fixture, 202);
     let done = job;
     for (let attempts = 0; attempts < 200 && ['queued', 'running'].includes(done.status); attempts++) {
         await call('health');
         await new Promise((resolve) => setTimeout(resolve, 50));
         done = await call<ChatTrainingJob>(`chat-jobs/${job.id}`);
     }
-    assert.equal(done.status, 'complete', done.error);
-    const conversation = await call<Conversation>('conversations', 'POST', { modelName: name }, 201);
-    const isolated = await call<Conversation>('conversations', 'POST', { modelName: name }, 201);
-    const request = { requestId: randomUUID(), revision: 0, content: 'hello', answerMode: 'neural' };
-    const sent = await call<ChatSendResponse>(`conversations/${conversation.id}/messages`, 'POST', request);
-    assert.equal(sent.conversation.revision, 2);
-    assert.equal(sent.conversation.messages[1]!.status, 'complete');
-    assert.equal(sent.conversation.messages[1]!.content, 'hello there');
-    assert.equal(sent.conversation.messages[1]!.finishReason, 'eos');
-    assert.deepEqual(await call(`conversations/${conversation.id}/messages`, 'POST', request), sent);
-    await call(`conversations/${conversation.id}/messages`, 'POST', { ...request, requestId: randomUUID() }, 409);
-    assert.equal((await call<Conversation>(`conversations/${isolated.id}`)).messages.length, 0);
-    const project = process.env.CGAI_E2E_PROJECT;
-    if (project && /^centroid-gai-e2e-\d+$/.test(project)) {
-        const restarted = spawnSync('docker', ['compose', '-p', project, 'restart', 'api'], { cwd: new URL('../../..', import.meta.url), encoding: 'utf8' });
-        assert.equal(restarted.status, 0, restarted.stderr);
-        let loaded: Conversation | undefined;
-        for (let attempt = 0; attempt < 100; attempt++) {
-            try { loaded = await call<Conversation>(`conversations/${conversation.id}`); break; }
-            catch { await new Promise((resolve) => setTimeout(resolve, 100)); }
+    assert.equal(done.status, 'rejected', done.error);
+    assert.equal(done.quality?.passed, false);
+    assert.ok(done.quality!.metrics.unknownTokenRate > 0);
+    assert.match(done.candidateChecksum!, /^[a-f0-9]{64}$/);
+    assert.deepEqual(await call(`chat-jobs/${job.id}`), done);
+    await call('conversations', 'POST', { modelName: name }, 404);
+});
+
+test('source HTTP lifecycle preserves revisions, retries, memory and session isolation across restart', { skip: !base }, async () => {
+    const conversation = await call<Conversation>('conversations', 'POST', {}, 201);
+    const isolated = await call<Conversation>('conversations', 'POST', {}, 201);
+    try {
+        const request = { requestId: randomUUID(), revision: 0, content: 'unsupported private topic', autoSearch: false };
+        const sent = await call<ChatSendResponse>(`conversations/${conversation.id}/messages`, 'POST', request);
+        assert.equal(sent.conversation.revision, 2);
+        assert.equal(sent.conversation.messages[1]?.finishReason, 'abstained');
+        assert.deepEqual(await call(`conversations/${conversation.id}/messages`, 'POST', request), sent);
+        await call(`conversations/${conversation.id}/messages`, 'POST', { ...request, content: 'changed input' }, 409);
+        await call(`conversations/${conversation.id}/messages`, 'POST', { ...request, requestId: randomUUID() }, 409);
+        assert.equal((await call<Conversation>(`conversations/${isolated.id}`)).messages.length, 0);
+        const memory = await call<{ id: string }>('memory', 'POST', { content: 'prefer concise answers', conversationId: conversation.id }, 201);
+        await call(`memory/${memory.id}`, 'PATCH', { content: 'prefer detailed answers' });
+        const project = process.env.CGAI_E2E_PROJECT;
+        if (project && /^centroid-gai-e2e-\d+$/.test(project)) {
+            const restarted = spawnSync('docker', ['compose', '-p', project, 'restart', 'api'], { cwd: new URL('../../..', import.meta.url), encoding: 'utf8' });
+            assert.equal(restarted.status, 0, restarted.stderr);
+            let loaded: Conversation | undefined;
+            for (let attempt = 0; attempt < 100; attempt++) {
+                try { loaded = await call<Conversation>(`conversations/${conversation.id}`); break; }
+                catch { await new Promise(resolve => setTimeout(resolve, 100)); }
+            }
+            assert.deepEqual(loaded, sent.conversation);
         }
-        assert.deepEqual(loaded, sent.conversation);
+        const remembered = await call<{ records: { content: string }[] }>('memory');
+        assert.ok(remembered.records.some(record => record.content === 'prefer detailed answers'));
+    } finally {
+        for (const value of [conversation, isolated]) {
+            const current = await call<Conversation>(`conversations/${value.id}`);
+            await call(`conversations/${value.id}`, 'DELETE', { revision: current.revision, forgetMemory: true });
+            await call(`conversations/${value.id}`, 'GET', undefined, 404);
+        }
     }
-    const help = await call<ChatSendResponse>(`conversations/${isolated.id}/messages`, 'POST', {
-        requestId: randomUUID(), revision: 0, content: 'what can you do', answerMode: 'neural' });
-    assert.equal(help.conversation.messages[1]!.content, 'i can return source excerpts');
-    assert.equal(help.conversation.messages[1]!.finishReason, 'eos');
-    const unsupported = await call<ChatSendResponse>(`conversations/${conversation.id}/messages`, 'POST', {
-        requestId: randomUUID(), revision: 2, content: 'unsupported private topic', autoSearch: false });
-    assert.equal(unsupported.conversation.messages.at(-1)!.research?.mode, 'abstained');
-    const memory = await call<{ id: string }>('memory', 'POST', { content: 'prefer concise answers', conversationId: conversation.id }, 201);
-    await call(`memory/${memory.id}`, 'PATCH', { content: 'prefer detailed answers' });
-    await call(`conversations/${conversation.id}`, 'DELETE', { revision: 4, forgetMemory: true });
-    await call(`conversations/${conversation.id}`, 'GET', undefined, 404);
-    await call(`conversations/${isolated.id}`, 'DELETE', { revision: 2 });
 });

@@ -48,10 +48,11 @@ export function trainChatModel(values: readonly ChatExample[], config: ChatModel
         numeric(config.embeddingDimensions, 8, 'embeddingDimensions'),
         numeric(config.hiddenDimensions, 16, 'hiddenDimensions'),
         numeric(config.centroidCount, 16, 'centroidCount'),
-        numeric(config.promptWindow, 48, 'promptWindow'),
-        numeric(config.responseWindow, 8, 'responseWindow'),
+        numeric(config.promptWindow, 160, 'promptWindow'),
+        numeric(config.responseWindow, 32, 'responseWindow'),
         numeric(config.routingTemperature, 1, 'routingTemperature'),
         numeric(training.epochs, 20, 'epochs'), numeric(training.learningRate, 0.01, 'learningRate'), 5,
+        numeric(config.evidenceWindow, 0, 'evidenceWindow'),
     ]);
     const initialSeed = seed(config.seed, 42n);
     const result = binding.trainChat(examples(values), settings, seed(training.seed, initialSeed));

@@ -15,6 +15,8 @@ export interface ChatModelConfig {
     readonly centroidCount?: number;
     readonly promptWindow?: number;
     readonly responseWindow?: number;
+    /** Maximum encoded evidence slots in protocol-two models; zero selects half the prompt. */
+    readonly evidenceWindow?: number;
     readonly routingTemperature?: number;
     readonly seed?: string;
 }
@@ -78,12 +80,16 @@ export interface ChatMessage extends ChatDialogueMessage {
     readonly action?: import('./repository.ts').RepositoryAction;
     readonly verification?: import('./repository.ts').RepositoryVerificationReport;
     readonly investigation?: import('./repository.ts').RepositoryInvestigation;
+    readonly grounding?: import('./grounding.ts').ChatGrounding;
 }
 export interface ChatUsage {
     readonly generatedTokens: number;
     readonly promptTokens: number;
     readonly droppedMessages: number;
     readonly unknownTokens: number;
+    /** Absent on legacy replies. Includes evidence role/boundary controls. */
+    readonly evidenceTokens?: number;
+    readonly droppedEvidence?: number;
 }
 export interface ConversationSummary {
     readonly ownerId: string;
@@ -131,6 +137,8 @@ export interface ChatSendResponse { readonly conversation: Conversation; readonl
 export interface ChatTrainRequest {
     readonly name: string;
     readonly examples: readonly ChatExample[];
+    /** Independent development cases required before a trained candidate can be published. */
+    readonly validation: import('./chat-quality.ts').ChatTrainingValidation;
     readonly config?: ChatModelConfig;
     readonly training?: ChatTrainingOptions;
     readonly provenance?: Readonly<Record<string, unknown>>;
@@ -138,10 +146,12 @@ export interface ChatTrainRequest {
 export interface ChatTrainingJob {
     readonly id: string;
     readonly modelName: string;
-    readonly status: 'queued' | 'running' | 'complete' | 'error';
+    readonly status: 'queued' | 'running' | 'complete' | 'rejected' | 'error';
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly model?: ChatModelSummary;
     readonly metrics?: Readonly<Record<string, unknown>>;
     readonly error?: string;
+    readonly candidateChecksum?: string;
+    readonly quality?: import('./chat-quality.ts').ChatQualityReport;
 }

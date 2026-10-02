@@ -16,6 +16,8 @@ export interface ChatStore {
     listModels(): Promise<ChatModelSummary[]>;
     findModel(name: string): Promise<ChatModelSummary | null>;
     getArtifact(checksum: string): Promise<StoredChatArtifact | null>;
+    /** Persist an immutable candidate without changing any named model head. */
+    saveArtifact(artifact: StoredChatArtifact): Promise<void>;
     publishModel(name: string, artifact: StoredChatArtifact): Promise<ChatModelSummary>;
     createConversation(conversation: Conversation): Promise<void>;
     getConversation(id: string): Promise<Conversation | null>;

@@ -1,0 +1,3 @@
+task_id	name	output_count	training_cases	development_cases	test_cases	minimum_development_accuracy	minimum_test_accuracy	teacher_complete	acceptance_complete	catalog	scenarios	task_features
+0	bark	9	48	12	12	0.95	0.95	1	1	bark-catalog.tsv	bark-scenarios.tsv	15
+1	intent	7	192	32	32	0.95	0.95	1	1	intent-catalog.tsv	intent-scenarios.tsv	499

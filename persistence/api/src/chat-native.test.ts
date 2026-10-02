@@ -17,12 +17,72 @@ test('chat options reject JSON coercions before reaching native numeric arrays',
     }
     for (const value of ['4', null, true, [], Infinity, NaN]) {
         assert.throws(() => trainChatModel(examples, { ...config, embeddingDimensions: value as never }, { epochs: 1 }), /embeddingDimensions must be a finite number/);
+        assert.throws(() => trainChatModel(examples, { ...config, evidenceWindow: value as never }, { epochs: 1 }), /evidenceWindow must be a finite number/);
         assert.throws(() => trainChatModel(examples, config, { epochs: value as never }), /epochs must be a finite number/);
         assert.throws(() => replyChatModel(Buffer.alloc(0), examples[0]!.messages, { temperature: value as never }), /temperature must be a finite number/);
     }
     assert.throws(() => trainChatModel(examples, { ...config, seed: null as never }, { epochs: 1, seed: '42' }), /seed must be an unsigned decimal string/);
     const trained = trainChatModel(examples, config, { epochs: 1 });
     assert.equal(replyChatModel(trained.payload, examples[0]!.messages, { maxTokens: 0 }).generatedTokens, 0);
+});
+
+test('new artifacts retain ordered evidence and disclose unknown words and whole evidence drops', () => {
+    const trained = trainChatModel(examples, { ...config, promptWindow: 24, evidenceWindow: 12 }, { epochs: 1 });
+    assert.equal(trained.metadata.formatVersion, 2);
+    assert.equal(trained.metadata.protocolVersion, 2);
+    assert.equal(trained.metadata.tokenizerVersion, 1);
+    assert.equal(trained.metadata.config.evidenceWindow, 12);
+    const retained = replyChatModel(trained.payload, [
+        { role: 'evidence', content: 'red red red red' },
+        { role: 'evidence', content: 'blue blue blue blue' },
+        { role: 'evidence', content: 'unseen' },
+        ...examples[0]!.messages,
+    ], { maxTokens: 0 });
+    assert.equal(retained.evidenceTokens, 12);
+    assert.equal(retained.droppedEvidence, 1);
+    assert.equal(retained.droppedMessages, 1);
+    assert.equal(retained.unknownTokens, 0);
+    const unknown = replyChatModel(trained.payload, [
+        { role: 'evidence', content: 'NovelLibrary42' }, ...examples[0]!.messages,
+    ], { maxTokens: 0 });
+    assert.equal(unknown.evidenceTokens, 3);
+    assert.equal(unknown.droppedEvidence, 0);
+    assert.equal(unknown.unknownTokens, 1);
+    for (const words of [11, 24]) {
+        const oversized = [{ role: 'evidence' as const, content: 'red '.repeat(words) }, ...examples[0]!.messages];
+        const reply = replyChatModel(trained.payload, oversized, { maxTokens: 0 });
+        assert.equal(reply.evidenceTokens, 0);
+        assert.equal(reply.droppedEvidence, 1);
+        assert.throws(() => trainChatModel([{ messages: oversized, answer: 'warm' }],
+            { ...config, promptWindow: 24, evidenceWindow: 12 }, { epochs: 1 }), /evidence exceeds/);
+    }
+    for (const evidenceWindow of [-1, 1.5, 21, 257]) {
+        assert.throws(() => trainChatModel(examples, { ...config, promptWindow: 24, evidenceWindow }, { epochs: 1 }));
+    }
+});
+
+test('legacy artifacts keep their version and smaller evidence budget after the addon upgrade', () => {
+    const trained = trainChatModel(examples, { ...config, promptWindow: 24, evidenceWindow: 12 }, { epochs: 1 });
+    // Version one has no evidence-budget field; weights and all preceding header fields match.
+    const legacy = Buffer.concat([trained.payload.subarray(0, 104), trained.payload.subarray(112)]);
+    legacy.writeBigUInt64LE(1n, 8); legacy.writeBigUInt64LE(1n, 16);
+    const metadata = inspectChatModel(legacy);
+    assert.equal(metadata.formatVersion, 1);
+    assert.equal(metadata.protocolVersion, 1);
+    const reply = replyChatModel(legacy, [
+        { role: 'evidence', content: 'red red red red' },
+        { role: 'evidence', content: 'blue blue blue blue' },
+        ...examples[0]!.messages,
+    ], { maxTokens: 0 });
+    assert.equal(reply.evidenceTokens, 6);
+    assert.equal(reply.droppedEvidence, 1);
+});
+
+test('default models allocate prompt and evidence context within the native total limit', () => {
+    const { metadata } = trainChatModel(examples, {}, { epochs: 1 });
+    assert.equal(metadata.config.promptWindow, 160);
+    assert.equal(metadata.config.responseWindow, 32);
+    assert.equal(metadata.config.evidenceWindow, 80);
 });
 
 test('chat trains independent answers, measures held-out targets, and rejects incompatible artifacts', () => {

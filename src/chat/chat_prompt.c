@@ -78,6 +78,29 @@ static void insert_group(cgai_chat_prompt_data *prompt, cgai_token_id *const *id
     prompt->unknown += unknown[0] + unknown[1];
 }
 
+/** @brief Publish retained encoded messages or count their complete omission.
+ * @param prompt Mutable bounded prompt.
+ * @param ids Borrowed two-element encoded pointer table.
+ * @param sizes Borrowed two-element lengths.
+ * @param unknown Borrowed two-element unknown counts.
+ * @param count Original message count.
+ * @param window Maximum prompt slots.
+ * @param evidence Nonzero when the group is one evidence message. */
+static void retain_group(cgai_chat_prompt_data *prompt, cgai_token_id *const *ids,
+                         const size_t *sizes, const size_t *unknown, size_t count, size_t window,
+                         int evidence) {
+    const size_t total = sizes[0] + sizes[1];
+    if (total <= window - prompt->count) {
+        insert_group(prompt, ids, sizes, unknown);
+        if (evidence)
+            prompt->evidence += total;
+    } else {
+        prompt->dropped += count;
+        if (evidence)
+            ++prompt->dropped_evidence;
+    }
+}
+
 /** @brief Prepend a whole message or whole user/assistant pair when it fits.
  * @param model Borrowed model.
  * @param messages Borrowed one or two messages.
@@ -93,11 +116,9 @@ static cgai_status prepend_group(const cgai_chat_model *model, const cgai_chat_m
         ids[i] = encode_message(model, &messages[i], &sizes[i], &unknown[i]);
         ok = ok && ids[i] != NULL;
     }
-    const size_t total = sizes[0] + sizes[1];
-    if (ok && total <= model->config.prompt_window - prompt->count) {
-        insert_group(prompt, ids, sizes, unknown);
-    } else if (ok)
-        prompt->dropped += count;
+    if (ok)
+        retain_group(prompt, ids, sizes, unknown, count, model->config.prompt_window,
+                     count == 1U && messages[0].role == CGAI_CHAT_EVIDENCE);
     free(ids[0]);
     free(ids[1]);
     return ok ? CGAI_STATUS_OK : CGAI_STATUS_ERROR;
@@ -108,40 +129,74 @@ static cgai_status prepend_group(const cgai_chat_model *model, const cgai_chat_m
  * @param messages Borrowed one or two messages.
  * @param count Group size.
  * @param prompt Mutable prompt.
- * @param evidence Running retained evidence slots.
  * @return OK or ERROR on encoding failure. */
 static cgai_status admit_history(const cgai_chat_model *model, const cgai_chat_message *messages,
-                                 size_t count, cgai_chat_prompt_data *prompt, size_t *evidence) {
+                                 size_t count, cgai_chat_prompt_data *prompt) {
     cgai_chat_prompt_data candidate = *prompt;
     if (!prepend_group(model, messages, count, &candidate))
         return CGAI_STATUS_ERROR;
-    const size_t added = candidate.count - prompt->count;
-    if (count == 1U && *evidence + added > model->config.prompt_window / 4U)
+    const size_t budget = model->protocol_version == 1U ? model->config.prompt_window / 4U
+                                                        : model->config.evidence_window;
+    if (candidate.evidence > budget) {
         ++prompt->dropped;
-    else {
+        ++prompt->dropped_evidence;
+    } else
         *prompt = candidate;
-        if (count == 1U)
-            *evidence += added;
-    }
     return CGAI_STATUS_OK;
 }
 
 /** @brief Admit history newest-first in indivisible groups.
  * @param model Borrowed shape.
  * @param messages Borrowed history and current question.
- * @param count Message count.
+ * @param end Exclusive history end, before current evidence/question.
  * @param prompt Mutable prompt already containing the question.
  * @return OK or ERROR. */
 static cgai_status format_history(const cgai_chat_model *model, const cgai_chat_message *messages,
-                                  size_t count, cgai_chat_prompt_data *prompt) {
-    size_t evidence = 0U;
-    for (size_t end = count - 1U; end > 0U;) {
+                                  size_t end, cgai_chat_prompt_data *prompt) {
+    while (end > 0U) {
         const size_t group = messages[end - 1U].role == CGAI_CHAT_ASSISTANT ? 2U : 1U;
         end -= group;
-        if (!admit_history(model, &messages[end], group, prompt, &evidence))
+        if (!admit_history(model, &messages[end], group, prompt))
             return CGAI_STATUS_ERROR;
     }
     return CGAI_STATUS_OK;
+}
+
+/** @brief Move the latest prepended evidence behind already retained current evidence.
+ * @param prompt Mutable complete prompt.
+ * @param retained Slots belonging to higher-priority evidence.
+ * @param added Slots just prepended, possibly zero. */
+static void order_evidence(cgai_chat_prompt_data *prompt, size_t retained, size_t added) {
+    cgai_token_id newest[CGAI_NEURAL_MAX_CONTEXT];
+    memcpy(newest, prompt->tokens, added * sizeof(*newest));
+    memmove(prompt->tokens, prompt->tokens + added, retained * sizeof(*newest));
+    memcpy(prompt->tokens + retained, newest, added * sizeof(*newest));
+}
+
+/** @brief Prioritize current evidence in input order before admitting older complete turns.
+ * @param model Borrowed version-two model.
+ * @param messages Borrowed structured messages ending in a user question.
+ * @param count Complete message count.
+ * @param prompt Mutable prompt initially containing only the current question.
+ * @return OK or ERROR on encoding failure. */
+static cgai_status format_evidence_history(const cgai_chat_model *model,
+                                           const cgai_chat_message *messages, size_t count,
+                                           cgai_chat_prompt_data *prompt) {
+    /* Step 1: Evidence immediately before this question takes priority over older turns. */
+    size_t start = count - 1U;
+    while (start > 0U && messages[start - 1U].role == CGAI_CHAT_EVIDENCE)
+        --start;
+    size_t retained = 0U;
+    for (size_t i = start; i + 1U < count; ++i) {
+        const size_t before = prompt->count;
+        if (!admit_history(model, &messages[i], 1U, prompt))
+            return CGAI_STATUS_ERROR;
+        const size_t added = prompt->count - before;
+        order_evidence(prompt, retained, added);
+        retained += added;
+    }
+    /* Step 2: Preserve chronological order while selecting older groups newest first. */
+    return format_history(model, messages, start, prompt);
 }
 
 cgai_status cgai_chat_format(const cgai_chat_model *model, const cgai_chat_message *messages,
@@ -158,7 +213,10 @@ cgai_status cgai_chat_format(const cgai_chat_model *model, const cgai_chat_messa
     if (formatted.dropped != 0U)
         return cgai_fail("current question exceeds prompt window");
     /* Step 2: Add bounded older groups and publish only after complete formatting. */
-    if (!format_history(model, messages, count, &formatted))
+    const cgai_status status = model->protocol_version == 1U
+                                   ? format_history(model, messages, count - 1U, &formatted)
+                                   : format_evidence_history(model, messages, count, &formatted);
+    if (!status)
         return CGAI_STATUS_ERROR;
     *prompt = formatted;
     return CGAI_STATUS_OK;

@@ -140,5 +140,6 @@ int main(void) {
     cgai_test_neural_math();
     cgai_test_neural_training();
     cgai_test_neural_io();
+    cgai_test_neural_session();
     return 0;
 }

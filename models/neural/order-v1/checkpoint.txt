@@ -1,0 +1,1928 @@
+CGAI-CHECKPOINT 1
+embedding_dimensions 8
+hidden_dimensions 16
+centroid_count 16
+context_window 4
+seed 42
+routing_temperature 0x1.0000000000000p+0
+vocabulary_size 7
+parameter_count 952
+optimizer 1
+training_step 194
+training_epochs 2
+training_shuffle 12221444612327018474
+vocabulary
+token 0 5 3c626f733e
+token 1 5 3c656f733e
+token 2 5 3c756e6b3e
+token 3 1 61
+token 4 1 62
+token 5 4 6c656674
+token 6 5 7269676874
+parameters
+parameter 0 0x1.6b173e7d8676fp-3
+parameter 1 0x1.8072d81b20567p-8
+parameter 2 -0x1.d0969c5053cedp-3
+parameter 3 -0x1.1d9e79701dc05p-6
+parameter 4 -0x1.c32c118866ab5p-2
+parameter 5 0x1.c00f3d8e16063p-3
+parameter 6 -0x1.6cc3f18a45028p-2
+parameter 7 -0x1.0bc3ee6e390cap-6
+parameter 8 -0x1.47d23c47a6144p-3
+parameter 9 0x1.e54d738297f70p-4
+parameter 10 -0x1.2e2e36d62293ap-2
+parameter 11 -0x1.cb75f1bae9b00p-8
+parameter 12 0x1.b6f6c4bf9f200p-7
+parameter 13 0x1.47e5dcd1fb5a0p-6
+parameter 14 0x1.523f18e0173c4p-3
+parameter 15 -0x1.2faeb4eaca0f4p-2
+parameter 16 -0x1.95f0a2b432852p-2
+parameter 17 -0x1.26fffc0980680p-8
+parameter 18 -0x1.a054802edd5e6p-2
+parameter 19 0x1.82f650d14b95cp-3
+parameter 20 0x1.d44d112d91568p-2
+parameter 21 -0x1.b531648b67826p-2
+parameter 22 0x1.98d8fb100ca10p-4
+parameter 23 0x1.eac75d45474c8p-4
+parameter 24 -0x1.2306a4aff3a68p-1
+parameter 25 -0x1.2ad798c7dd22fp-1
+parameter 26 0x1.5cdc8623c13a8p-2
+parameter 27 0x1.82e16ef506c46p-1
+parameter 28 0x1.6d81c3a61752cp-1
+parameter 29 0x1.528a0fd93c9b6p-4
+parameter 30 0x1.53a9ce0a72197p-3
+parameter 31 0x1.198e4d9d371d3p-1
+parameter 32 -0x1.d2cf739d774dfp-5
+parameter 33 0x1.12a1cf7935a83p-1
+parameter 34 0x1.f9b4ee6fdd651p-2
+parameter 35 0x1.da55a06cab9c9p-5
+parameter 36 -0x1.70e183ddd9ce5p-2
+parameter 37 -0x1.8aac516f90662p-2
+parameter 38 0x1.3c5aff312a63fp-1
+parameter 39 -0x1.97e1d64a40b06p-1
+parameter 40 -0x1.05a9c44c5ea60p-4
+parameter 41 0x1.98b157846dd2cp-11
+parameter 42 -0x1.9084e07b1cc0ap-1
+parameter 43 0x1.3908154ea4291p-1
+parameter 44 0x1.704dd54c9908ap-2
+parameter 45 -0x1.39ed55f8ddccap-1
+parameter 46 -0x1.18c84a6f70390p+0
+parameter 47 -0x1.a4b4baeceb2acp-2
+parameter 48 0x1.916944756a351p-3
+parameter 49 0x1.bebf3f33fcccbp-2
+parameter 50 0x1.d503f9473b0bfp-4
+parameter 51 -0x1.76ca70e1ffacap-1
+parameter 52 -0x1.504e8011ae01dp-1
+parameter 53 0x1.52312b7c3c4acp-6
+parameter 54 -0x1.963846fe3f3c3p-1
+parameter 55 0x1.310f3bd85414bp-1
+parameter 56 0x1.083bdf5e03869p-2
+parameter 57 0x1.303bfef7688aap-2
+parameter 58 0x1.7eaf6cd52016ep-3
+parameter 59 -0x1.fcbf6cbdf0527p-2
+parameter 60 -0x1.542659ae9345cp-2
+parameter 61 0x1.203eeeb123a9dp-3
+parameter 62 0x1.a8a9e066136f9p-6
+parameter 63 -0x1.db49b81ac48fcp-2
+parameter 64 -0x1.7b8d3663d3843p-2
+parameter 65 -0x1.8624cc20f03b8p-4
+parameter 66 0x1.e2efb29957b87p-2
+parameter 67 0x1.667174220d2f3p-2
+parameter 68 0x1.21dfb071311e4p-1
+parameter 69 0x1.4fd330ad891a0p-2
+parameter 70 0x1.ed57dacc3581ep-2
+parameter 71 0x1.26c620884340dp-3
+parameter 72 -0x1.64fd2195d5ab7p-5
+parameter 73 0x1.28dd60482a789p-1
+parameter 74 0x1.bccc9f315cb62p-3
+parameter 75 -0x1.db3017739edc9p-6
+parameter 76 -0x1.c9d96c8ff254bp-2
+parameter 77 -0x1.2c07f96f5f856p-4
+parameter 78 -0x1.06b2f56627eaep-5
+parameter 79 -0x1.6317a03af4708p-2
+parameter 80 -0x1.81e47b10d0315p-1
+parameter 81 -0x1.8ef61e56ecf9bp-4
+parameter 82 0x1.f69b2972475f6p-4
+parameter 83 0x1.0a556d28d07f6p-1
+parameter 84 0x1.8ccfffbfbf85ap-1
+parameter 85 -0x1.eb0630ed5c103p-3
+parameter 86 0x1.4c7207318de7fp-2
+parameter 87 0x1.39c98c1ffdb8fp-2
+parameter 88 0x1.412eb3ad553dep-2
+parameter 89 0x1.9cfa8526fdcc1p-3
+parameter 90 0x1.02e72b8e11fddp-5
+parameter 91 -0x1.2d74a9400592cp-2
+parameter 92 -0x1.1b8dd3f30bf5bp-2
+parameter 93 0x1.2de669425afc6p-4
+parameter 94 -0x1.65a9e7b28c20bp-4
+parameter 95 -0x1.51205c344b574p-5
+parameter 96 -0x1.cf04ffa7d2286p-3
+parameter 97 -0x1.66a22165c81aap-2
+parameter 98 0x1.1b1fd5bf26310p-1
+parameter 99 -0x1.7f781e962aebep-5
+parameter 100 0x1.b4f20b7d21dd0p-2
+parameter 101 0x1.24141d3132577p-3
+parameter 102 0x1.325b5a18a160ap-1
+parameter 103 0x1.36f957da2263bp-1
+parameter 104 0x1.590f5888b37e1p-2
+parameter 105 -0x1.6439a481d43f1p-4
+parameter 106 -0x1.571c88ad563bbp-2
+parameter 107 -0x1.4af0ee1893ebdp-2
+parameter 108 -0x1.151358642c5a1p-2
+parameter 109 0x1.012875268c69dp-3
+parameter 110 -0x1.4b2631c1f9dc4p-2
+parameter 111 0x1.3439bd0de6d9bp-6
+parameter 112 -0x1.8da7ab8dfb082p-2
+parameter 113 0x1.5f932688aa032p-3
+parameter 114 -0x1.06e856a892317p-2
+parameter 115 0x1.01055c0bd5aa2p-2
+parameter 116 0x1.60ae007792c90p-2
+parameter 117 -0x1.cdd21c318ad47p-5
+parameter 118 0x1.828d493bc6889p-4
+parameter 119 0x1.f3c7d71292096p-3
+parameter 120 0x1.3875c0d6b0d6dp-2
+parameter 121 0x1.c76abb79e8bf9p-4
+parameter 122 -0x1.e8c6d0fc0f87dp-4
+parameter 123 -0x1.f656643d766afp-3
+parameter 124 -0x1.a3aafa817176ap-5
+parameter 125 -0x1.689c777820e0dp-3
+parameter 126 -0x1.aba2ed5c00033p-3
+parameter 127 -0x1.3b26d14b150e6p-3
+parameter 128 0x1.28c39a2282bf1p-5
+parameter 129 0x1.087289c5a838bp-4
+parameter 130 -0x1.6a81797b17dd9p-4
+parameter 131 -0x1.a44fe1aaf7bebp-3
+parameter 132 0x1.9522d41b8dca0p-3
+parameter 133 -0x1.fd02b87dbf07dp-3
+parameter 134 0x1.a888d52ab3ac1p-3
+parameter 135 -0x1.ca60331a87903p-3
+parameter 136 0x1.ac6faf5493874p-2
+parameter 137 0x1.e65acc7155802p-7
+parameter 138 -0x1.e447e815f2ecbp-2
+parameter 139 0x1.d7e8863b0c99ap-9
+parameter 140 0x1.32c1bf540c747p-3
+parameter 141 0x1.1b4ec0dc9cde7p-2
+parameter 142 0x1.98c7dc173369fp-3
+parameter 143 0x1.6de5307129722p-7
+parameter 144 -0x1.1b0326dfff2dcp-4
+parameter 145 -0x1.4438e6f3e5b9cp-2
+parameter 146 0x1.b0726bbff5d71p-9
+parameter 147 0x1.b2cbfa76ce2e3p-5
+parameter 148 0x1.05fc1cf6ebd57p-2
+parameter 149 0x1.321380a8b3e9dp-2
+parameter 150 0x1.f1bd2e8830cc0p-3
+parameter 151 0x1.e603ebdbd321ap-3
+parameter 152 0x1.24d0da3f1cfdcp-4
+parameter 153 0x1.c96e0ddaa89f3p-6
+parameter 154 -0x1.848944a9282e6p-4
+parameter 155 0x1.4e58b1a6badd3p-3
+parameter 156 0x1.e424cce5106dcp-4
+parameter 157 0x1.c420b995dfd9ap-3
+parameter 158 -0x1.7c8b15d02ecd7p-2
+parameter 159 0x1.0f25549c67997p-2
+parameter 160 -0x1.3168492f067bfp-2
+parameter 161 -0x1.537249e1e3b4fp-3
+parameter 162 0x1.35b7577f20a79p-1
+parameter 163 0x1.6ed69da1ad6fcp-2
+parameter 164 -0x1.52da86a79e99cp-4
+parameter 165 0x1.914d03908717cp-3
+parameter 166 0x1.fce05339b9b83p-2
+parameter 167 -0x1.7c373aa4b6fcbp-4
+parameter 168 -0x1.1c83f1fcc113ep-6
+parameter 169 -0x1.940f539a7cba1p-3
+parameter 170 -0x1.f0be9e377215ap-2
+parameter 171 -0x1.301fe0354ebe9p-2
+parameter 172 -0x1.8cd3aec94fa8ap-3
+parameter 173 -0x1.e55d42deecbc8p-4
+parameter 174 -0x1.d6ca232e6cce2p-2
+parameter 175 -0x1.408bc76311c6ep-2
+parameter 176 0x1.8b43c1dd3c787p-4
+parameter 177 -0x1.736164bdced07p-2
+parameter 178 0x1.59ce71c42bd59p-2
+parameter 179 0x1.c35104a788dc6p-3
+parameter 180 0x1.d190390ce98d0p-3
+parameter 181 -0x1.ff55ceba4ba58p-5
+parameter 182 -0x1.50081b88268f1p-3
+parameter 183 0x1.5fe96aa35d786p-2
+parameter 184 -0x1.e42a1e0fb8707p-4
+parameter 185 -0x1.5487bb924228fp-4
+parameter 186 -0x1.fdfc2631dcdacp-2
+parameter 187 0x1.ba06a1082a5e5p-3
+parameter 188 0x1.03c0ca1ba59f8p-4
+parameter 189 0x1.124ddcc251010p-6
+parameter 190 -0x1.de6aaab2118e8p-2
+parameter 191 0x1.02ac23318f1d7p-3
+parameter 192 0x1.85f37bb2be5e8p-3
+parameter 193 -0x1.02a21cc43063ap-2
+parameter 194 0x1.95177e29d8a0ep-3
+parameter 195 -0x1.35209ad7a8b42p-6
+parameter 196 -0x1.4814e2d3468f1p-3
+parameter 197 0x1.9fd90c6a90489p-3
+parameter 198 0x1.4c4169da0d86ap-2
+parameter 199 0x1.ffb442afe5463p-5
+parameter 200 0x1.13c92b8d402cbp-2
+parameter 201 -0x1.95a689c4cca79p-5
+parameter 202 -0x1.52310e2923015p-2
+parameter 203 0x1.b23ddf377643cp-3
+parameter 204 0x1.45b9465ebc4adp-5
+parameter 205 0x1.8c5f9ff9f194bp-2
+parameter 206 -0x1.3cf7978673f7cp-1
+parameter 207 0x1.6da4066091a28p-3
+parameter 208 -0x1.119bc03883f1cp-3
+parameter 209 0x1.66b726e071bd9p-5
+parameter 210 0x1.a0f946b7cba0fp-3
+parameter 211 0x1.1103096a2782dp-2
+parameter 212 0x1.5bd76d7d8b1e5p-4
+parameter 213 0x1.0ea82e7c8f720p-4
+parameter 214 -0x1.8184dc2a606b2p-3
+parameter 215 -0x1.5367731b07c11p-3
+parameter 216 -0x1.cacf72403473ep-7
+parameter 217 -0x1.24be633106596p-2
+parameter 218 0x1.157952ce0e893p-5
+parameter 219 0x1.eaea6f0245947p-4
+parameter 220 0x1.02ea9e151c644p-2
+parameter 221 0x1.ab7ff9897d573p-3
+parameter 222 0x1.2f9158b48ae8ap-1
+parameter 223 -0x1.185b4a7b49cfap-4
+parameter 224 -0x1.578fcf0e4b6d6p-8
+parameter 225 0x1.ec36721299993p-3
+parameter 226 -0x1.9c9f838441744p-2
+parameter 227 -0x1.3d1d8e55709b1p-3
+parameter 228 0x1.ca37286cd3e41p-4
+parameter 229 -0x1.47a4439144ebfp-3
+parameter 230 -0x1.4a47d59979692p-1
+parameter 231 -0x1.1746d9f45831fp-3
+parameter 232 -0x1.cedbb6023c6bdp-2
+parameter 233 -0x1.9195a2ae99a52p-2
+parameter 234 0x1.8b00b5375b853p-2
+parameter 235 0x1.7b503369801f8p-2
+parameter 236 0x1.181e12e55ebdcp-8
+parameter 237 0x1.810ddde9c06b2p-6
+parameter 238 0x1.9fee52fd9e645p-1
+parameter 239 -0x1.ef8b535b155c8p-4
+parameter 240 0x1.0715d5db64ec6p-4
+parameter 241 0x1.014bdd28f2626p-2
+parameter 242 0x1.6174320fe9d96p-2
+parameter 243 -0x1.0de1e74699fa4p-4
+parameter 244 -0x1.88b2b514eb077p-2
+parameter 245 0x1.3fa2769e67b30p-3
+parameter 246 0x1.2dba4f2af6821p-5
+parameter 247 0x1.109827c281074p-3
+parameter 248 0x1.581fa04d85f07p-2
+parameter 249 0x1.adde3dcccecdcp-1
+parameter 250 0x1.f3fa2158d3bb6p-4
+parameter 251 -0x1.43274b3a650aep-1
+parameter 252 -0x1.f4cb6cd33e475p-3
+parameter 253 -0x1.80f7805537980p-3
+parameter 254 0x1.80c94bfc6b92ap-2
+parameter 255 -0x1.506a37e092b3bp-2
+parameter 256 -0x1.7243eaed36f21p-2
+parameter 257 -0x1.ec3482ae7a182p-2
+parameter 258 0x1.e04e11678bef0p-2
+parameter 259 0x1.aac1ce348ef17p-2
+parameter 260 0x1.d84bee39ce643p-1
+parameter 261 0x1.0f733bc320346p-3
+parameter 262 0x1.68eab3261ae5fp-5
+parameter 263 0x1.fce5fbff85fc7p-3
+parameter 264 -0x1.e9f97c4724303p-4
+parameter 265 0x1.8455e4ccf6709p-1
+parameter 266 0x1.69436a14e8aa8p-3
+parameter 267 -0x1.a75d2648a9b68p-2
+parameter 268 -0x1.ffc0fef6a893ep-3
+parameter 269 -0x1.3f84bfb5e38a5p-2
+parameter 270 0x1.96e94db70bb46p-2
+parameter 271 -0x1.9bc59bf854389p-3
+parameter 272 -0x1.5478cdc6dd556p-3
+parameter 273 0x1.af35f01e128d7p-4
+parameter 274 0x1.7888581d4b7b8p-2
+parameter 275 0x1.632a35840082ap-1
+parameter 276 0x1.d7f3be5826ad8p-1
+parameter 277 -0x1.03551cc9dbfa0p-3
+parameter 278 0x1.a10ae29f5aaccp-2
+parameter 279 0x1.f00b812a19b1bp-4
+parameter 280 -0x1.8578d8544d17fp-2
+parameter 281 0x1.1db40dd2ddea2p-5
+parameter 282 0x1.c1119fa72fbadp-2
+parameter 283 0x1.a7e30ce279871p-2
+parameter 284 0x1.ad4c4be3adb30p-6
+parameter 285 0x1.e11454bc6c7fap-7
+parameter 286 0x1.6197b260898bcp-2
+parameter 287 0x1.d1d56ce64906cp-4
+parameter 288 0x1.95a610433e77ep-2
+parameter 289 0x1.34001f713a2f5p-3
+parameter 290 -0x1.4a9b892f20c9dp-2
+parameter 291 -0x1.1ca724bc4a962p-2
+parameter 292 -0x1.9304381b2e950p-6
+parameter 293 -0x1.4cccff681849fp-1
+parameter 294 -0x1.665470da87a4bp-2
+parameter 295 -0x1.179bfc267899dp-1
+parameter 296 -0x1.965d019c87e5dp-2
+parameter 297 -0x1.00bb4c5b0336bp-2
+parameter 298 0x1.e5539e9db5999p-3
+parameter 299 0x1.336970905e2a8p-5
+parameter 300 0x1.d3b87e575198fp-2
+parameter 301 0x1.c30bca81507c6p-3
+parameter 302 0x1.3cd52b1b593efp-2
+parameter 303 -0x1.ad967a020da71p-3
+parameter 304 0x1.6761a0d4d403bp-2
+parameter 305 0x1.8661219fa2f1bp-3
+parameter 306 0x1.a0ff8c7ecbd13p-4
+parameter 307 -0x1.3a2b8ab70b29ap-2
+parameter 308 -0x1.a8ce86a2f95a6p-2
+parameter 309 -0x1.b83cc37096912p-10
+parameter 310 0x1.492b5d6fbc5dap-4
+parameter 311 -0x1.b4b4b280ed557p-3
+parameter 312 -0x1.67a9f604e399cp-2
+parameter 313 -0x1.956058d400244p-4
+parameter 314 -0x1.72c853fe75edfp-3
+parameter 315 -0x1.1a99ba89ecd38p-3
+parameter 316 0x1.c01dd7ffa925fp-4
+parameter 317 -0x1.b4b65cfbecb6fp-4
+parameter 318 -0x1.fa93d57341a93p-4
+parameter 319 0x1.93246b56185e1p-2
+parameter 320 0x1.5aa05364d1b3cp-2
+parameter 321 0x1.b92b532323483p-3
+parameter 322 -0x1.22af17d965c99p-4
+parameter 323 -0x1.c87b1810c63eep-2
+parameter 324 -0x1.6251a1edbcb84p-2
+parameter 325 0x1.2ee7e3657a553p-5
+parameter 326 -0x1.498226e416ab4p-3
+parameter 327 -0x1.9fafd43f5cd91p-2
+parameter 328 -0x1.3817858423b54p-3
+parameter 329 -0x1.e220569a53ef5p-2
+parameter 330 -0x1.d3821ed55259ep-5
+parameter 331 0x1.aa56be23ecef8p-4
+parameter 332 -0x1.10cee0a17749cp-4
+parameter 333 -0x1.9b6e993255b73p-5
+parameter 334 -0x1.a42fcfff00466p-4
+parameter 335 -0x1.d3889767d66a4p-5
+parameter 336 0x1.7de906eebc247p-2
+parameter 337 0x1.14fe3a83aae8cp-1
+parameter 338 0x1.7142e6dc795dbp-8
+parameter 339 -0x1.9763db6a0a086p-1
+parameter 340 -0x1.7b9de7af0ae0ep-1
+parameter 341 0x1.644c6e1ca0a79p-2
+parameter 342 -0x1.06db7af495a95p-2
+parameter 343 0x1.1b77124c09ccep-5
+parameter 344 -0x1.08630070b8f85p-4
+parameter 345 -0x1.b63da3add333fp-3
+parameter 346 -0x1.9b6bbfb13c27ep-3
+parameter 347 0x1.b0601e74e343dp-3
+parameter 348 0x1.4e414fbc793c3p-2
+parameter 349 -0x1.cc97803ab25efp-4
+parameter 350 -0x1.5303d9d30ab4cp-4
+parameter 351 -0x1.5ba99cb2a9358p-3
+parameter 352 0x1.0b7a6c2ddee5ap-3
+parameter 353 0x1.98c0a0790f662p-3
+parameter 354 0x1.3c3fb8442493bp-5
+parameter 355 -0x1.0b8302de612c1p-1
+parameter 356 -0x1.a9bba94726a83p-2
+parameter 357 -0x1.f15f349226394p-4
+parameter 358 0x1.ec737accf009ap-4
+parameter 359 0x1.e9974d345a3b0p-5
+parameter 360 -0x1.af651950feff9p-6
+parameter 361 -0x1.d8746ae5d95a3p-2
+parameter 362 -0x1.15351814bd9a9p-2
+parameter 363 0x1.43e731be5ac74p-2
+parameter 364 -0x1.f6fbbb13d6e1ep-4
+parameter 365 0x1.bab3c9d547f9cp-4
+parameter 366 -0x1.eb6aa423baa63p-2
+parameter 367 0x1.1bb3d2bd803c8p-1
+parameter 368 0x1.5352115aea7c6p-3
+parameter 369 0x1.1b4fd7ef6d684p-1
+parameter 370 -0x1.1116c284cc798p-3
+parameter 371 -0x1.14df7cb23a4a9p-1
+parameter 372 -0x1.8d4f0351e3103p-2
+parameter 373 0x1.0f73f16212c34p-4
+parameter 374 -0x1.a1bdc3152b5dap-6
+parameter 375 -0x1.1d89ae930f13cp-5
+parameter 376 0x1.693b6dfc5192fp-3
+parameter 377 0x1.2676b557448cfp-3
+parameter 378 0x1.98ff72060ad3ep-4
+parameter 379 -0x1.1f00ed815eaa3p-2
+parameter 380 0x1.e5f5117d81018p-4
+parameter 381 -0x1.04e6e99f1d2f0p-4
+parameter 382 -0x1.f96f0b699c83cp-10
+parameter 383 -0x1.4cec8519df6aep-4
+parameter 384 -0x1.64f6e7d8bbaeap-3
+parameter 385 -0x1.dbabb6fc107cap-3
+parameter 386 0x1.a64f131068cdep-2
+parameter 387 0x1.d6aaa3157e594p-4
+parameter 388 -0x1.1204686eae76fp-5
+parameter 389 0x1.3bf513a38e8c3p-2
+parameter 390 -0x1.a2dc652b563f4p-3
+parameter 391 0x1.f133326983059p-3
+parameter 392 -0x1.631fe90755af0p-8
+parameter 393 0x1.6b21062f75e19p-6
+parameter 394 0x1.2592dc9a9e3e7p-2
+parameter 395 0x1.7260dd2057083p-3
+parameter 396 -0x1.7bdcb68507f6dp-3
+parameter 397 -0x1.7aae3fbc646a5p-5
+parameter 398 0x1.31222d3ed7ed5p-6
+parameter 399 0x1.7cb594aeb96e3p-2
+parameter 400 -0x1.83816d5bd9104p-2
+parameter 401 0x1.16b688fbbd2d3p-2
+parameter 402 0x1.76e71f3485b72p-3
+parameter 403 0x1.ea8428ae3a025p-2
+parameter 404 0x1.39e2f8a7d703ep-3
+parameter 405 -0x1.c323004fa50ecp-3
+parameter 406 0x1.1873bc1e60d71p-6
+parameter 407 -0x1.ef8da3805a585p-2
+parameter 408 -0x1.1c645aad0b3b0p-5
+parameter 409 -0x1.9f5d087d639a4p-2
+parameter 410 -0x1.eae0fef0c1f64p-4
+parameter 411 0x1.938e6658a6b3ap-2
+parameter 412 -0x1.adaae98b48415p-3
+parameter 413 0x1.0b3397743e91ap-2
+parameter 414 -0x1.492dea1946f4bp-2
+parameter 415 0x1.4402ea9b38a4bp-3
+parameter 416 0x1.000caef7a7755p-1
+parameter 417 0x1.688ffb35305f5p-3
+parameter 418 -0x1.6fbd8bbaeb63bp-5
+parameter 419 -0x1.4db9b1f62a75fp-3
+parameter 420 -0x1.311ca18956af4p-1
+parameter 421 0x1.497ca54b447c9p-3
+parameter 422 0x1.51c0afa759fcfp-2
+parameter 423 -0x1.87ba243bd490dp-2
+parameter 424 0x1.d0a682d65823bp-2
+parameter 425 -0x1.8aad50e89da9fp-4
+parameter 426 -0x1.0a9446156464ep-1
+parameter 427 0x1.aee5d3973d565p-5
+parameter 428 0x1.e7d3be5d9b236p-4
+parameter 429 -0x1.e4e34a2611a42p-5
+parameter 430 -0x1.5814a8e787d72p-1
+parameter 431 0x1.078cba3cd12d4p-6
+parameter 432 0x1.dbb9653901cc1p-2
+parameter 433 0x1.1e07c3ceb3c41p-3
+parameter 434 -0x1.68a9f04fbf689p-1
+parameter 435 -0x1.4f4e05f95b22ap-1
+parameter 436 -0x1.2c3d6ff1c2c05p-1
+parameter 437 0x1.93222f72e0e84p-3
+parameter 438 -0x1.4052c96e46823p-2
+parameter 439 0x1.d2dcbb3fd9c97p-2
+parameter 440 -0x1.d442d0926ba69p-11
+parameter 441 -0x1.36a61ae189bd4p-1
+parameter 442 -0x1.94d2f9e0ad958p-6
+parameter 443 0x1.9473571c0c400p-2
+parameter 444 0x1.1b89bd2c1b515p-3
+parameter 445 0x1.4d708f10dfbf7p-2
+parameter 446 -0x1.d658c7ef07c22p-3
+parameter 447 0x1.e5b2e3248a0c8p-3
+parameter 448 0x1.404250c0d2803p-1
+parameter 449 -0x1.5b86ee4575142p-6
+parameter 450 0x1.2aeec6d684086p-2
+parameter 451 -0x1.2f2bd8a77e7ebp-3
+parameter 452 -0x1.8650276df4e24p-1
+parameter 453 0x1.3b0ce35c65341p-2
+parameter 454 -0x1.6480dd2e215a8p-2
+parameter 455 0x1.147c8bd2efcbbp-4
+parameter 456 0x1.00c1c6d893998p-2
+parameter 457 -0x1.728d789c522ffp-1
+parameter 458 -0x1.9f3ab59e4ecbep-2
+parameter 459 0x1.20563dee3def5p-3
+parameter 460 -0x1.1b4e8c91a0d78p-6
+parameter 461 0x1.056ed584049a8p-2
+parameter 462 -0x1.841c237abb7e6p-4
+parameter 463 0x1.721601de3e6b3p-2
+parameter 464 0x1.02a332b3e8a59p-1
+parameter 465 0x1.b2a097b5c9391p-5
+parameter 466 0x1.e59b45cf8c26bp-4
+parameter 467 -0x1.5b12db2359facp-4
+parameter 468 -0x1.10b72bd1729e4p-2
+parameter 469 0x1.7b75f8b5c5baep-5
+parameter 470 0x1.1b8945a37d64bp-4
+parameter 471 0x1.0ab08fb2928dfp-2
+parameter 472 0x1.8d6bd8dda6436p-3
+parameter 473 -0x1.2cd8b4ccf2240p-3
+parameter 474 -0x1.a7852cf5dbbdep-3
+parameter 475 0x1.514566db60589p-3
+parameter 476 -0x1.8823034e743c0p-3
+parameter 477 -0x1.d50dca6dc9d64p-6
+parameter 478 -0x1.8225d7e9267c2p-2
+parameter 479 -0x1.18d45fb707430p-4
+parameter 480 0x1.7d8ad2854c53bp-3
+parameter 481 -0x1.1aa1543ffb405p-7
+parameter 482 -0x1.d93706e121f5dp-4
+parameter 483 0x1.9bc64f5faf5b3p-3
+parameter 484 -0x1.0f074e1853100p-3
+parameter 485 -0x1.a8dfb12c18107p-2
+parameter 486 0x1.9854d958df481p-7
+parameter 487 -0x1.ad880ce54e08ep-2
+parameter 488 0x1.5adf74d7f40dbp-2
+parameter 489 0x1.989d6e790b1fdp-7
+parameter 490 -0x1.100319715ee7ap-1
+parameter 491 0x1.6c41ef9e2dfe4p-3
+parameter 492 -0x1.4539cf620328ap-4
+parameter 493 -0x1.226d8383cd35dp-2
+parameter 494 -0x1.6c014c964b619p-2
+parameter 495 -0x1.8f60f47c5eb03p-3
+parameter 496 -0x1.09b85bfc3324bp-3
+parameter 497 -0x1.6791a1eab85e1p-3
+parameter 498 -0x1.72c42aec342eap-3
+parameter 499 -0x1.401a0439cf03cp-2
+parameter 500 -0x1.51c8f69bd30e0p-3
+parameter 501 0x1.22585385b0eb8p-3
+parameter 502 -0x1.52b7c5adcb864p-1
+parameter 503 0x1.23644a7882505p-2
+parameter 504 0x1.080d713ee4006p-2
+parameter 505 0x1.9ba21ab53060bp-4
+parameter 506 0x1.36d3fd5be8816p-3
+parameter 507 -0x1.239ed69a0fc37p-3
+parameter 508 0x1.21c8143828ed6p-4
+parameter 509 0x1.6d0608fc15f3ep-6
+parameter 510 0x1.0b8685fe37ffep-2
+parameter 511 0x1.b4eab413c8002p-5
+parameter 512 -0x1.8871b47f04b28p-3
+parameter 513 -0x1.6179af2530c82p-3
+parameter 514 0x1.0a27d39647341p-3
+parameter 515 0x1.a221dfaf25590p-16
+parameter 516 0x1.1203a46e640a0p-3
+parameter 517 0x1.c07dd7a9b790dp-2
+parameter 518 -0x1.aaffcb7bbc173p-3
+parameter 519 0x1.0ff41b90be66cp-1
+parameter 520 -0x1.51232938e8d58p-2
+parameter 521 0x1.abe0235da53cep-3
+parameter 522 0x1.64c287afb33a3p-2
+parameter 523 -0x1.02289b849c823p-3
+parameter 524 0x1.1c651095efb4dp-2
+parameter 525 -0x1.a0803878a8d70p-4
+parameter 526 0x1.33c3e4154bd05p-3
+parameter 527 -0x1.04f04c96027b6p-4
+parameter 528 -0x1.4f8e3a9a34eb9p-1
+parameter 529 0x1.cc7a588542dc2p-5
+parameter 530 0x1.ce10899ac536dp-3
+parameter 531 0x1.94c6854b01420p-1
+parameter 532 0x1.cd42783b57f88p-3
+parameter 533 -0x1.ea05ee51db479p-2
+parameter 534 0x1.1c178e29ac0e4p-2
+parameter 535 0x1.41118e6d11008p-3
+parameter 536 0x1.298702ccc2a5bp-2
+parameter 537 -0x1.765f808ac78d9p-2
+parameter 538 -0x1.e9cba1ea62245p-2
+parameter 539 0x1.1a741242aa1efp-2
+parameter 540 -0x1.52bc7fd90c246p-2
+parameter 541 0x1.2f9c9e90381f7p-2
+parameter 542 -0x1.544b16fd7de49p-1
+parameter 543 -0x1.0d76b274f69a3p-4
+parameter 544 0x1.0b106ddd0a878p-1
+parameter 545 -0x1.fd5d59ad047b3p-3
+parameter 546 0x1.6612e2a0425bbp-5
+parameter 547 0x1.14af6bc0302d8p-4
+parameter 548 -0x1.a268335f45c70p-4
+parameter 549 0x1.846517462bf1fp-4
+parameter 550 0x1.a19cb0b329be8p-2
+parameter 551 -0x1.04fd33641ef00p-1
+parameter 552 0x1.95a0b68a1a6e5p-3
+parameter 553 -0x1.57ee2925e17b6p-1
+parameter 554 -0x1.73bf0a99c0812p-1
+parameter 555 0x1.2ad6584b17513p-3
+parameter 556 -0x1.64832f48b6263p-3
+parameter 557 -0x1.9f1ecaa96f0c9p-5
+parameter 558 -0x1.95c63355893dep-1
+parameter 559 -0x1.17dc72e4673afp-4
+parameter 560 0x1.f5212e74cad73p-4
+parameter 561 -0x1.20b91a7c1526dp-4
+parameter 562 -0x1.211fb28b9771bp-3
+parameter 563 -0x1.1c6fbddc864c9p-1
+parameter 564 -0x1.1546a7192c3a8p-1
+parameter 565 0x1.006fedcb6e585p-1
+parameter 566 -0x1.1a086c81e84cbp-1
+parameter 567 0x1.02b12d3e226cbp-2
+parameter 568 -0x1.b7191c9c7a39bp-6
+parameter 569 -0x1.0949968299285p-2
+parameter 570 -0x1.a017b31dc7eb4p-2
+parameter 571 0x1.181b9cd8e641fp-2
+parameter 572 0x1.a2fcea7756e61p-2
+parameter 573 0x1.72f1c839df174p-4
+parameter 574 -0x1.aff25f922a934p-3
+parameter 575 0x1.0e9e4909e20e8p-3
+parameter 576 0x1.5c80b7aa00088p-3
+parameter 577 0x1.07f76244c6a22p-2
+parameter 578 -0x1.59eeb6c050c92p-11
+parameter 579 0x1.85bb9ae1822e8p-4
+parameter 580 0x1.25186a561d7e3p-1
+parameter 581 0x1.a4756770c26b7p-3
+parameter 582 -0x1.68c8fd0c9a225p-3
+parameter 583 0x1.6a335d5a0dfa3p-3
+parameter 584 0x1.1b32658539f92p-2
+parameter 585 -0x1.d8e21013746c5p-2
+parameter 586 -0x1.56fd75f0d3966p-4
+parameter 587 0x1.15e5657c3a475p-2
+parameter 588 0x1.3b666447c6df4p-2
+parameter 589 0x1.04925e4a427f6p-3
+parameter 590 0x1.637c860681c89p-5
+parameter 591 -0x1.b39eeb099d393p-3
+parameter 592 -0x1.635b6aae44028p-3
+parameter 593 -0x1.dfa930afa7898p-3
+parameter 594 -0x1.668766d2c91a7p-5
+parameter 595 -0x1.b81583e606e24p-3
+parameter 596 0x1.05c083b022347p-2
+parameter 597 0x1.8f5bda25d987ap-2
+parameter 598 -0x1.83ee1ba9ba4c7p-4
+parameter 599 0x1.9ac069cda3fbdp-4
+parameter 600 0x1.6aef3d5e638dep-5
+parameter 601 0x1.03af1b0598da6p-1
+parameter 602 -0x1.bde4afca44bf8p-2
+parameter 603 0x1.fc7fbe2f2612bp-2
+parameter 604 -0x1.4bae5a8e57131p-1
+parameter 605 -0x1.ad90e32b0938bp-2
+parameter 606 -0x1.e79923a570ee4p-2
+parameter 607 0x1.2537346b8f8b7p-6
+parameter 608 -0x1.043baab22ccf6p-1
+parameter 609 -0x1.6b02f609b9782p-2
+parameter 610 -0x1.6314a434ab7d1p-1
+parameter 611 -0x1.06154629d0df9p-5
+parameter 612 0x1.8b00e2befbc44p-2
+parameter 613 -0x1.49fac6973322dp-1
+parameter 614 -0x1.016d09cd246edp-1
+parameter 615 -0x1.9373d33bc30e1p-3
+parameter 616 0x1.d02517de2c797p-1
+parameter 617 0x1.3f1632c609a73p-1
+parameter 618 -0x1.0239b1a2dfe06p-3
+parameter 619 0x1.96254c1ad752ap-1
+parameter 620 0x1.63a973d3fb327p-3
+parameter 621 -0x1.1a46c38eb9efap-1
+parameter 622 0x1.45329f0db6a20p-1
+parameter 623 -0x1.a6c60e2fb713ap-1
+parameter 624 -0x1.8991cd04bb0cbp-2
+parameter 625 -0x1.9e79dee1b126cp-4
+parameter 626 0x1.31fcc3097feedp-3
+parameter 627 -0x1.51c89188089e7p-1
+parameter 628 -0x1.c144000bf3244p-2
+parameter 629 0x1.420ea2e47ae4ep-4
+parameter 630 0x1.166833cc23c3cp-2
+parameter 631 -0x1.cded4d60d957bp-2
+parameter 632 -0x1.082d32eea0ffep-1
+parameter 633 0x1.9df7d6ebfc9f9p-2
+parameter 634 0x1.430d5035bdd72p-7
+parameter 635 -0x1.e000514b32b6fp-2
+parameter 636 0x1.077718a6d8017p-2
+parameter 637 -0x1.58f7bb1768878p-1
+parameter 638 0x1.22cd2a5f2614fp-4
+parameter 639 0x1.040c54eacd741p-3
+parameter 640 0x1.9970a3899681ap-3
+parameter 641 0x1.7daed26750ad6p-1
+parameter 642 -0x1.dea106836fd8cp-2
+parameter 643 -0x1.71d3bea61f303p-1
+parameter 644 -0x1.7c44be89b9a30p-1
+parameter 645 -0x1.6d170a3a3f897p-1
+parameter 646 -0x1.187406f166833p-1
+parameter 647 -0x1.aa785adb70552p-2
+parameter 648 0x1.ea2c2b141dd47p-2
+parameter 649 0x1.8a4e548924335p-1
+parameter 650 0x1.474270db708f7p-1
+parameter 651 0x1.216e3de9832e5p-2
+parameter 652 -0x1.a3942ad0a41ffp-2
+parameter 653 0x1.746be563817b9p-2
+parameter 654 0x1.1e6d9085084d3p-2
+parameter 655 -0x1.7468213408be2p-2
+parameter 656 0x1.fbbc0b9a8d2b1p-2
+parameter 657 0x1.5e0da20ed8223p-2
+parameter 658 -0x1.8208e9c0ab677p-1
+parameter 659 0x1.88943dcbb9e00p-3
+parameter 660 0x1.be893cd7f6515p-2
+parameter 661 -0x1.58b9667123109p-1
+parameter 662 -0x1.614e219b59b72p-1
+parameter 663 -0x1.4f3cb32dd18b4p-1
+parameter 664 0x1.d7cc182792034p-4
+parameter 665 0x1.4825ad8a8deedp-2
+parameter 666 0x1.c9d492cce5f9dp-2
+parameter 667 0x1.b8ab797a0856dp-2
+parameter 668 0x1.2717d786e3fd0p-5
+parameter 669 0x1.0eea09177fc94p-2
+parameter 670 -0x1.ab091b63d7371p-2
+parameter 671 0x1.1412364c7df6ep-3
+parameter 672 -0x1.1a5c823df2cc0p-5
+parameter 673 0x1.ed61efcbf1700p-3
+parameter 674 -0x1.2aa9c78643001p-1
+parameter 675 -0x1.e9d029e8926e7p-2
+parameter 676 0x1.a3364a590a691p-6
+parameter 677 -0x1.6717a4637c2fap-2
+parameter 678 0x1.56f877601cb47p-1
+parameter 679 0x1.4568b57a69650p-1
+parameter 680 -0x1.56e386b708f5dp-1
+parameter 681 0x1.4b9c70a4835b5p-4
+parameter 682 -0x1.4ff743835337dp-1
+parameter 683 0x1.03c25550c6930p-2
+parameter 684 0x1.71dc4089d5e99p-2
+parameter 685 0x1.7477fb3f2b406p-1
+parameter 686 0x1.bd4db77663629p-2
+parameter 687 -0x1.3b0c7ca6d4343p-2
+parameter 688 -0x1.bc256d32d6c17p-3
+parameter 689 -0x1.fb0f972834ec9p-6
+parameter 690 -0x1.4466d5e9a1652p-1
+parameter 691 -0x1.b20bc7599b418p-6
+parameter 692 -0x1.423a9b9f45ae4p-5
+parameter 693 -0x1.0dc8d357bfd83p-2
+parameter 694 -0x1.46136370e7e6ep-1
+parameter 695 -0x1.372500d43d07fp-1
+parameter 696 0x1.976d48a256d31p-2
+parameter 697 -0x1.6cd6277987aabp-1
+parameter 698 0x1.4498a6ca22341p-5
+parameter 699 -0x1.42370369a0edcp-3
+parameter 700 -0x1.e9010333d169cp-1
+parameter 701 0x1.432a5a7094eacp-1
+parameter 702 0x1.9e870fc162baep-1
+parameter 703 0x1.bba4ce2268ad3p-3
+parameter 704 -0x1.35eb33f0b76c3p-2
+parameter 705 -0x1.041bc2a7d5448p-1
+parameter 706 -0x1.6b406e4130afbp-2
+parameter 707 -0x1.d73f7ca9e1854p-1
+parameter 708 -0x1.ab76bb4221b9ep-1
+parameter 709 0x1.3cd41f8302385p-2
+parameter 710 0x1.060d9e6cac9ffp-2
+parameter 711 -0x1.ca3c86b4ddef2p-1
+parameter 712 -0x1.485188c616587p-1
+parameter 713 -0x1.635e666b7401dp-2
+parameter 714 -0x1.5530a162903cfp-3
+parameter 715 0x1.6461780d75e33p-3
+parameter 716 0x1.ccc3a721029dcp-4
+parameter 717 0x1.feebf1af853bap-6
+parameter 718 -0x1.c3142fed78763p-1
+parameter 719 0x1.1c8138bc512c3p-4
+parameter 720 0x1.64f1e27baa195p-1
+parameter 721 0x1.d7a9961780c21p-2
+parameter 722 -0x1.2d45430e0463bp-3
+parameter 723 0x1.7f3c3c5d85f83p-1
+parameter 724 0x1.5c3b47df1a781p-1
+parameter 725 0x1.04db91d347fbdp-1
+parameter 726 -0x1.263962e78bf05p-1
+parameter 727 0x1.b35911067677ap-1
+parameter 728 -0x1.9924172cc37a2p-1
+parameter 729 -0x1.b4d30b2acf12ap-1
+parameter 730 -0x1.c1e284accfdbap-1
+parameter 731 -0x1.9f1d39b8f2690p-1
+parameter 732 -0x1.68fb1efe22107p-9
+parameter 733 0x1.f14463b97a0dap-1
+parameter 734 -0x1.abbc380bf9b54p-1
+parameter 735 0x1.78f6440ab5de8p-1
+parameter 736 0x1.819ba653089a3p-2
+parameter 737 0x1.1edee056db0e1p-1
+parameter 738 0x1.ac277639f85bdp-2
+parameter 739 -0x1.95dcc8ee4cf7cp-2
+parameter 740 0x1.697ac2c4778bbp-1
+parameter 741 -0x1.bcded75829d9dp-1
+parameter 742 0x1.10d5bdb55dcc3p-2
+parameter 743 -0x1.4337d6aa4295ap-1
+parameter 744 -0x1.040e2efa8ba4bp-1
+parameter 745 -0x1.f427fe01fe040p-2
+parameter 746 0x1.d2e6f1783afc0p-3
+parameter 747 0x1.a778cea5e1f6bp-2
+parameter 748 -0x1.58d5b1234b721p-1
+parameter 749 -0x1.6bcd1fc4090cfp-2
+parameter 750 0x1.1c8e4b64a1ecap-3
+parameter 751 -0x1.17cb3b65f675dp-3
+parameter 752 0x1.688d5a2bfac14p-2
+parameter 753 0x1.df6e97b9f8d13p-2
+parameter 754 -0x1.3890961a8fe7ap-1
+parameter 755 -0x1.05b34fec2c7c7p-4
+parameter 756 -0x1.8f7f671dc4020p-2
+parameter 757 0x1.6e562f8847c2fp-2
+parameter 758 0x1.09dfa4c1997abp-2
+parameter 759 -0x1.25d827abaceb6p-1
+parameter 760 0x1.16bf1fd9723bdp-1
+parameter 761 0x1.10117937110aap-6
+parameter 762 -0x1.5b34a5be2a315p-1
+parameter 763 -0x1.5dd9697245e44p-3
+parameter 764 -0x1.882ddcc65731dp-1
+parameter 765 -0x1.006feec495bc5p-1
+parameter 766 -0x1.141ce5a94b5b4p-3
+parameter 767 -0x1.5812cec4ea067p-4
+parameter 768 -0x1.84b0b0b731953p-2
+parameter 769 -0x1.cde63f5413c5dp-2
+parameter 770 -0x1.0e052a4a87883p-3
+parameter 771 -0x1.80ad04a725e0cp-2
+parameter 772 0x1.4583d66a6f13ap-1
+parameter 773 -0x1.d2fe4bf0703bap-2
+parameter 774 -0x1.5135d59454fd3p-1
+parameter 775 0x1.2260ba27e52fdp-3
+parameter 776 0x1.a5ef75d836ad7p-2
+parameter 777 -0x1.aa94859825d34p-3
+parameter 778 0x1.821946cad90d5p-1
+parameter 779 0x1.ea71b69a407d5p-6
+parameter 780 -0x1.272ec0df2b793p-1
+parameter 781 -0x1.aacae078e1ffbp-2
+parameter 782 -0x1.0357ca4d7506dp-2
+parameter 783 0x1.28beb02c79a87p-2
+parameter 784 0x1.99f0ccbebb24ap-4
+parameter 785 -0x1.911ca45ea665ap-3
+parameter 786 -0x1.08e7d06c8a9a0p-1
+parameter 787 -0x1.9225a48bff294p-7
+parameter 788 -0x1.029d11d86c654p-1
+parameter 789 -0x1.b6b79792919e7p-2
+parameter 790 0x1.18b8a28881857p-1
+parameter 791 0x1.91693b950c60cp-2
+parameter 792 -0x1.6870894442a37p-3
+parameter 793 -0x1.22b4cf90f7b07p-8
+parameter 794 0x1.e185169fdc858p-3
+parameter 795 -0x1.be651ddd06958p-2
+parameter 796 -0x1.2532a2b03590dp-1
+parameter 797 -0x1.3d6c6fea27b03p-2
+parameter 798 -0x1.66be09ef30256p-3
+parameter 799 -0x1.d8bb02d622460p-4
+parameter 800 0x1.c5f485fe0f3f5p-3
+parameter 801 0x1.c641dda4a7fd6p-3
+parameter 802 0x1.b9e3c3113f04ap-3
+parameter 803 -0x1.60384d6e94b7dp-2
+parameter 804 -0x1.51a8ce9ca984bp-2
+parameter 805 0x1.7bd455953a474p-1
+parameter 806 0x1.0a2329ab60af8p-3
+parameter 807 0x1.4baaf1fc98d55p-3
+parameter 808 0x1.f9944312ab202p-3
+parameter 809 0x1.e5e6f4c1abfe6p-3
+parameter 810 0x1.d4bcff8586de2p-3
+parameter 811 0x1.437e2b653cca1p-4
+parameter 812 -0x1.b784673f7e764p-3
+parameter 813 -0x1.eba2f9ba39fa8p-4
+parameter 814 -0x1.9f4d34e512774p-4
+parameter 815 -0x1.8d7c109b2ba1cp-4
+parameter 816 0x1.945b0a7a8d33ep-4
+parameter 817 0x1.71c425ee8a1f3p-3
+parameter 818 -0x1.40b3e24b34759p-4
+parameter 819 0x1.756142880bc6cp-3
+parameter 820 -0x1.937e90a574cf3p-2
+parameter 821 0x1.84dbc2b56deddp-2
+parameter 822 -0x1.4df9e67e1166ep-3
+parameter 823 0x1.8ff0f5e1f339cp-4
+parameter 824 -0x1.861e1fd0d3547p-2
+parameter 825 0x1.98685aaf228a6p-2
+parameter 826 0x1.4d8341e48ebd3p-3
+parameter 827 0x1.db5693b0bfcc7p-2
+parameter 828 0x1.3824dfe76373fp-2
+parameter 829 0x1.2d2ee5193c250p-2
+parameter 830 0x1.69c9e823d3646p-3
+parameter 831 -0x1.87d097eafb208p-5
+parameter 832 0x1.2ac62d126b8b8p-1
+parameter 833 -0x1.f7736c68f055cp-3
+parameter 834 -0x1.996085c8f1a72p-3
+parameter 835 -0x1.5668c4a54b285p-3
+parameter 836 -0x1.8d125953e7fbep-2
+parameter 837 -0x1.79528f25a5b65p-2
+parameter 838 -0x1.12633048d3ae0p-6
+parameter 839 -0x1.5a292c7d799f4p-2
+parameter 840 -0x1.b000730d8f0cdp-11
+parameter 841 -0x1.db97bb067f432p-2
+parameter 842 -0x1.bc590caa90100p-2
+parameter 843 -0x1.261210bca0de9p-2
+parameter 844 0x1.cded377c3c7b4p-2
+parameter 845 -0x1.115833edfc1d8p-1
+parameter 846 -0x1.7399ff8b15b9ap-3
+parameter 847 0x1.7434d8623489fp-4
+parameter 848 -0x1.58c4175f749b0p-2
+parameter 849 -0x1.c04b661f33f98p-2
+parameter 850 0x1.0c7380ba5138cp-2
+parameter 851 0x1.2f78915db5737p-3
+parameter 852 -0x1.cd8ce6fab3c37p-5
+parameter 853 -0x1.257fb18c0493fp-2
+parameter 854 0x1.a3cc885d9a607p-6
+parameter 855 -0x1.8e4ede22a82acp+0
+parameter 856 -0x1.909f0f7024646p+0
+parameter 857 -0x1.3417a244fab7cp+0
+parameter 858 0x1.83c76575c7751p+0
+parameter 859 -0x1.825c9fe9ab733p+0
+parameter 860 -0x1.0d29713b92d53p+0
+parameter 861 -0x1.88f39cfa8099ap-13
+parameter 862 -0x1.ac0a517fe98aep-3
+parameter 863 -0x1.737318762661fp-3
+parameter 864 0x1.0876501223058p-9
+parameter 865 0x1.7c42161bb5800p-3
+parameter 866 -0x1.56e11da2f15b2p-3
+parameter 867 -0x1.6a20692bbece7p-3
+parameter 868 0x1.22f54e65941b2p-4
+parameter 869 -0x1.c276ee043fbfcp-3
+parameter 870 -0x1.1b4703d0b761cp-2
+parameter 871 -0x1.a23b232c07120p-7
+parameter 872 0x1.77eb1434470eep-4
+parameter 873 -0x1.761b3eb65d73ap-3
+parameter 874 -0x1.7c66d82bfd776p-3
+parameter 875 -0x1.2f7c8b1912b23p-4
+parameter 876 -0x1.902216e2a4018p-4
+parameter 877 -0x1.63dc64e5772e4p-2
+parameter 878 0x1.5673e8eaa1811p-3
+parameter 879 0x1.63ea568a211f0p-4
+parameter 880 -0x1.f9fbd31b3ddbep-3
+parameter 881 -0x1.71a96f157f099p-2
+parameter 882 0x1.de41aad1579dap-7
+parameter 883 -0x1.730d43f3087cep-2
+parameter 884 -0x1.965a3b217fe8bp-2
+parameter 885 0x1.1a12c3f2673acp-7
+parameter 886 0x1.41968c89f2a49p-3
+parameter 887 0x1.d6905a1f2a62bp-5
+parameter 888 -0x1.c17cdf6f2b6fbp-3
+parameter 889 -0x1.27628e14b50f0p-5
+parameter 890 -0x1.33ca4f6eb844fp+0
+parameter 891 -0x1.6f91533b03bb6p+0
+parameter 892 -0x1.35652dddc643bp+0
+parameter 893 -0x1.548e7be7a16a2p-1
+parameter 894 -0x1.2b922c7eb37efp+0
+parameter 895 0x1.0a200680f7f75p+0
+parameter 896 0x1.74fe2a012ebcdp-5
+parameter 897 -0x1.24df320f6f13dp+0
+parameter 898 -0x1.93c15897f0c53p+0
+parameter 899 0x1.57e3410df17ddp+0
+parameter 900 -0x1.650d82f52eeabp+0
+parameter 901 -0x1.4e2160c82d735p+0
+parameter 902 -0x1.6cd5ce68117dbp+0
+parameter 903 -0x1.3ff9297fef86fp-4
+parameter 904 -0x1.26d7ea373537fp+0
+parameter 905 -0x1.39d26c8c4fcc8p+0
+parameter 906 -0x1.c3c6d4ed9f3afp-1
+parameter 907 -0x1.1a0281113d599p+0
+parameter 908 0x1.0f85148c16840p+0
+parameter 909 -0x1.376d153f8450ep+0
+parameter 910 -0x1.5b1fe6d72ab4dp-5
+parameter 911 -0x1.7579b57246fe0p-3
+parameter 912 -0x1.c27729933c710p-2
+parameter 913 -0x1.475943e5312f8p-4
+parameter 914 0x1.a76894bc6ba8cp-6
+parameter 915 -0x1.5453f3eeb10b2p-3
+parameter 916 0x1.1baaf9c364308p-4
+parameter 917 0x1.b1aa0942d1fdap-5
+parameter 918 -0x1.c378514ece218p-3
+parameter 919 -0x1.cd6482dac6f13p-2
+parameter 920 0x1.614d288ebd856p-4
+parameter 921 -0x1.7480cfb60edb8p-4
+parameter 922 -0x1.0d0a9a916a1dbp-3
+parameter 923 -0x1.44e87e0c1ce40p-2
+parameter 924 -0x1.3cec56966d037p-5
+parameter 925 -0x1.abeb05568a591p-4
+parameter 926 -0x1.79c539522d631p-2
+parameter 927 -0x1.0803690a41a5bp-3
+parameter 928 0x1.0d045735b3179p-2
+parameter 929 -0x1.579428b453901p-2
+parameter 930 -0x1.5114180567897p-8
+parameter 931 -0x1.6615f334ca700p-9
+parameter 932 -0x1.fe8c0bc18d65fp-4
+parameter 933 -0x1.7086b7cf54290p-2
+parameter 934 0x1.6f6b1ef12e0c9p-3
+parameter 935 -0x1.3b614c7d8ca51p-6
+parameter 936 -0x1.3beeb639a6188p-2
+parameter 937 -0x1.3e64855659442p-2
+parameter 938 0x1.fcbf1eecfe0cap-5
+parameter 939 -0x1.2306b7f71f5e5p-2
+parameter 940 -0x1.1b3992323de4cp-1
+parameter 941 0x1.b55a2eb9ff28cp-3
+parameter 942 0x1.1161c4791fdeap-2
+parameter 943 -0x1.01b62aec6c4a8p-1
+parameter 944 -0x1.8232bb0e422e8p-3
+parameter 945 -0x1.02f672715e303p-4
+parameter 946 -0x1.50888c87437dbp-3
+parameter 947 -0x1.0403fc28354a7p-1
+parameter 948 0x1.cbe1bd50efbc1p-5
+parameter 949 0x1.b2b58d1f4bd40p-3
+parameter 950 -0x1.49224cba5488cp-3
+parameter 951 -0x1.24289e9721be4p-3
+moments
+adam 0 0x1.2a20cbe03f900p-13 0x1.4a1b5e200040fp-15
+adam 1 -0x1.c3d7eb9847003p-12 0x1.4256765f78fbfp-15
+adam 2 -0x1.0712f19599755p-11 0x1.349b20bd7042fp-13
+adam 3 0x1.6015572556d8ap-12 0x1.2f1b186164bcbp-14
+adam 4 -0x1.58bf17dedcda4p-12 0x1.96f00105d8cebp-14
+adam 5 0x1.b82e45ba8d24cp-12 0x1.eaab3d6c4d889p-12
+adam 6 0x1.8b20c23176fbcp-13 0x1.1797976a7a23cp-12
+adam 7 -0x1.fb5fb5cdcda0fp-14 0x1.17451fc27f08ap-12
+adam 8 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 9 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 10 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 11 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 12 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 13 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 14 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 15 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 16 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 17 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 18 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 19 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 20 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 21 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 22 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 23 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 24 0x1.8c08b0452709dp-14 0x1.3e99208d94df6p-19
+adam 25 0x1.437b852103b20p-12 0x1.28dfce554c0b5p-18
+adam 26 0x1.4565482d1a646p-12 0x1.4faa95ef4029ep-16
+adam 27 -0x1.80ce5c0385090p-12 0x1.40340d0de9b57p-16
+adam 28 -0x1.c4aadaf7987a4p-15 0x1.32a58146c100ep-16
+adam 29 0x1.c9aebefa532d3p-14 0x1.1193424b1e257p-16
+adam 30 0x1.981098c52528bp-12 0x1.0a6ebd6d799b9p-16
+adam 31 0x1.363b125d22574p-15 0x1.aed96b15a6dedp-18
+adam 32 -0x1.9e940812e85c0p-12 0x1.47d2d18b99f9dp-19
+adam 33 -0x1.bc5420c82a2d3p-16 0x1.e3740bdafd684p-20
+adam 34 0x1.5fd3bcf41a9aap-17 0x1.ea191fd3a4836p-20
+adam 35 0x1.3bf9e59d31d72p-12 0x1.60377261d3086p-18
+adam 36 0x1.18c72832e4be3p-11 0x1.1f1263ef3df23p-19
+adam 37 -0x1.fd890030d9d9ap-14 0x1.2f82e4f436f7cp-20
+adam 38 -0x1.c455251924d3ap-14 0x1.62b6db1364d9bp-18
+adam 39 0x1.4662b1edc5b98p-12 0x1.3a466800f1579p-19
+adam 40 -0x1.44e1c41cc9a00p-12 0x1.eb0380dc2e246p-19
+adam 41 0x1.9c3a929aef7dbp-13 0x1.e256b0b2bd488p-21
+adam 42 0x1.5fc720cdb9e53p-11 0x1.ca9e1e4327836p-20
+adam 43 -0x1.d333581982eb2p-16 0x1.d48673f39da43p-19
+adam 44 0x1.c9e5bec730a7ap-16 0x1.a4419a69cb00bp-20
+adam 45 0x1.250cb70ffa6dep-12 0x1.9f42e14119c65p-20
+adam 46 0x1.3b86a10015e1cp-11 0x1.bf2d3274a22cap-20
+adam 47 0x1.9093f65739734p-13 0x1.396400f4e2c92p-19
+adam 48 -0x1.23727c457f03fp-18 0x1.a08a91510da0ep-20
+adam 49 -0x1.195c03456ffc2p-15 0x1.145e8d7bbe725p-20
+adam 50 0x1.2f8e2c2f10dc2p-16 0x1.332fa7d999773p-21
+adam 51 0x1.4dcc1cb494ca9p-17 0x1.d8cad5329d632p-20
+adam 52 0x1.66d84e3554ef8p-17 0x1.93e7de42c932cp-21
+adam 53 0x1.848b4566cfaa2p-17 0x1.714628cc82007p-19
+adam 54 0x1.598ea8cedfa61p-14 0x1.2de6cfda33f95p-19
+adam 55 -0x1.3497a09b7fda8p-16 0x1.c7cbda24db364p-22
+adam 56 -0x1.67e990a48f179p-14 0x1.353e13f053ceep-21
+adam 57 -0x1.12448ff070c66p-14 0x1.ab7e5f9cff78cp-20
+adam 58 0x1.0c6e8644e32d6p-14 0x1.d9c3922e4430dp-22
+adam 59 0x1.660e2097d2e15p-14 0x1.c56e92e55af11p-23
+adam 60 0x1.f6944509b85dfp-14 0x1.0f9d4cba4bee7p-19
+adam 61 -0x1.25208321f10c4p-21 0x1.64327d9f40ee5p-19
+adam 62 0x1.6cb0887634e34p-15 0x1.83c559efb3cc8p-20
+adam 63 0x1.2d5f3f3345f24p-14 0x1.b13874cd7ded6p-22
+adam 64 -0x1.8259e185694d9p-16 0x1.3aa567719ce65p-21
+adam 65 0x1.30c9831d1af4bp-14 0x1.a727c730eb1a5p-20
+adam 66 0x1.51198bd8be258p-14 0x1.db664c1aa2f18p-22
+adam 67 -0x1.1e73e7a16d864p-20 0x1.dd857944409e0p-23
+adam 68 -0x1.8c9a61285b356p-17 0x1.10aba56a6286ep-19
+adam 69 -0x1.f2ca2b9eec8f4p-15 0x1.61afe938bf2ccp-19
+adam 70 0x1.8ebb3c8ba6b30p-14 0x1.91a897cdbd9d8p-20
+adam 71 -0x1.862f1c337f894p-14 0x1.94086d1eda7e8p-22
+adam 72 -0x1.c8a3883ef382dp-16 0x1.365ccf62fccb5p-21
+adam 73 0x1.22eca3189cbc4p-18 0x1.aa510e062502ep-20
+adam 74 -0x1.20efe3a3685a3p-14 0x1.d8f8d880248b2p-22
+adam 75 0x1.2390f47c6fe8ep-14 0x1.cea368e49f196p-23
+adam 76 0x1.4cd49c7b4752bp-14 0x1.103e52696d3cep-19
+adam 77 -0x1.5f7a3d4322ee3p-14 0x1.6290bf4250dc0p-19
+adam 78 -0x1.c53073fac5bb8p-14 0x1.8054284bf403ap-20
+adam 79 -0x1.62d8b03a6a85cp-15 0x1.ca1f8bbe769fcp-22
+adam 80 0x1.884500c35b8ebp-15 0x1.fe7782c80fc8dp-21
+adam 81 0x1.ad26feeacb228p-14 0x1.0422b456866b1p-19
+adam 82 0x1.bdce7ccb821fcp-21 0x1.8373c0f6a6118p-21
+adam 83 -0x1.c13a8cfb5c0c9p-15 0x1.d845f124b0e41p-21
+adam 84 -0x1.f5636282a59c2p-14 0x1.1a16d83f5d6efp-19
+adam 85 -0x1.d2d40a39ff4a4p-15 0x1.5b7c0e4bd6636p-19
+adam 86 0x1.2e84b3a6071f4p-15 0x1.7e5d09b8f0845p-20
+adam 87 -0x1.5bb8750a29a17p-13 0x1.775e67783d899p-20
+adam 88 -0x1.980d515dde87ap-15 0x1.046f071628e6bp-20
+adam 89 0x1.322c4a0f8482cp-14 0x1.03edcf425a2c5p-19
+adam 90 0x1.ddd220620478cp-14 0x1.6156d0d43ad88p-19
+adam 91 0x1.0f9ecd12ca5abp-17 0x1.01907d6163b4bp-22
+adam 92 0x1.ddabb065d0ab9p-17 0x1.f1e6bf184a2e3p-18
+adam 93 -0x1.168f2a8a7e021p-14 0x1.0d26adef0509ep-18
+adam 94 0x1.302af31d26cd4p-13 0x1.798716c94d1cap-19
+adam 95 -0x1.cb1b25308951bp-14 0x1.1739b19daa7e7p-21
+adam 96 -0x1.3c215734b8a68p-15 0x1.07dd157b06f8bp-20
+adam 97 0x1.ee60c89668aa9p-17 0x1.e8a64e766d01bp-20
+adam 98 -0x1.35fe01a166800p-14 0x1.6fc289850b56ep-19
+adam 99 0x1.22e601a25b3a3p-14 0x1.88d14a09d4682p-22
+adam 100 0x1.8ccb800618039p-14 0x1.f02369f0497e1p-18
+adam 101 -0x1.ae730d4445655p-14 0x1.0ec8ef41dd9bbp-18
+adam 102 -0x1.0103d64bc47cep-13 0x1.96356c38304a8p-19
+adam 103 -0x1.1609f6fc4bbecp-14 0x1.a71616278f9c8p-22
+adam 104 -0x1.54234c8b00dbdp-15 0x1.0ef1fdf3a98cfp-20
+adam 105 0x1.493795512f32fp-14 0x1.0913b6170add5p-19
+adam 106 0x1.9149ab30d936ap-14 0x1.5e8066c2987fep-19
+adam 107 -0x1.831ffa0479bfdp-20 0x1.ff0f7db76574bp-23
+adam 108 0x1.1ddb4d9743c83p-17 0x1.f3b49c072cd51p-18
+adam 109 -0x1.2b2bfe2d4937bp-14 0x1.0b8f0f61192e4p-18
+adam 110 0x1.d6f7bb98ce12cp-14 0x1.65dfc8557a370p-19
+adam 111 -0x1.b7b089d5111b5p-14 0x1.514205b2aab64p-21
+adam 112 0x1.91f5407c10b61p-15 0x1.a7d0eb7a456fcp-19
+adam 113 -0x1.84c6195ba062ap-17 0x1.074c1ce9fbaf5p-18
+adam 114 -0x1.57d3f0e5de701p-14 0x1.1c31251832f68p-18
+adam 115 -0x1.25aaa828c3058p-15 0x1.1d01b54bd3c6cp-18
+adam 116 -0x1.b6728e15c70e8p-14 0x1.0d842001f747ep-17
+adam 117 0x1.6a7664915b501p-16 0x1.f5c20ac275c91p-19
+adam 118 -0x1.c7bd7d2a80373p-15 0x1.5ca7e84f9be91p-19
+adam 119 -0x1.3c4e6fba3687cp-14 0x1.9cdcc83d10db6p-18
+adam 120 -0x1.3eedaf64bab2ap-15 0x1.889eef1a8230dp-22
+adam 121 0x1.0e013156cbe6ep-15 0x1.54c4797056ff9p-21
+adam 122 0x1.2278f72d3ead5p-14 0x1.035fa258999b9p-20
+adam 123 0x1.5d7537db82188p-18 0x1.dc6db8f42e765p-22
+adam 124 0x1.128a37eab93c0p-15 0x1.1965e4727acd4p-19
+adam 125 -0x1.3d846afc851bbp-15 0x1.3d5eedfe2dd45p-20
+adam 126 0x1.0c01081b10a0ep-14 0x1.6eba243030d47p-20
+adam 127 -0x1.acd0cd3b05144p-16 0x1.0763d686c2b27p-21
+adam 128 -0x1.c837a77ab4712p-15 0x1.c5c771c5ede64p-22
+adam 129 -0x1.0d9a895657eedp-17 0x1.a1b13988b3974p-21
+adam 130 0x1.754f2638e5ab8p-15 0x1.8c79348cc47c7p-21
+adam 131 0x1.5dabc0b988870p-15 0x1.32043f947b6e4p-22
+adam 132 0x1.493be20bc9d6bp-14 0x1.2ab5d07750ecep-19
+adam 133 -0x1.0c88ac949e5b0p-15 0x1.1bffb928de36fp-20
+adam 134 0x1.0275061dbc024p-15 0x1.1455b66b1f9fbp-20
+adam 135 0x1.06c22e86e04cap-17 0x1.4b8636a478005p-21
+adam 136 -0x1.9485068880e80p-16 0x1.14609620050e7p-21
+adam 137 0x1.3955020ce736ep-15 0x1.8c6f76b853b48p-21
+adam 138 0x1.347936fbb6a03p-15 0x1.bfb6076ab56efp-21
+adam 139 -0x1.46fc936a03e60p-16 0x1.28d81dd997675p-21
+adam 140 0x1.89e3438d72c38p-16 0x1.31db343de5292p-19
+adam 141 -0x1.4e06e5d58ea77p-15 0x1.11fb34c54312bp-20
+adam 142 -0x1.0d99360a25112p-17 0x1.f5f0282c085c1p-21
+adam 143 0x1.8b7835687c22ep-18 0x1.a8c0f4dfc58e6p-21
+adam 144 0x1.4eaff914c9502p-15 0x1.3388fd89b7afep-20
+adam 145 0x1.0848d3dd44a68p-15 0x1.834eda2d0ed84p-20
+adam 146 -0x1.d398e0ae5c78cp-15 0x1.5f448d47821ddp-20
+adam 147 -0x1.107c174d18866p-15 0x1.eb1dc85d70ce4p-20
+adam 148 -0x1.2ed48e84cda8bp-14 0x1.4d659f3f2e316p-19
+adam 149 -0x1.7ae937b56582ap-16 0x1.e3f6a1ee6b9a7p-21
+adam 150 -0x1.41fec9bfbd7a9p-15 0x1.47d42e7dd734dp-20
+adam 151 -0x1.79643d9595ae7p-14 0x1.5b35ac9b07772p-19
+adam 152 -0x1.2570aeabd368dp-14 0x1.e108ead9fb42cp-21
+adam 153 0x1.fbbd0735f410ep-14 0x1.7c485255b7536p-20
+adam 154 0x1.446c15fc875e8p-13 0x1.b664a8312bb03p-20
+adam 155 0x1.08b1e309e5ce4p-16 0x1.5b82ccbf72518p-21
+adam 156 0x1.b00303ba38510p-14 0x1.1186710746685p-18
+adam 157 -0x1.25324d47fe161p-13 0x1.561d0a2c448d2p-19
+adam 158 0x1.a1188e6737cfep-13 0x1.417ac6e1baf51p-19
+adam 159 -0x1.18fbc0f4cffd5p-13 0x1.b3f53c79f15e9p-21
+adam 160 -0x1.77d52baaa9f39p-15 0x1.c2ac79b088696p-21
+adam 161 0x1.46197cd6f987ap-14 0x1.962cd16ed5a06p-20
+adam 162 -0x1.a95a6898c11ddp-15 0x1.7b414dd86f9f5p-20
+adam 163 0x1.df4b1dd816aefp-15 0x1.8fbacaf0e1c1ep-22
+adam 164 0x1.5a150dde0376cp-13 0x1.1ab2a45205279p-18
+adam 165 -0x1.7d83be00d88bfp-13 0x1.4a0bde1a5740bp-19
+adam 166 -0x1.abcd460e7bb79p-14 0x1.29d132df2ca72p-19
+adam 167 -0x1.84e1650143c22p-14 0x1.b71dcc7d5166fp-21
+adam 168 -0x1.3162aeed6fe19p-14 0x1.ff752e8ca9a14p-21
+adam 169 0x1.e934453b90623p-14 0x1.8c9afcb041954p-20
+adam 170 0x1.3eb16f47ce849p-13 0x1.a1503582e48cap-20
+adam 171 0x1.d1bf64b87cb0cp-17 0x1.793261b35c29bp-21
+adam 172 0x1.cec582994be3bp-14 0x1.153ed61fbf0afp-18
+adam 173 -0x1.247be7354894ep-13 0x1.4925b0f819074p-19
+adam 174 0x1.7eea4e29381acp-13 0x1.289356aaba9d7p-19
+adam 175 -0x1.e56e22de799a0p-14 0x1.01b1b247d05c2p-20
+adam 176 0x1.1cb8f5e5115f4p-16 0x1.73467fe9b9373p-19
+adam 177 0x1.3b46abd2dad06p-15 0x1.bd762904f459ap-19
+adam 178 -0x1.afd20fe732789p-17 0x1.76d988b9f4ac1p-19
+adam 179 -0x1.316aee4e3827cp-15 0x1.0c2860fe7f8f9p-18
+adam 180 -0x1.638dd4d97fbf8p-17 0x1.428dbfa8a0645p-18
+adam 181 -0x1.7cd33cff41cd7p-15 0x1.21cbf0554e8c0p-19
+adam 182 0x1.1b5d82f08abe8p-16 0x1.1e9bc3fea0ce0p-19
+adam 183 -0x1.3932baa82e5fap-14 0x1.896fe15ec32e0p-18
+adam 184 -0x1.832eba782ef30p-14 0x1.3fa3b0f7e5153p-20
+adam 185 0x1.12a9d4dd72decp-14 0x1.4a8ef7e87914fp-20
+adam 186 0x1.147c59673ec26p-13 0x1.812b09223068bp-19
+adam 187 0x1.1911619e67e4fp-16 0x1.6b7ce1109703ap-21
+adam 188 0x1.d78b10fcd9f14p-13 0x1.c314ae7c359dfp-18
+adam 189 -0x1.0d17ae293baa2p-13 0x1.79640ba1eb612p-19
+adam 190 0x1.78bc4e6187c70p-13 0x1.be945d6005133p-19
+adam 191 -0x1.8a2ccd8e0f672p-15 0x1.3f408054c9da1p-21
+adam 192 -0x1.57e448cab1e5ep-15 0x1.334a09511c02ep-20
+adam 193 0x1.f08ace34bef36p-14 0x1.8424caa07d663p-20
+adam 194 0x1.e0a36b90ed6d8p-15 0x1.53e52ed7f9321p-19
+adam 195 -0x1.82a2d1095269cp-15 0x1.0fc71ae525011p-22
+adam 196 0x1.59b0aa0e4f7f1p-13 0x1.cf19ad723e2dap-18
+adam 197 -0x1.47e51b7122944p-13 0x1.6b25b092c66eap-19
+adam 198 0x1.abb056ee119b9p-15 0x1.73db333291322p-19
+adam 199 -0x1.09d8aadaeb381p-14 0x1.a599f92717b41p-21
+adam 200 -0x1.71ac0a61651afp-14 0x1.5a709fa008374p-20
+adam 201 0x1.0672c15839c9ep-14 0x1.687eb9b4a9b86p-20
+adam 202 0x1.04b41ed5e14bbp-13 0x1.6fbec0c5caf51p-19
+adam 203 0x1.f32b79387210cp-20 0x1.8fb0e12507f93p-21
+adam 204 0x1.ceff58a42a7cep-13 0x1.c9c0a8998c21dp-18
+adam 205 -0x1.fab821b11b50cp-14 0x1.685140d234c7cp-19
+adam 206 0x1.3ac3177641b93p-13 0x1.90fda494312dbp-19
+adam 207 -0x1.2a7d7fbd6fe90p-16 0x1.b59d49e33db1bp-21
+adam 208 0x1.13fda3a5bd361p-13 0x1.42944154c36dap-18
+adam 209 0x1.4123461f50feap-13 0x1.48fa98ce75ef0p-18
+adam 210 -0x1.70a47b1c1ee9ap-14 0x1.62bad8cd0de50p-18
+adam 211 -0x1.9e01126cda747p-13 0x1.e60e3f6ce539ap-18
+adam 212 -0x1.273652d440aafp-13 0x1.0bd2b3bc73b8ep-17
+adam 213 -0x1.3d5a9ebe0c792p-14 0x1.3005978d4ee9dp-19
+adam 214 -0x1.abbc7fb79347dp-17 0x1.81d758b37ad33p-19
+adam 215 -0x1.9fa2fae60f689p-13 0x1.5ccd0e83a1a42p-17
+adam 216 0x1.16a262cef49bbp-16 0x1.a96f6d0aa2fd4p-22
+adam 217 -0x1.1e2b17081db24p-14 0x1.4e79c139aa721p-21
+adam 218 -0x1.01517b7a8ee2fp-14 0x1.6be79eca92c89p-21
+adam 219 0x1.b96892363ef39p-16 0x1.a7a457a69d166p-23
+adam 220 -0x1.1c38830aa5fe7p-15 0x1.f71783622c5eep-20
+adam 221 0x1.f81e674885354p-15 0x1.f122700503a25p-21
+adam 222 -0x1.8229a244e38abp-14 0x1.d4d2f97b79094p-21
+adam 223 0x1.2f7b0d8e4416dp-14 0x1.00bcb02dcf845p-21
+adam 224 0x1.2b9e083c4f60ap-16 0x1.7f7da1dfcf8e5p-22
+adam 225 -0x1.1ecbd19df12edp-16 0x1.0f1fb3fc1e298p-21
+adam 226 0x1.409ef8ec5b161p-15 0x1.a95c2651294c7p-21
+adam 227 -0x1.1855fc4cf94fbp-17 0x1.7c8d54ea51a6ap-22
+adam 228 -0x1.7ad2056587d7bp-14 0x1.f0382e5fb13f8p-20
+adam 229 0x1.0e741458f56b2p-14 0x1.f6f2f2d33fc07p-21
+adam 230 0x1.098dce0f4dba5p-14 0x1.6400c36b1b8bcp-20
+adam 231 0x1.60a9abd004bb7p-17 0x1.fb7966f75d2dep-23
+adam 232 0x1.3943df3da5c94p-15 0x1.b29b3c60c2f77p-22
+adam 233 -0x1.762c941733969p-15 0x1.58a4e0f6edfd4p-21
+adam 234 -0x1.aa56139aee950p-14 0x1.712c49e9a3a79p-21
+adam 235 0x1.44b0ae00c6a82p-16 0x1.02a8131a40f66p-22
+adam 236 -0x1.b5ac973d3e6b7p-15 0x1.fa2dc1a10833ap-20
+adam 237 0x1.2ff86838aea95p-15 0x1.ea1e53ad86f55p-21
+adam 238 -0x1.18a9a2380ddd8p-13 0x1.e0803a7ecc297p-21
+adam 239 0x1.0a99aebd843d0p-15 0x1.11412ed90d54bp-21
+adam 240 -0x1.afd0d846a4588p-15 0x1.7dfe30cf09fb0p-20
+adam 241 -0x1.19250602a118ep-16 0x1.9d91c9ba053d1p-20
+adam 242 0x1.1b9242dd94aeep-14 0x1.84a5eafc98b3dp-20
+adam 243 0x1.0a9182387be98p-14 0x1.170ff5c64fc1ep-19
+adam 244 0x1.c29eb0fbd6ad8p-15 0x1.286f8ea45e955p-19
+adam 245 0x1.04ba1f91e76bcp-20 0x1.a9ad5235c5db5p-21
+adam 246 0x1.54b136e73b1c5p-15 0x1.9a1d787679a3ap-21
+adam 247 0x1.a4087cbbe6e32p-15 0x1.a6f38af16d032p-19
+adam 248 0x1.627df9579435ap-16 0x1.0502954da117dp-21
+adam 249 -0x1.75837db4ab5e7p-15 0x1.a6958cad9ac6bp-20
+adam 250 -0x1.6e2908d9fd443p-15 0x1.b34c3f93eb626p-21
+adam 251 0x1.782a805c85c48p-17 0x1.02bf85598396bp-23
+adam 252 -0x1.2b94ba9432030p-14 0x1.90fa2143e5decp-19
+adam 253 0x1.ec2e5bdfe8949p-15 0x1.8a5bf5bc7e319p-19
+adam 254 -0x1.787b6dd37753cp-15 0x1.7d4f4a5cbf9cap-20
+adam 255 0x1.8d16fd3ddec5bp-17 0x1.1bf0e3e3e7bedp-22
+adam 256 0x1.c60cdf7342be7p-16 0x1.07bd93dc0df5ap-21
+adam 257 -0x1.05db3266c8b02p-15 0x1.a3569f91a6feep-20
+adam 258 -0x1.596e4b5dee9f3p-15 0x1.b67e297ccd576p-21
+adam 259 0x1.4f9afe90ff25ep-19 0x1.09398ab0f1504p-23
+adam 260 -0x1.61e798488cab6p-14 0x1.915baba25451bp-19
+adam 261 0x1.c038124739c22p-15 0x1.8a69c0f792fe4p-19
+adam 262 -0x1.46c06b56b9e29p-15 0x1.7ffa5c08637cdp-20
+adam 263 -0x1.e01bdeab0b162p-19 0x1.12fd0ec2df0f2p-22
+adam 264 0x1.b7557b4c60bedp-16 0x1.0613767c79115p-21
+adam 265 -0x1.4258aa6d480fap-15 0x1.a559a2bfbac41p-20
+adam 266 -0x1.d1fd73bd0f0afp-15 0x1.b3e3838932948p-21
+adam 267 0x1.4ddca989bb231p-17 0x1.fae7216c4d558p-24
+adam 268 -0x1.392ad788d48ffp-14 0x1.91489cb02b713p-19
+adam 269 0x1.acbcc4e7b227cp-15 0x1.8a63286a5271cp-19
+adam 270 -0x1.ec3e5f9d082a9p-15 0x1.7af34a517f98dp-20
+adam 271 0x1.035ead5722622p-19 0x1.1f85fd158907cp-22
+adam 272 -0x1.a7bcfc0f47c7cp-17 0x1.44298a0430b86p-21
+adam 273 -0x1.8ce6b5895bfa1p-15 0x1.c311d43fa259ap-20
+adam 274 0x1.66d64c8e2afb7p-18 0x1.e21ea327b14d6p-21
+adam 275 0x1.08eb91e35f20ep-15 0x1.632034f333bbap-22
+adam 276 -0x1.913831aa2bf43p-16 0x1.95096b42529d1p-19
+adam 277 0x1.ac610c6a94960p-15 0x1.88831e34fa6a3p-19
+adam 278 -0x1.fe8a0779a9941p-19 0x1.7a497bd2079d0p-20
+adam 279 0x1.38f2a0625cedcp-15 0x1.325dea9c53821p-21
+adam 280 0x1.4f131ae8a3d29p-14 0x1.237b8b316a7d1p-20
+adam 281 -0x1.d042615a60d03p-14 0x1.36252a7ff38eap-20
+adam 282 -0x1.60ce4de6e6ab5p-13 0x1.4d369f24dbae6p-19
+adam 283 -0x1.13cac74002c29p-17 0x1.ff7f9a6af3f21p-23
+adam 284 -0x1.5468458fa0483p-14 0x1.b2cfbed96c070p-18
+adam 285 0x1.f89017897cda3p-14 0x1.49592f8035647p-19
+adam 286 -0x1.92c540da92688p-13 0x1.60a03ab4eaadbp-19
+adam 287 0x1.e9082a3374e00p-14 0x1.7e720ae0c1c33p-22
+adam 288 0x1.20a81d2a5e45ep-14 0x1.28cf3a920627ap-20
+adam 289 -0x1.9a52898b2a4f1p-15 0x1.1df66adbda22ap-20
+adam 290 0x1.437404be0a11dp-15 0x1.552083ca4b927p-19
+adam 291 -0x1.5a30c0d095a2dp-14 0x1.6120fe01156e6p-22
+adam 292 -0x1.67df76c0a6fa4p-13 0x1.b3559db5e7498p-18
+adam 293 0x1.5b75319d66a4ap-13 0x1.49eb32a94d6dbp-19
+adam 294 0x1.8bb585aa16633p-14 0x1.7a63f71067d96p-19
+adam 295 0x1.5fc048bb66c27p-14 0x1.f0e44ecf690ccp-23
+adam 296 0x1.2c27f569d37afp-14 0x1.2b0df64ff2857p-20
+adam 297 -0x1.fd78228c752a0p-14 0x1.38b3090839993p-20
+adam 298 -0x1.2f2ff68e1cba6p-13 0x1.4de78d8dba3afp-19
+adam 299 -0x1.d9fd36ef01f2ep-18 0x1.27f6d937246f5p-22
+adam 300 -0x1.482c3e99513f8p-14 0x1.b52a35b53c235p-18
+adam 301 0x1.1dc7aa3508e32p-13 0x1.46093458d4defp-19
+adam 302 -0x1.5469e51ccd425p-13 0x1.58a8245a82b3ap-19
+adam 303 0x1.1722c582588fcp-13 0x1.d41e94d342f32p-22
+adam 304 -0x1.06867c17b6040p-14 0x1.3c8d82ee6eeb9p-18
+adam 305 -0x1.432f0e35aa914p-15 0x1.34e813b2a9056p-18
+adam 306 0x1.818f5ac254f6bp-14 0x1.5d6674850b1c9p-18
+adam 307 0x1.f7542d9de65d1p-15 0x1.cb1c3e8b85733p-18
+adam 308 0x1.b0b41618714cfp-14 0x1.f2f08cdf1c2b0p-18
+adam 309 0x1.04911d99a6517p-15 0x1.1b88ba96d2fd7p-19
+adam 310 0x1.cc360ca9cda15p-15 0x1.335d6e53d8bd4p-19
+adam 311 0x1.1a44e90c605bbp-13 0x1.4d5ab0fa0feddp-17
+adam 312 0x1.bd8ad741543e1p-14 0x1.18773fdd1c695p-21
+adam 313 0x1.09aade0163e60p-14 0x1.9601dec23d743p-21
+adam 314 -0x1.70c2c78735e31p-14 0x1.08c2ebf35842ap-20
+adam 315 -0x1.659c6128b6172p-14 0x1.aeed29e392c06p-23
+adam 316 -0x1.57e65f434c366p-13 0x1.70c6802ac3dbdp-19
+adam 317 0x1.ee6f1c957d6fep-17 0x1.8b62679741090p-20
+adam 318 -0x1.2438ab299549bp-14 0x1.3fe616d262380p-20
+adam 319 -0x1.4da8b7b42e6edp-14 0x1.0f4b643f57e8dp-22
+adam 320 0x1.3b1210598e9bap-15 0x1.0451f14c7a426p-21
+adam 321 -0x1.6b4dc7f425aa8p-14 0x1.960a6c79d233ep-21
+adam 322 -0x1.c26f4bbc2334ap-14 0x1.0129cff5cd3dcp-20
+adam 323 0x1.98f6956dddd31p-17 0x1.cfc870e1b7c5bp-24
+adam 324 -0x1.4003c9120b573p-16 0x1.749af6cbd40dfp-19
+adam 325 0x1.40acf0c203736p-14 0x1.89f15c8526c87p-20
+adam 326 -0x1.05e2d3822ef26p-13 0x1.431e21fad7bc4p-20
+adam 327 0x1.8cf24cb8bea18p-14 0x1.e92749be1aa10p-23
+adam 328 0x1.574fc8e4adcd7p-15 0x1.02b8dfc92544cp-21
+adam 329 -0x1.84c391fa8da69p-17 0x1.8a05cd734a56bp-21
+adam 330 0x1.cd4b72e8c76f2p-15 0x1.0f66557134c17p-20
+adam 331 -0x1.0925571ea546ep-14 0x1.a1e62a3e3549fp-23
+adam 332 -0x1.e575884e769bbp-14 0x1.697c22d54bd3cp-19
+adam 333 0x1.a41464adf899cp-14 0x1.900b05bf363a7p-20
+adam 334 0x1.910968da82f5cp-14 0x1.61b1023830eafp-20
+adam 335 0x1.42fd65c642260p-15 0x1.8f02579db357cp-23
+adam 336 -0x1.8509d16852dd6p-14 0x1.cfd3066fbfae0p-20
+adam 337 -0x1.22d2e3348a2bdp-13 0x1.071a8cde01455p-19
+adam 338 0x1.758301b1cd57bp-15 0x1.fca6dd52cf8fbp-20
+adam 339 0x1.c6f2fa43d1e57p-14 0x1.3f2b8fce9fe09p-19
+adam 340 0x1.797aa9f6793cap-13 0x1.9f1b38e069defp-19
+adam 341 0x1.19c9b25e427e5p-14 0x1.6bf3fee2a0fdcp-20
+adam 342 -0x1.4eae293626bfap-17 0x1.2203348a4c316p-20
+adam 343 0x1.dbac5d916c41cp-13 0x1.dcad72b7ba549p-19
+adam 344 0x1.e1924c33adebbp-16 0x1.e2457ded9c4e3p-21
+adam 345 0x1.5bc7d1e247f8dp-15 0x1.3a326e9ce6c6dp-19
+adam 346 -0x1.0c36bfb51a2e3p-16 0x1.6b4bdb675b6f4p-19
+adam 347 -0x1.2f8484fd7305ap-17 0x1.6b81f51eb67f5p-23
+adam 348 -0x1.5a54efa4b710dp-16 0x1.0fd504886f5a7p-17
+adam 349 -0x1.0bdfbd1ddca90p-15 0x1.51056db31b894p-18
+adam 350 -0x1.669967c67d50bp-17 0x1.67158f6ce48eep-19
+adam 351 -0x1.2436b3b961a70p-15 0x1.676d898717814p-22
+adam 352 0x1.d375d7b94cdd0p-17 0x1.edb321b51d424p-21
+adam 353 0x1.d8d70595fca33p-18 0x1.35e30ebbb28e0p-19
+adam 354 -0x1.93d16f96a0e48p-16 0x1.69b155fac1f9cp-19
+adam 355 0x1.afc6a1673e754p-17 0x1.42e6a91e2d02cp-23
+adam 356 0x1.a798f492a2236p-17 0x1.11323419be576p-17
+adam 357 -0x1.36b3b4af12d35p-16 0x1.4e7897341a875p-18
+adam 358 -0x1.e8579d7bd840dp-16 0x1.6989dfca33795p-19
+adam 359 0x1.8bb2ef80b94bfp-18 0x1.55db7aa3e3946p-22
+adam 360 0x1.c3d47b9ed10bfp-17 0x1.db41d74dc521ep-21
+adam 361 0x1.9251d818ff694p-16 0x1.35e1a3deb258ep-19
+adam 362 0x1.445dd8cbc227dp-16 0x1.6bc8df236331ep-19
+adam 363 -0x1.eb76e282be03dp-19 0x1.8c309869989d0p-23
+adam 364 -0x1.61333fcedc7f5p-17 0x1.0fa2bb50fe0e5p-17
+adam 365 -0x1.6d70cf7354bdbp-17 0x1.4f8fc2371209dp-18
+adam 366 0x1.0f87b92da4c1dp-15 0x1.6da49dce3d6c9p-19
+adam 367 -0x1.2f222f07daabbp-17 0x1.5cc2de704ec6bp-22
+adam 368 -0x1.beaf5d80ceb2dp-14 0x1.005e5641a7630p-19
+adam 369 -0x1.803d65e913161p-15 0x1.be5daebe3c594p-19
+adam 370 0x1.eeb2d628ebd8bp-14 0x1.d19a4d3d91e4cp-19
+adam 371 0x1.a6c0cef40f2a7p-14 0x1.0e30888a018a3p-19
+adam 372 0x1.9945581121047p-13 0x1.18682b655455fp-17
+adam 373 -0x1.5858338d4a5ebp-16 0x1.48335329fda81p-18
+adam 374 0x1.4bfa9d19bd061p-14 0x1.5cbc2dc54ce35p-19
+adam 375 0x1.1ad72838e4055p-13 0x1.9d793577b82a3p-19
+adam 376 -0x1.73d31e7ee74d1p-17 0x1.3a6f8f0d9ef5cp-22
+adam 377 0x1.787c8ad192191p-16 0x1.25567c5220c7cp-21
+adam 378 0x1.1c62ee86c296ep-15 0x1.fe1aa4115864dp-22
+adam 379 0x1.3d2780c27be53p-16 0x1.5acfb17164075p-21
+adam 380 -0x1.8ab088ee028b5p-16 0x1.022e1ac50bf5ep-20
+adam 381 -0x1.2877910667aecp-16 0x1.8f817ff60e677p-21
+adam 382 0x1.b0e80e2342936p-15 0x1.6a1c3cb2a3d34p-21
+adam 383 -0x1.e1f4c79fe531bp-15 0x1.91c477950e728p-21
+adam 384 0x1.12658009d7c06p-17 0x1.3d721b698eb28p-23
+adam 385 0x1.d04bc9b824d9cp-17 0x1.76c1a9e66f72fp-21
+adam 386 -0x1.4cd4265967d44p-14 0x1.d78bf21f477dcp-23
+adam 387 0x1.50bd7a4457e91p-15 0x1.a93c698cd7a36p-22
+adam 388 0x1.b82e0d8480f50p-22 0x1.2538bfddc7bcap-20
+adam 389 -0x1.b6a82f5175c45p-15 0x1.43dd42d0f0d2fp-21
+adam 390 -0x1.ae9d9544a35e6p-14 0x1.d1302ca44095fp-21
+adam 391 -0x1.0e234422e7835p-14 0x1.3bc0d08218ac3p-21
+adam 392 -0x1.30c5f648ea4d0p-23 0x1.64e11c1b81c62p-22
+adam 393 0x1.31756b78e8b68p-15 0x1.415cd150f4c2fp-21
+adam 394 0x1.1642063308d35p-16 0x1.c132d6d76eee2p-22
+adam 395 0x1.3a7dd1bb9699ap-16 0x1.6f77e54474adep-21
+adam 396 -0x1.292ea680ea155p-15 0x1.0cd6708f58eb9p-20
+adam 397 -0x1.01272c1fa6541p-15 0x1.69d1f9bd48271p-21
+adam 398 0x1.6c49880d4a24fp-15 0x1.14ae6d92cba51p-21
+adam 399 -0x1.7c4038883ec9ep-14 0x1.d52accf4769c8p-21
+adam 400 -0x1.fc535fb116f8dp-16 0x1.4eca716e832ebp-23
+adam 401 -0x1.96babfc088a45p-15 0x1.5661c06bc327cp-21
+adam 402 0x1.3a028b142d0f0p-16 0x1.fb9c8e5c57ce2p-23
+adam 403 0x1.67a1fe104b842p-15 0x1.2f44d93d229aep-22
+adam 404 0x1.3952aa41ef467p-16 0x1.38540491aae5cp-20
+adam 405 0x1.d7b6001b8774cp-16 0x1.5c535db82542dp-21
+adam 406 0x1.848c0f741c5d6p-17 0x1.48479be22260ep-21
+adam 407 0x1.43eb6ee168bbbp-15 0x1.8c608e13cc7e6p-21
+adam 408 0x1.1a9469aae5a84p-15 0x1.a6baac4ccdea6p-21
+adam 409 0x1.82e02645c2ff8p-14 0x1.48127b11cb19fp-19
+adam 410 0x1.83d33185916eap-18 0x1.5ca8027fe63e6p-19
+adam 411 -0x1.f4d15d4b4cf53p-15 0x1.df04a7b5f1707p-21
+adam 412 -0x1.001103a688b14p-17 0x1.b06507bfca87cp-18
+adam 413 -0x1.09533e71ea701p-14 0x1.640bcb91906e0p-18
+adam 414 0x1.cb7a15d886910p-17 0x1.d3b438cd09ee4p-19
+adam 415 -0x1.ec5d5a9c51c47p-15 0x1.cff3995d24f27p-21
+adam 416 -0x1.8b1ebbbb1e3fep-17 0x1.73a54e16f15efp-21
+adam 417 -0x1.128d5882ba40dp-17 0x1.8df42a9b886e3p-19
+adam 418 -0x1.31bcfec61dbcep-17 0x1.0351a3b31ad8bp-19
+adam 419 0x1.619ccd80513f8p-18 0x1.4d89b77f560b0p-22
+adam 420 0x1.7703905856921p-14 0x1.bdc1b3a9bdecep-18
+adam 421 -0x1.751a9d902f59dp-16 0x1.53a9effc26a23p-18
+adam 422 -0x1.ba76b62c5f91cp-16 0x1.66293ce6149c7p-19
+adam 423 0x1.eb2b199a638e9p-15 0x1.3909e38739bbap-20
+adam 424 -0x1.ab501d2cb39e5p-16 0x1.2509daf3a6fe4p-20
+adam 425 0x1.08b5ab4e89481p-15 0x1.75c55eb299db4p-19
+adam 426 0x1.d29d548388ec6p-14 0x1.2ef26f9cf153ep-19
+adam 427 -0x1.ef1e7e340e03ap-16 0x1.2358dd21f088dp-20
+adam 428 0x1.a4bbe3d3ed8dbp-15 0x1.c82f64226c580p-18
+adam 429 -0x1.6cafa87540babp-17 0x1.4c898c2b5afbcp-18
+adam 430 0x1.10e2a9a505f9fp-13 0x1.3e9fa1883748ep-19
+adam 431 0x1.170741b3bda72p-15 0x1.b6812fe9b3632p-20
+adam 432 -0x1.458bf9e547799p-15 0x1.8b033a8e40df1p-21
+adam 433 -0x1.f3ed17fa8d3a6p-21 0x1.73147a0dbc9fap-19
+adam 434 0x1.0dc844a0ebe67p-15 0x1.04743745f3a7ep-19
+adam 435 0x1.94edd626b0804p-16 0x1.bf9f8f186507ap-21
+adam 436 0x1.067beaf988713p-13 0x1.d697a061f9a58p-18
+adam 437 -0x1.5ccd92c5ca1ffp-15 0x1.44978af99956cp-18
+adam 438 0x1.1c7baa3caefe8p-16 0x1.b158d08bfd4bdp-19
+adam 439 0x1.d6f7f1e155763p-15 0x1.34eadc9559e87p-20
+adam 440 0x1.eab520f8816adp-18 0x1.0bf5c1d8def3cp-22
+adam 441 0x1.3afdfa962524fp-14 0x1.f1c82dd9585d0p-22
+adam 442 0x1.1632dba0d84d2p-15 0x1.8439c3daf653ap-21
+adam 443 -0x1.e1ca39d685d05p-15 0x1.0a446eef366c7p-21
+adam 444 0x1.3cac336250d00p-16 0x1.41613be5ae264p-20
+adam 445 -0x1.ce16d2e2d7fcdp-15 0x1.01e841af9e66dp-20
+adam 446 0x1.7e9419267225cp-15 0x1.4d2ce3d9dca90p-20
+adam 447 -0x1.8fa374e79d3bap-15 0x1.cc2e607271dbdp-22
+adam 448 -0x1.fe0ced368515ap-16 0x1.dc1f22197f262p-23
+adam 449 -0x1.c90f1b542a4bbp-17 0x1.80735e853cb9bp-21
+adam 450 0x1.f6082fc38635dp-18 0x1.a6e917a281076p-22
+adam 451 0x1.250e871cc42cap-19 0x1.a75bdd217ebe5p-23
+adam 452 0x1.bf6f97b23f273p-14 0x1.63b190d66e89ep-20
+adam 453 -0x1.883c6db094836p-16 0x1.c10172147c6a0p-21
+adam 454 -0x1.95fe4ef4e5090p-18 0x1.9be6ad9c49a72p-21
+adam 455 0x1.c09e7261e8cf3p-15 0x1.49816b6107d20p-21
+adam 456 -0x1.663a0a50d6aa7p-16 0x1.c4d630378b29cp-22
+adam 457 0x1.461e95ac8365cp-15 0x1.49b279a2f7dd2p-21
+adam 458 0x1.9f77d9cfc027ep-14 0x1.2140449f59aecp-21
+adam 459 -0x1.c0fd67ed727e6p-15 0x1.274b4d64d166ap-21
+adam 460 0x1.3fc256e5a8474p-15 0x1.75164342a9fdfp-20
+adam 461 -0x1.5e3a46005030ap-17 0x1.ab235dabfa92ep-21
+adam 462 0x1.e3a37df4531f9p-14 0x1.4a3a9023afa1ap-21
+adam 463 0x1.332158e68128ep-16 0x1.aeb7f3f8e35b3p-21
+adam 464 0x1.4bad8eeb1de96p-15 0x1.4fa1abcfee907p-21
+adam 465 0x1.94b8c9a42b159p-17 0x1.07d410c7cfa75p-20
+adam 466 -0x1.243c1615ce8c5p-14 0x1.6fa0dbc7bd7b7p-21
+adam 467 -0x1.a29fc59185123p-15 0x1.411e881693346p-20
+adam 468 -0x1.e408477f6d042p-19 0x1.ae209288d5afap-20
+adam 469 -0x1.d583a099d7c5ap-17 0x1.6fa4911b0ce9cp-21
+adam 470 -0x1.e845b94f6f73dp-15 0x1.1efc3f6292498p-20
+adam 471 -0x1.3082b15dfbd2ap-16 0x1.a58586322ccd3p-20
+adam 472 0x1.064e481597addp-14 0x1.a69fc5f93c5c9p-20
+adam 473 0x1.66155af34fb33p-15 0x1.0daa067717673p-18
+adam 474 -0x1.2117ecbcab5d1p-14 0x1.09cff3d9de149p-18
+adam 475 -0x1.483678a7e179bp-14 0x1.68ba392f2e648p-20
+adam 476 0x1.1703530d6145cp-20 0x1.89d8783c83115p-17
+adam 477 -0x1.3dcbe4b22db92p-16 0x1.01fe696928e26p-17
+adam 478 -0x1.469e213c23960p-14 0x1.061d684a5b26bp-18
+adam 479 0x1.60cba9990211ep-16 0x1.df68dc4cca76fp-20
+adam 480 0x1.4c70dbfbb26cap-16 0x1.37bd62ac40d69p-20
+adam 481 -0x1.308a725b488e8p-18 0x1.185c1d19db76cp-18
+adam 482 0x1.c402f0b991a24p-16 0x1.e6f5234f85549p-19
+adam 483 -0x1.014d22cba26f9p-14 0x1.b4c9d0c0a1f75p-21
+adam 484 0x1.10c6632a2e82dp-15 0x1.94244d028a817p-17
+adam 485 0x1.262e7754f477dp-15 0x1.f774cce79ebb1p-18
+adam 486 0x1.63e09637f4583p-15 0x1.38ac7188b1f5cp-18
+adam 487 0x1.7b8f910747b81p-14 0x1.5babe4d328cebp-20
+adam 488 -0x1.d627804c76c82p-17 0x1.925ff9f1492c1p-20
+adam 489 -0x1.a5c4431a29b2dp-16 0x1.0a7ca76936744p-18
+adam 490 0x1.250e25003d462p-14 0x1.11bce169e3d4ep-18
+adam 491 -0x1.49a7a0cf97d02p-16 0x1.73a40394e6735p-20
+adam 492 0x1.39c09b8684e17p-14 0x1.85b7b67da6090p-17
+adam 493 0x1.158b4e68bfc18p-15 0x1.03edb6047b9a1p-17
+adam 494 0x1.cb503bab4d485p-14 0x1.1d4ab61c2f66cp-18
+adam 495 0x1.6380c57627469p-14 0x1.c025327d78c71p-20
+adam 496 -0x1.483d25831e489p-16 0x1.be0e54a14ac76p-20
+adam 497 0x1.112592b699462p-15 0x1.358b5bac6258ep-18
+adam 498 0x1.06e89df11b904p-15 0x1.0f6f478234a1ap-18
+adam 499 -0x1.774159a917c0ep-17 0x1.47f2f92492c36p-20
+adam 500 0x1.074cca5464e01p-13 0x1.98a6c5d7ae3a7p-17
+adam 501 -0x1.b55268c3051e4p-15 0x1.00bc42ba88de5p-17
+adam 502 0x1.03f2e2bad3e62p-16 0x1.03e66cc4a7c19p-18
+adam 503 0x1.e5699d09c377dp-15 0x1.901a36d7e82f0p-19
+adam 504 -0x1.79f9049a649cep-14 0x1.7fd78701dfc56p-21
+adam 505 -0x1.c4a0ad241e115p-14 0x1.e1da55ddf7cf1p-20
+adam 506 0x1.91b0694ad5923p-15 0x1.fddacb3202fadp-20
+adam 507 0x1.a0650103f18e7p-14 0x1.e176dc6de1703p-22
+adam 508 0x1.da1f928d5e386p-14 0x1.6b439ac0ee9b0p-18
+adam 509 0x1.2a9d899f4abe4p-15 0x1.ebc0ffbb220b9p-19
+adam 510 0x1.27d510bffe527p-15 0x1.1be30500fb0c2p-19
+adam 511 0x1.7d57847181044p-14 0x1.2f23bb3f681d9p-21
+adam 512 -0x1.183cebb5b65fcp-17 0x1.4aadffdd711e7p-21
+adam 513 0x1.1b2fd4bc9c67dp-14 0x1.fad07000d96c9p-20
+adam 514 0x1.1e0cee5a56545p-14 0x1.cfdc90fa530e1p-20
+adam 515 -0x1.2e4c0f9871d37p-16 0x1.f0951e40c65abp-23
+adam 516 -0x1.e6f7d9c7e8236p-15 0x1.730956a606aa5p-18
+adam 517 -0x1.2a6afcc7a5fe0p-15 0x1.e193fbed0def6p-19
+adam 518 0x1.862ef9c3cfd1fp-14 0x1.1b43f9cc857c5p-19
+adam 519 -0x1.c6181267203dap-14 0x1.182a3d44a4364p-21
+adam 520 -0x1.ed0bfe0c2f069p-18 0x1.92fe27d237f31p-21
+adam 521 -0x1.2aea509f07f2ep-16 0x1.edda182997df3p-20
+adam 522 -0x1.e6bbd9b7837dbp-14 0x1.f5f3cb86b7212p-20
+adam 523 0x1.0f3bf2d2e2adfp-14 0x1.09f59914508d7p-21
+adam 524 0x1.5e50fe466b732p-15 0x1.6dc15979fa03dp-18
+adam 525 -0x1.cfb61423763a6p-15 0x1.e586a1103df3ap-19
+adam 526 -0x1.390967a778086p-13 0x1.0e75f6dc76736p-19
+adam 527 -0x1.a207280403e51p-15 0x1.6578a8d00f7a1p-21
+adam 528 0x1.599021ea14730p-14 0x1.49838673eeed2p-20
+adam 529 0x1.7142c218bd659p-14 0x1.498b440159ccbp-19
+adam 530 -0x1.59189fa30f965p-15 0x1.23d737f0ca236p-19
+adam 531 -0x1.67d6fbe6fd83fp-14 0x1.64fb9ad9da029p-20
+adam 532 -0x1.99790afee4b03p-13 0x1.810743431e75bp-18
+adam 533 -0x1.842054ebb2271p-17 0x1.d8703f4377970p-19
+adam 534 0x1.26886d57704f6p-18 0x1.100f56a86b6c0p-19
+adam 535 -0x1.6f972672cb729p-13 0x1.242e754832c88p-19
+adam 536 0x1.5d5b8f5da66eep-14 0x1.0ec86922d13e3p-21
+adam 537 0x1.43e69487e1d2bp-13 0x1.46d9017b4e240p-20
+adam 538 -0x1.04efc8503f21bp-16 0x1.b74a785405d2cp-21
+adam 539 -0x1.3795cf9d6222bp-13 0x1.e14f7c1ca1686p-22
+adam 540 -0x1.4c502f9f323f0p-14 0x1.6089fe7dc9d01p-19
+adam 541 -0x1.24a08ec8934e5p-14 0x1.129f071255f8cp-19
+adam 542 0x1.162774dd255b6p-18 0x1.1ce719b16ecc1p-20
+adam 543 -0x1.d9a0fd8e3e39bp-14 0x1.6cb09a8fe9b97p-21
+adam 544 -0x1.8453b54ecc844p-16 0x1.82dd48ca7396bp-22
+adam 545 -0x1.40498613ef43bp-14 0x1.465daca6e426bp-20
+adam 546 -0x1.7de0c46f332a3p-15 0x1.9e5e69b70fffdp-21
+adam 547 0x1.2ced0a0bfa42ep-18 0x1.873e2f8e5a3f6p-22
+adam 548 0x1.30eba943aebfcp-13 0x1.65d0f90582d04p-19
+adam 549 0x1.8f7419d0e6ccap-16 0x1.0cd79829b1420p-19
+adam 550 -0x1.488e75a5b6b22p-14 0x1.8c0796a713ce2p-20
+adam 551 0x1.3d2d117df6853p-13 0x1.db6f9a0577cd6p-22
+adam 552 -0x1.27703bdbfa2efp-15 0x1.11c56f77085ccp-21
+adam 553 0x1.d15a94d051d9ap-16 0x1.4e9f0741b790dp-20
+adam 554 0x1.b531df4723c5bp-13 0x1.e4b55b518b991p-21
+adam 555 -0x1.92b483b7349d9p-14 0x1.3e937d8366a16p-21
+adam 556 0x1.e96784450379dp-16 0x1.61941ccfb37d2p-19
+adam 557 0x1.a803b97ba97e5p-15 0x1.0f24b5e9cfc60p-19
+adam 558 0x1.075d17ed1a832p-12 0x1.3c8f043dd0e81p-20
+adam 559 0x1.6a0a414da3e9dp-14 0x1.b36206d4903ccp-21
+adam 560 0x1.6d06e26f84110p-16 0x1.308d8a19497acp-21
+adam 561 -0x1.e15ca80fe8bd5p-16 0x1.941944b1fc99fp-20
+adam 562 -0x1.637545613d776p-14 0x1.f0ed4fc89cbf1p-21
+adam 563 -0x1.09a826df7e102p-15 0x1.1f1bbf050a94cp-21
+adam 564 0x1.24e0a465eaa8cp-14 0x1.6f3ddfcd855a1p-19
+adam 565 -0x1.555f9a00ca720p-19 0x1.0e2b0f40340d3p-19
+adam 566 -0x1.8bebfa5fa0a3ap-14 0x1.2c22803842f8cp-20
+adam 567 0x1.02db1e2580067p-14 0x1.6cc9aa7760731p-20
+adam 568 0x1.27d3deb827717p-14 0x1.d0abeae1038adp-17
+adam 569 0x1.7a76e2dc56268p-14 0x1.3401a09d1f0f4p-15
+adam 570 0x1.e538660abb26cp-16 0x1.73ca2204873e8p-17
+adam 571 -0x1.268a9dc665b35p-13 0x1.5d7c0df8c6e19p-16
+adam 572 -0x1.bd0fe198845f6p-12 0x1.f7e4108fa5968p-16
+adam 573 0x1.0f1e739f89f4ap-13 0x1.280dedf811d69p-17
+adam 574 0x1.87f4d41d1d44cp-13 0x1.39030f14a4dddp-16
+adam 575 0x1.5ded6415528ddp-16 0x1.cf710ffbbe396p-16
+adam 576 -0x1.678b830a176c0p-20 0x1.b94f30bd3ea3ep-17
+adam 577 -0x1.3fbd6320f5e67p-14 0x1.68ee3901a9d8ep-15
+adam 578 0x1.df68b620e8581p-14 0x1.bb7a85ce9f7d6p-18
+adam 579 -0x1.bff66f293831dp-13 0x1.47ef0185b1542p-15
+adam 580 -0x1.9c4cb19c6157ap-13 0x1.ed9c105bc4f3cp-18
+adam 581 -0x1.5b2ae5edadae4p-12 0x1.17c0e52ed22c0p-14
+adam 582 0x1.207ca97a40671p-13 0x1.f9c2935e30d87p-16
+adam 583 -0x1.3687fcb0e6bdfp-12 0x1.065a2e6ed83c6p-16
+adam 584 -0x1.95993e9dd5fdfp-12 0x1.f895114b69550p-20
+adam 585 -0x1.bf0baa98e4580p-21 0x1.b6cecc33d1493p-19
+adam 586 -0x1.ef087c561cf01p-15 0x1.8db26746784edp-17
+adam 587 0x1.a4b26d1c44b49p-12 0x1.8e6ad63ef71acp-17
+adam 588 0x1.9c9634c0f8ee7p-12 0x1.46b61ee90ca45p-16
+adam 589 -0x1.b3c06af1b2c88p-12 0x1.1993817c43d3bp-16
+adam 590 -0x1.2f8c33533e96cp-11 0x1.63f50b06a66a1p-16
+adam 591 0x1.d503a7fbca4b6p-13 0x1.07e52803e7c5ap-17
+adam 592 0x1.0bf1c22d7f591p-15 0x1.136dbf0d75d95p-16
+adam 593 0x1.cc050906c1040p-14 0x1.91c693e2326c9p-17
+adam 594 -0x1.6e87313c8c662p-14 0x1.088905351e54ep-18
+adam 595 0x1.e0019dfdae097p-13 0x1.e2ebe370ecbe0p-19
+adam 596 0x1.f049c20d4a5edp-14 0x1.070c17328cf86p-20
+adam 597 -0x1.60836af2a249cp-13 0x1.f2076d0c8e190p-18
+adam 598 -0x1.f73cf04ec60fap-15 0x1.58e2fb3b74dafp-20
+adam 599 0x1.755d1f57df73ap-14 0x1.5b03cfa538cb5p-20
+adam 600 -0x1.eeb2f2c69644ap-18 0x1.34be5c70ef114p-23
+adam 601 -0x1.69b5671c0f8aap-18 0x1.32df66814f67ap-24
+adam 602 0x1.4db53f7c892b3p-19 0x1.9b883bff8b3c7p-26
+adam 603 -0x1.27248d222fbfcp-17 0x1.5f4bf59d76c34p-22
+adam 604 0x1.a4ac3eb914587p-16 0x1.20f8968c312a2p-24
+adam 605 0x1.0d704db3bd38fp-19 0x1.10dd002a7eaf2p-23
+adam 606 0x1.159e795b03200p-17 0x1.26b5bcb2ea74ep-23
+adam 607 -0x1.5eb5478a04c67p-17 0x1.c8a099a3b78cfp-24
+adam 608 0x1.5bb3358a06e4bp-16 0x1.68ae921b7a790p-22
+adam 609 0x1.cb61710214b60p-19 0x1.0b13185117b02p-25
+adam 610 0x1.34e4734db0454p-15 0x1.ba73607721f2ep-22
+adam 611 0x1.bdacd8289e6f6p-19 0x1.92df7ebed8a1fp-24
+adam 612 -0x1.0a618651cf794p-17 0x1.e1f63d8b262d1p-26
+adam 613 0x1.2fb4ba39e77dfp-16 0x1.a0abc0814f85cp-24
+adam 614 0x1.5a5308b792fcap-16 0x1.366a990936d20p-23
+adam 615 0x1.a16517f870110p-17 0x1.885f2a2bb0ac7p-23
+adam 616 0x1.f3220ac0fd348p-20 0x1.5f59ef2fccdbdp-18
+adam 617 -0x1.2dc7c3fc8c7b6p-12 0x1.5c9415bf78ec2p-19
+adam 618 0x1.c54284134121bp-14 0x1.c1e0adef986f7p-19
+adam 619 -0x1.5b6b6c6b270a0p-13 0x1.c612b2d5bcadfp-19
+adam 620 -0x1.9f7401d218cdcp-13 0x1.c1697df8bfbffp-20
+adam 621 0x1.4a4761c4264f7p-12 0x1.5a76ce7fd43dep-19
+adam 622 -0x1.233c0faf4007dp-14 0x1.235211bcfde82p-19
+adam 623 0x1.98dd78a0ac3b2p-13 0x1.4dce883324e31p-20
+adam 624 0x1.58f07fa072a6ep-14 0x1.9f107702156c8p-19
+adam 625 0x1.10e8659aa2edcp-13 0x1.9bf77c5fd755cp-18
+adam 626 -0x1.a6d6bede5bd76p-13 0x1.dbd72b07b11bbp-18
+adam 627 0x1.0cc8ef9ff5c4ap-15 0x1.f1c2c141c39fdp-20
+adam 628 0x1.0e4d682ea901bp-14 0x1.39359642c3956p-17
+adam 629 0x1.4ef6a1a9739acp-14 0x1.2e5ac02178f25p-20
+adam 630 -0x1.cdbe12447a37cp-14 0x1.bc153aaa9ea34p-19
+adam 631 0x1.2c900fd86fe8ep-15 0x1.5af15b9d8d3b0p-18
+adam 632 0x1.ccaf4d289bbb9p-19 0x1.01477bb476149p-25
+adam 633 0x1.c1d2dc990fe30p-25 0x1.c48876138a86ap-27
+adam 634 -0x1.dfbee216db494p-20 0x1.45d29771b215fp-27
+adam 635 0x1.830f5209880ccp-18 0x1.346ac3e6f3b6fp-26
+adam 636 0x1.c4cb3ce7c5589p-20 0x1.d2a04d4094f30p-29
+adam 637 -0x1.34f86565944fdp-22 0x1.778f5f97d4dfcp-26
+adam 638 -0x1.93d7412a4be60p-26 0x1.f68871dcc8bbcp-27
+adam 639 -0x1.257f4c23f5c02p-19 0x1.3085ca359f2d5p-27
+adam 640 -0x1.791f0b5f93d16p-19 0x1.1776922945b5ep-28
+adam 641 -0x1.55b7da99bb0b6p-18 0x1.59bc1eca4c215p-26
+adam 642 0x1.47faa3d660dd1p-18 0x1.ec7851bc1dc06p-28
+adam 643 0x1.7a2bef7c53344p-20 0x1.62f30e1e9d282p-26
+adam 644 0x1.24b45cafbd203p-19 0x1.10f9dec5f6b63p-26
+adam 645 0x1.ca183eee3e2a6p-20 0x1.47dd5ce8d873ep-27
+adam 646 0x1.48f549a933c87p-18 0x1.fd1d05d1aeb94p-28
+adam 647 -0x1.741f3805ad200p-25 0x1.0f09a622f0600p-27
+adam 648 -0x1.7ecb537607c87p-17 0x1.3f27b63f39f3ap-23
+adam 649 0x1.85095a3299dd4p-20 0x1.4b5ebaccc9c85p-25
+adam 650 -0x1.a98480dab5f2fp-19 0x1.6665afeab6755p-24
+adam 651 -0x1.a35344b98a5cfp-18 0x1.6fead615fbfecp-24
+adam 652 0x1.20cc435ecfbe7p-24 0x1.57a57d5427aa2p-25
+adam 653 -0x1.079525a43a77fp-18 0x1.ce800aeb7d18bp-27
+adam 654 -0x1.78a64d2e1ecd7p-17 0x1.a9e078f5764a0p-24
+adam 655 -0x1.3a54784e90cdep-19 0x1.282d5ad30744dp-27
+adam 656 0x1.c62a74fefb466p-21 0x1.3d6c0dba84883p-24
+adam 657 -0x1.50777a3bad625p-18 0x1.593b991914247p-26
+adam 658 0x1.1cf5687d25f7cp-17 0x1.65d0ef017f563p-23
+adam 659 0x1.7ee40d24f0034p-19 0x1.0b0f83b502bccp-26
+adam 660 0x1.7053b0526806bp-19 0x1.135f9bfc2c3a4p-24
+adam 661 -0x1.76b22630d39adp-21 0x1.1b7e8d50d80c4p-24
+adam 662 0x1.227fbc6cd9002p-18 0x1.12332eb15d5d6p-24
+adam 663 0x1.70283bc5df339p-17 0x1.cedfe1e76e651p-23
+adam 664 -0x1.1a92d69d821a1p-16 0x1.73cd587b9754bp-23
+adam 665 -0x1.2977e03242b62p-16 0x1.1d1da66ca0ed8p-23
+adam 666 -0x1.aed10aa9d8da5p-16 0x1.e5ba0de0efe5cp-24
+adam 667 0x1.2fe940e9e9327p-17 0x1.3051ffa39acbfp-23
+adam 668 0x1.3cd51dad830e6p-16 0x1.e572dc07483eep-25
+adam 669 -0x1.34e2d0bbc0e4ap-16 0x1.efae8c69ee227p-23
+adam 670 -0x1.35db3f532f1e3p-17 0x1.07bd7a4668042p-21
+adam 671 0x1.0da853c2ff9e8p-17 0x1.9e617985d7f73p-23
+adam 672 0x1.22da43c1de20ap-17 0x1.d9f51720a6f69p-25
+adam 673 0x1.3a82f53d9590ap-19 0x1.debad9eadafd4p-23
+adam 674 0x1.113c4cce13c10p-16 0x1.e7e8aea2b64b9p-22
+adam 675 0x1.8b5fe9a9e8c1ap-16 0x1.2fbb6a6da33fbp-23
+adam 676 0x1.6646e68dfc37ep-17 0x1.cdd19dcb50356p-24
+adam 677 0x1.ae041cf791c10p-17 0x1.defd4c5028074p-24
+adam 678 -0x1.8909d8d1f9563p-16 0x1.af5c2a8cef08cp-23
+adam 679 -0x1.f7627586c8469p-18 0x1.825598d4fdc5bp-23
+adam 680 -0x1.7204d69a96566p-17 0x1.d8897d55e6804p-25
+adam 681 -0x1.865b62f9db657p-16 0x1.117aae5e21a48p-25
+adam 682 -0x1.33d27d7306344p-19 0x1.2cbdc2a66697ep-27
+adam 683 0x1.8f3e3929b88e7p-16 0x1.6269890756fffp-25
+adam 684 0x1.948a8beb2d053p-16 0x1.728ccd54db5a2p-25
+adam 685 -0x1.1709deb7fcd4fp-15 0x1.86d809626a77dp-27
+adam 686 -0x1.a40b683a23d08p-15 0x1.fe8e67a7cd3d1p-25
+adam 687 0x1.1a5a39f7836f9p-15 0x1.607b617691d40p-25
+adam 688 0x1.80ba3e9bdbca3p-16 0x1.01953aea5547dp-25
+adam 689 0x1.8448388f79a36p-16 0x1.029ab4adba190p-26
+adam 690 0x1.edcd0b6c85cc0p-18 0x1.36e0985af1de9p-25
+adam 691 0x1.abe549c0a16cbp-16 0x1.904c416a739e2p-26
+adam 692 0x1.8736f9295afd6p-16 0x1.2d610bf754baep-26
+adam 693 0x1.081be9409a9aap-16 0x1.82f6639262b63p-25
+adam 694 -0x1.13d2d7158584cp-19 0x1.12bef661bc607p-25
+adam 695 0x1.2064309ae1ea9p-15 0x1.72c18d1df8d7bp-25
+adam 696 -0x1.d8cea753ca6d5p-13 0x1.d2992618af3bbp-21
+adam 697 0x1.0ce9567448ad5p-13 0x1.2b7026d2914ecp-20
+adam 698 -0x1.6e495346e5443p-13 0x1.5e18749aef2a9p-18
+adam 699 0x1.ceed2c27072fdp-14 0x1.a7d454d04c895p-22
+adam 700 0x1.8d20334786f7ap-13 0x1.244f62b9d1225p-18
+adam 701 -0x1.3427dbd337592p-13 0x1.fb777c326fb9ep-21
+adam 702 -0x1.3f39346eeb51ap-14 0x1.606e3b5a02ff3p-21
+adam 703 -0x1.04e0a0262d5a4p-13 0x1.3991f74ee2dc3p-20
+adam 704 0x1.c7aa6a933c662p-12 0x1.01b65617f3514p-17
+adam 705 0x1.956a6c5f514a3p-12 0x1.3c6a4328d51bcp-17
+adam 706 -0x1.11f02c7bebaacp-14 0x1.f918e5312d107p-19
+adam 707 0x1.3cd2dca145f9fp-12 0x1.cf004b4c62e22p-17
+adam 708 0x1.8dd045a94865cp-12 0x1.552e694a8c184p-16
+adam 709 0x1.4c39dd2b6f8ffp-13 0x1.6a1da14360770p-20
+adam 710 -0x1.229d28266cff7p-12 0x1.51184b1e446b5p-20
+adam 711 0x1.8045e18e99b3bp-12 0x1.45d5160c1d1e4p-16
+adam 712 0x1.ac50e217565a5p-12 0x1.10ef955f7481fp-16
+adam 713 0x1.72546cc01f4eap-15 0x1.bb647c2d246bep-15
+adam 714 0x1.1030d2a3cafb6p-12 0x1.4d76dece21d96p-17
+adam 715 -0x1.50ecd6a9a6adbp-12 0x1.21eb67c56db06p-14
+adam 716 -0x1.bffefb36a49b6p-12 0x1.44796efc81693p-15
+adam 717 0x1.43452f60ffb38p-12 0x1.0f2ad0fc6004cp-17
+adam 718 0x1.9b61dd84d6d6ap-12 0x1.320398f64b85ep-15
+adam 719 -0x1.55ddd1e239d31p-12 0x1.c7158f2aa5c10p-16
+adam 720 -0x1.64b5b941b6c58p-13 0x1.73180b73c5d66p-19
+adam 721 -0x1.223d4b9b91617p-13 0x1.78fd8a33c891ep-15
+adam 722 0x1.565bc605a95bcp-16 0x1.fac8c8eb4ee75p-16
+adam 723 -0x1.f0043b68331b2p-13 0x1.af8a21b4be5c5p-17
+adam 724 -0x1.320211452ca5ap-12 0x1.93931a908f780p-18
+adam 725 0x1.54e115ba9b908p-13 0x1.9406655bc7505p-15
+adam 726 0x1.6b2abd9e4231ep-14 0x1.e62183ae3ec05p-16
+adam 727 -0x1.289632cc027a8p-13 0x1.72a8f350f3cfcp-18
+adam 728 0x1.be9e012c9abb3p-16 0x1.734b2c327fad4p-22
+adam 729 0x1.671c1bf7700ddp-15 0x1.1f3bf1dcbecffp-20
+adam 730 0x1.931eb4babc6efp-16 0x1.bd3baf3183bc3p-22
+adam 731 0x1.f1478c6970e6bp-15 0x1.57c0ce0c5db04p-22
+adam 732 -0x1.2b319663fd7b5p-16 0x1.8162ca85f51a4p-20
+adam 733 -0x1.a19761b14ca08p-15 0x1.f659e5fab3498p-22
+adam 734 0x1.56428d61f4948p-15 0x1.6251caca0375ap-21
+adam 735 -0x1.69506f13b4825p-15 0x1.1c5e8cd6e9d1bp-20
+adam 736 0x1.837416c8bbec6p-18 0x1.522fc9e961c6ep-23
+adam 737 -0x1.a8a1b4d954abcp-16 0x1.b6640de537bf9p-21
+adam 738 -0x1.399e638705ce6p-15 0x1.3c091178d559ep-18
+adam 739 0x1.1b7f60626abc1p-14 0x1.73297dec5aa7fp-18
+adam 740 -0x1.a491f74e63ec4p-17 0x1.093997f148983p-22
+adam 741 0x1.70b0e7a24ca8cp-14 0x1.1dcd4f17229d6p-20
+adam 742 -0x1.8cdc076ff67afp-15 0x1.1f78770fc936bp-20
+adam 743 0x1.3755c4e8cacc7p-14 0x1.2c0ea36c2af19p-19
+adam 744 -0x1.1636b3a9eb363p-17 0x1.9ca1838ee59fap-22
+adam 745 -0x1.7f67468ce879fp-17 0x1.8a389ecc9ff7bp-23
+adam 746 -0x1.c615d2c109565p-16 0x1.1076194fdea90p-23
+adam 747 0x1.416e0315afa3fp-16 0x1.7da0b2bdb8521p-23
+adam 748 0x1.b5a5c0845c171p-15 0x1.456e53e114819p-23
+adam 749 -0x1.82ca51838dacap-19 0x1.d5e565fc2a41dp-23
+adam 750 -0x1.62fe223190f35p-15 0x1.3035fdda9c8dfp-22
+adam 751 0x1.26d41780040d0p-15 0x1.e3a0085e3e883p-24
+adam 752 0x1.5a51330e7eea1p-20 0x1.33bf8a752e209p-24
+adam 753 0x1.a423384113598p-19 0x1.d02928b6e3b38p-23
+adam 754 0x1.8a158658d1c2ap-17 0x1.188119470406cp-22
+adam 755 0x1.98abcb13f75cdp-16 0x1.285d25bd51a0ap-23
+adam 756 0x1.013be499c7d9ap-15 0x1.257698b72d487p-23
+adam 757 -0x1.adfbfede92eebp-20 0x1.677e2686acd71p-25
+adam 758 -0x1.7bbeb673a3ccfp-16 0x1.57b3102e2be58p-25
+adam 759 0x1.1f77758a420c6p-15 0x1.ff6fe4848393bp-23
+adam 760 -0x1.519727acb6798p-15 0x1.4f1ddc4e58b26p-19
+adam 761 0x1.73acc97bac872p-16 0x1.0213655290faap-21
+adam 762 0x1.a2fb5f47e0974p-16 0x1.0dae52b8dba79p-22
+adam 763 0x1.b52e4a2a27d83p-20 0x1.c70135ef47b8dp-22
+adam 764 0x1.a94590b434deap-16 0x1.1d0a560c5247ap-21
+adam 765 0x1.6675f4250d622p-16 0x1.c67e8dd63cfd7p-21
+adam 766 0x1.ec819c20687f8p-22 0x1.7730734303700p-21
+adam 767 -0x1.4432d219cc88ep-16 0x1.49da520e2beafp-21
+adam 768 0x1.5fa8d5ea7beeep-16 0x1.8ba64875fbcbdp-20
+adam 769 -0x1.c14835cfd94acp-18 0x1.208f64b0b192dp-22
+adam 770 0x1.19f943803dcf1p-15 0x1.38b07d89a7cc3p-21
+adam 771 0x1.308f7ba279cdfp-16 0x1.5af7ddb0547efp-20
+adam 772 -0x1.132319bb07b7cp-15 0x1.4cd95f6f4795cp-24
+adam 773 0x1.a77181b933bffp-17 0x1.0f139cba19333p-22
+adam 774 0x1.c82b8ea0632b4p-15 0x1.4bcac92c614a6p-20
+adam 775 -0x1.5b91ea3d8f0c6p-18 0x1.6210ac3cddbb1p-22
+adam 776 0x1.f52d9ebd34575p-16 0x1.040d02c19f00fp-21
+adam 777 -0x1.f52f67a794564p-17 0x1.2eef7f1602f62p-22
+adam 778 -0x1.813aae7a1f541p-15 0x1.080be72d22c68p-22
+adam 779 -0x1.5044be45c4e60p-16 0x1.232bd474f758ap-22
+adam 780 -0x1.6ad17b730892bp-17 0x1.20497e58c1f2ep-23
+adam 781 0x1.07241fe93654cp-14 0x1.08fe84e18f8c4p-22
+adam 782 0x1.1d670c1950b23p-14 0x1.23f0131730d22p-21
+adam 783 -0x1.d68239e7b37c2p-19 0x1.9045f18ee045ap-22
+adam 784 -0x1.1ec7cf58a9f3bp-14 0x1.c425a835f5510p-23
+adam 785 -0x1.c4f57c328a8f9p-15 0x1.2eb42364e1c69p-22
+adam 786 0x1.cdf1b4da8afe6p-15 0x1.11b1136622169p-21
+adam 787 -0x1.ef68e194e8b1ep-15 0x1.86481b1577c92p-23
+adam 788 -0x1.ce2187a1495a6p-16 0x1.a2fba9e1e291fp-23
+adam 789 0x1.70d1856755992p-16 0x1.617d10bd773ecp-22
+adam 790 0x1.65b6fa350c056p-16 0x1.8ab6c4d78d552p-24
+adam 791 -0x1.5ebdb20a7918ep-14 0x1.c01e73f98fce7p-23
+adam 792 0x1.ec326bbf76a6fp-17 0x1.429aa7c9c90f7p-20
+adam 793 -0x1.a3ff334a7d2bcp-18 0x1.08ef076ab2742p-20
+adam 794 -0x1.4322f179ab499p-16 0x1.0f7cb5e4c2ef0p-20
+adam 795 0x1.88131768589d7p-16 0x1.a4805d61c2738p-22
+adam 796 0x1.26dcb2bc6e89ap-16 0x1.950270b3dce1ep-20
+adam 797 0x1.2990c71669278p-16 0x1.389b3b6a0f05fp-20
+adam 798 0x1.382ba6e5f88bep-19 0x1.1d5953682717ep-19
+adam 799 0x1.80885b0d36c54p-17 0x1.a1903863ba377p-21
+adam 800 -0x1.2d268f699fd50p-15 0x1.67da1ca98aa48p-21
+adam 801 -0x1.974a77f6cb2dap-15 0x1.5292ce33029a8p-20
+adam 802 0x1.8eef6d9738210p-18 0x1.c16841c5c0aa4p-22
+adam 803 0x1.d2055c4a9b058p-20 0x1.dbf91fd9a7de6p-20
+adam 804 0x1.50ed9631e4135p-20 0x1.c53f20400acfbp-20
+adam 805 -0x1.9cf3cb9f54ac1p-15 0x1.1c4e4c3d31c39p-20
+adam 806 0x1.37e8dc3d5e218p-16 0x1.3ac8071e07fa3p-20
+adam 807 -0x1.9e0a012cf1716p-16 0x1.cbb292f88f258p-20
+adam 808 -0x1.6c15559075808p-14 0x1.387afcc2eef5fp-20
+adam 809 0x1.703d53c8a582ap-16 0x1.871204b0d33c2p-19
+adam 810 -0x1.1b073fb79cd83p-15 0x1.dcdb273d77e58p-19
+adam 811 0x1.107ca65c92a8ap-13 0x1.575fcf1baa84ap-20
+adam 812 0x1.27cc543839000p-13 0x1.1f1ef4b5c7324p-21
+adam 813 -0x1.2ec62d02dec86p-13 0x1.ecbb20d099e8ep-19
+adam 814 -0x1.2395fe3cdbbccp-13 0x1.229585ad4ce01p-18
+adam 815 0x1.487bf4478ccb0p-18 0x1.0e1aaed9fd34ep-20
+adam 816 -0x1.653a74fd5032cp-15 0x1.5a1d08db2e4c7p-20
+adam 817 -0x1.5a269b21420a2p-15 0x1.f88997ebb305ep-21
+adam 818 0x1.2987f08598faap-16 0x1.e64a0e149091ep-21
+adam 819 0x1.a40e54f803c59p-16 0x1.d0dd8f5576d1dp-21
+adam 820 0x1.09d8785c1883dp-15 0x1.d687bf5c22222p-19
+adam 821 -0x1.63b62d238a960p-14 0x1.336a78da3842cp-20
+adam 822 0x1.354eeb14a5f1cp-16 0x1.52435b75345b8p-21
+adam 823 0x1.9b9c18a11c682p-18 0x1.532f0919f266ap-21
+adam 824 0x1.b8f9667e44f02p-14 0x1.14b4ee8e54c55p-20
+adam 825 0x1.ab08f51fef080p-15 0x1.564dd4b079d8dp-21
+adam 826 -0x1.b9334874e4ec4p-15 0x1.8e59074a677d6p-21
+adam 827 0x1.53ae33e044396p-17 0x1.d3dbf9e94c0afp-19
+adam 828 -0x1.a772f588b9da9p-18 0x1.d2a6fe16429f5p-20
+adam 829 -0x1.3eb4cd0b2ca7cp-13 0x1.1e03b6c74d33fp-21
+adam 830 0x1.044a0907f3bccp-18 0x1.ef729e7f8ee06p-20
+adam 831 -0x1.860f1ad4d8188p-14 0x1.1c02e40817edbp-21
+adam 832 -0x1.553d6a86e07e4p-13 0x1.5513f73b4671fp-21
+adam 833 -0x1.1354dddd11f7dp-14 0x1.a80c57e7cd068p-22
+adam 834 0x1.0bee843373d2fp-13 0x1.0e70e5df15574p-20
+adam 835 -0x1.5dd8573999153p-15 0x1.2286a9dc68e8fp-20
+adam 836 0x1.17bdb75e6c2a8p-18 0x1.d7e294a06d4f0p-19
+adam 837 -0x1.cc09929f2d4f5p-19 0x1.ddad1706a76a8p-21
+adam 838 0x1.78923809f6bcfp-14 0x1.634ca7ecce513p-22
+adam 839 0x1.cbd8be0b7b780p-23 0x1.b6735f812b90cp-19
+adam 840 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 841 0x1.12ce11cbfd7e8p-14 0x1.9826204ba3baep-16
+adam 842 0x1.1c1631dd9662fp-14 0x1.943e362c1bf67p-16
+adam 843 -0x1.4ce5a6f54dbb2p-17 0x1.f99314bfc988ep-16
+adam 844 -0x1.0be510b276162p-12 0x1.d906bdd4088bdp-12
+adam 845 0x1.ff1e462c9eedfp-15 0x1.4a5518a67f9d8p-16
+adam 846 0x1.2abd90e89eb7bp-14 0x1.34deea60e6180p-13
+adam 847 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 848 0x1.badb3cdfc2998p-17 0x1.831b2a549d76ep-21
+adam 849 0x1.94212522303bap-17 0x1.f8e10869bab3dp-22
+adam 850 -0x1.13f44b22a8a49p-14 0x1.0ed1ea0a7f61fp-17
+adam 851 0x1.440cc78672f5ap-17 0x1.3e9bf53d4736cp-18
+adam 852 0x1.2171cda959e91p-16 0x1.f491ae391ff58p-20
+adam 853 0x1.c9b5943a2b88ap-17 0x1.1dd281b376a29p-20
+adam 854 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 855 0x1.d5c7865d80517p-7 0x1.65fefd8fec7c0p-12
+adam 856 0x1.d18dc7e88da8cp-7 0x1.5f93597ba39c2p-12
+adam 857 0x1.4bc4085aec7e2p-6 0x1.e68600b8de831p-11
+adam 858 -0x1.665df7dba60f1p-4 0x1.593ef8ec9e411p-7
+adam 859 0x1.ec39589140368p-7 0x1.88eef27622ab4p-12
+adam 860 0x1.83ec83a804a5cp-6 0x1.0c3e5897d9ae7p-10
+adam 861 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 862 0x1.3efd420685c4bp-21 0x1.3622397bb75a1p-22
+adam 863 0x1.483fcfada8c0cp-21 0x1.0b010288ec073p-22
+adam 864 -0x1.7a18a873da923p-22 0x1.d5bca742a0524p-22
+adam 865 -0x1.0704f59861b62p-19 0x1.5252d91dd2614p-18
+adam 866 0x1.17c18165301f5p-21 0x1.ab07cc7d2c1bep-22
+adam 867 0x1.3a219782157c5p-21 0x1.fe710013c718fp-23
+adam 868 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 869 0x1.3fb46bda7b40cp-18 0x1.18d121622cee7p-21
+adam 870 0x1.2e3ecefa6ed03p-18 0x1.f7d4b270988fbp-22
+adam 871 -0x1.b0631f6040f07p-17 0x1.9e6521d13372fp-21
+adam 872 -0x1.a1f7fb94ed41ep-18 0x1.8ddf84c711fa5p-17
+adam 873 0x1.4b1febb47e5ebp-18 0x1.795601d0e9843p-21
+adam 874 0x1.49ab13cc06b28p-18 0x1.1f73aba4c04a7p-21
+adam 875 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 876 0x1.16cc9568898d8p-17 0x1.13c9a77deb378p-19
+adam 877 0x1.b5cf95eb53e7ep-18 0x1.887e0d7c6b3bbp-21
+adam 878 -0x1.11873515ff03ap-16 0x1.011ee7efa4292p-18
+adam 879 -0x1.842fde1d23c7fp-17 0x1.0737f2c7a340dp-16
+adam 880 0x1.d6c63d6a6be5cp-18 0x1.e7bd4686814e8p-21
+adam 881 0x1.944d926b70b5cp-18 0x1.6d5551a008773p-21
+adam 882 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 883 0x1.3186826cd4cd1p-18 0x1.eb17df7f1d114p-22
+adam 884 0x1.27fa0c73416a3p-18 0x1.ba57f5b630f43p-22
+adam 885 -0x1.30f7722d1533bp-21 0x1.61d4073f40a69p-20
+adam 886 -0x1.4ca92b91f7033p-16 0x1.7755145309744p-18
+adam 887 0x1.ba8b7c68a1963p-18 0x1.a8d892ab5c904p-18
+adam 888 0x1.44b79144c6e54p-18 0x1.23adfd7814f46p-21
+adam 889 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 890 0x1.7c62be5001b95p-7 0x1.426d24059c136p-12
+adam 891 0x1.2d2cb7efabaf1p-7 0x1.941a4769ce45bp-13
+adam 892 0x1.7a02b5c13c38dp-7 0x1.3e440bea618d9p-12
+adam 893 0x1.36688e2c5f2c7p-6 0x1.cf9b8a07b30a1p-11
+adam 894 0x1.88cab617a507fp-7 0x1.57f45027c2654p-12
+adam 895 -0x1.0325bfce29a05p-4 0x1.225c4826ee372p-7
+adam 896 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 897 0x1.6b30efcd8ce80p-6 0x1.766e8c8a7466ap-10
+adam 898 0x1.e97cf9df4f836p-7 0x1.8eed7577108a0p-12
+adam 899 -0x1.789a9a6a8e488p-4 0x1.bbcd1fa4b6fcbp-7
+adam 900 0x1.245ef6a862f5cp-6 0x1.1b64e745fda97p-11
+adam 901 0x1.412dccf846c63p-6 0x1.59455d38a8543p-11
+adam 902 0x1.1cee394c5abbfp-6 0x1.0e558b2971bb8p-11
+adam 903 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 904 0x1.2b39f04b0316cp-7 0x1.7dda465aec063p-12
+adam 905 0x1.15de47e29fa27p-7 0x1.48d6534cc239dp-12
+adam 906 0x1.86b47455d39b2p-7 0x1.492916f6375c2p-11
+adam 907 0x1.39fb58c1b24d9p-7 0x1.a403a1900e552p-12
+adam 908 -0x1.8690e4079f35bp-5 0x1.3e5c0354d3944p-7
+adam 909 0x1.187b8ad954355p-7 0x1.4f03222c8e3f0p-12
+adam 910 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 911 0x1.771ab48e2b261p-17 0x1.50555a8fdd3ffp-19
+adam 912 0x1.22bab8c43755dp-17 0x1.3eb52d489a996p-20
+adam 913 0x1.3f020f9567fedp-18 0x1.8b9e7018c07c5p-18
+adam 914 -0x1.915b5c6f3c300p-15 0x1.2fddfbc09bcedp-16
+adam 915 0x1.7a33467f2bf6dp-17 0x1.a174ccef032a5p-18
+adam 916 0x1.91e3b620ae4cdp-17 0x1.22bbbbad0172ap-17
+adam 917 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 918 0x1.426adf8796167p-15 0x1.4621213c7b052p-17
+adam 919 0x1.0353566f189ecp-15 0x1.039d0343bea02p-18
+adam 920 -0x1.c20385e7bd167p-14 0x1.2e901b172be86p-14
+adam 921 -0x1.365ad158b8314p-15 0x1.f60e41fbdccbfp-18
+adam 922 0x1.596a758f10594p-15 0x1.266402ea2fe08p-15
+adam 923 0x1.1b3931a2734f0p-15 0x1.76150bb89eb87p-18
+adam 924 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 925 0x1.ab5c70cd768e0p-18 0x1.6fb698e167471p-18
+adam 926 0x1.487cd62684cb3p-18 0x1.e0ea72056197cp-20
+adam 927 -0x1.2e83ff549f73dp-19 0x1.2ebfaff5264abp-17
+adam 928 -0x1.255464fdb405bp-17 0x1.c63acf0506f85p-16
+adam 929 0x1.53225b794e0e8p-18 0x1.1d20faa8ca75dp-19
+adam 930 -0x1.6510d8c791a23p-18 0x1.72e7539cfceedp-17
+adam 931 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 932 0x1.078ee0c246799p-13 0x1.5cd79bfed3a45p-15
+adam 933 0x1.a6178f16501a3p-14 0x1.22b859ab2f3b8p-16
+adam 934 -0x1.2642e3c867ab4p-14 0x1.9159d256ed44fp-12
+adam 935 -0x1.7ba044afbf5b2p-12 0x1.09d8ac8b64c97p-14
+adam 936 0x1.b778c7b50c515p-14 0x1.ab5735c3b1e82p-16
+adam 937 0x1.a815de377bb99p-14 0x1.29436728e6eabp-16
+adam 938 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 939 0x1.03f47588513f7p-14 0x1.91ffc783178e5p-18
+adam 940 0x1.915f74375054cp-15 0x1.70ecb6b92e82bp-19
+adam 941 -0x1.ac959c3ba236cp-14 0x1.0352060ce1fdcp-15
+adam 942 -0x1.f8c5ec02d4ccfp-14 0x1.4cd0841e04657p-15
+adam 943 0x1.a5b093e5639bfp-15 0x1.94ee9d969f101p-19
+adam 944 0x1.05df0ea7cbcbap-14 0x1.e3ebb99528af4p-16
+adam 945 0x0.0000000000000p+0 0x0.0000000000000p+0
+adam 946 0x1.1e39a612b99d7p-15 0x1.6f71f503d5f84p-16
+adam 947 0x1.9f68b7c2f45f8p-16 0x1.5ddde06289897p-19
+adam 948 -0x1.450172c565339p-14 0x1.fc3c6a0dcab0ap-16
+adam 949 -0x1.9ab096f7baeacp-15 0x1.1b79ca1975c46p-16
+adam 950 0x1.1e9757eff99c5p-15 0x1.da1d411f96131p-17
+adam 951 0x1.182e229e57e7ep-15 0x1.a4a17413234aap-17
+end

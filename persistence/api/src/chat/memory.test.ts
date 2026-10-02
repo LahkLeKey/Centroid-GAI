@@ -7,6 +7,32 @@ import { MemoryService } from './memory.ts';
 const epoch = Date.parse('2026-09-29T12:00:00Z');
 const source: ChatSource = { id: 'source', path: 'https://example.com/source', url: 'https://example.com/source',
     excerpt: 'Centroid facts from the original passage.', contentHash: 'a'.repeat(64), fetchedAt: new Date(epoch).toISOString() };
+
+test('volatile evidence expires from fetch time and saved excerpts are not labeled verified facts', async () => {
+    const store = storage();
+    let now = epoch + 60000;
+    const memory = new MemoryService(store, 'owner', () => now);
+    const [saved] = await memory.sources('latest centroid release', '', [source], 'conversation');
+    assert.equal(saved!.state, 'sourced');
+    assert.equal(saved!.freshnessPolicy, 'volatile-v1');
+    assert.equal(Date.parse(saved!.expiresAt!), epoch + 300000);
+    assert.equal((await memory.retrieve('latest centroid release', '')).length, 1);
+    now = epoch + 300000;
+    assert.deepEqual(await memory.retrieve('latest centroid release', ''), []);
+    assert.deepEqual(await memory.sources('latest centroid release', '', [source], 'conversation'), []);
+    assert.deepEqual(await memory.sources('daily question', '', [{ ...source, fetchedAt: new Date(now + 1).toISOString() }], 'conversation'), []);
+});
+
+test('refreshing a canonical source replaces its old content only within matching query and applicability', async () => {
+    const store = storage();
+    const memory = new MemoryService(store, 'owner', () => epoch);
+    await memory.sources('centroid question', 'v1', [source], 'first');
+    await memory.sources('centroid question', 'v2', [source], 'other');
+    const corrected = { ...source, contentHash: 'b'.repeat(64), excerpt: 'Corrected centroid facts.' };
+    await memory.sources('centroid question', 'v1', [corrected], 'second');
+    assert.deepEqual((await memory.retrieve('centroid question', 'v1')).map(record => record.content), [corrected.excerpt]);
+    assert.deepEqual((await memory.retrieve('centroid question', 'v2')).map(record => record.content), [source.excerpt]);
+});
 function storage() {
     const documents = new Map<string, MemoryDocument>();
     return { documents, async getMemory(owner: string) { return structuredClone(documents.get(owner) ?? null); },

@@ -1,4 +1,4 @@
-/** @file chat_codec.c @brief Bounded little-endian inference artifacts for protocol one. */
+/** @file chat_codec.c @brief Bounded versioned little-endian conversation artifacts. */
 #include "internal/chat_internal.h"
 #include "internal/error.h"
 #include <float.h>
@@ -70,7 +70,7 @@ static void codec_double(chat_codec *codec, double *value) {
  * @param model Mutable shell.
  * @param fields Borrowed nine header integers. */
 static void header_fields(chat_codec *codec, cgai_chat_model *model, const uint64_t *fields) {
-    if (fields[0] != 1U || fields[1] != CGAI_CHAT_PROTOCOL_VERSION ||
+    if ((fields[0] != 1U && fields[0] != 2U) || fields[1] != fields[0] ||
         fields[8] != CGAI_CHAT_TOKENIZER_VERSION)
         codec->ok = 0;
     for (size_t i = 2U; i < 7U; ++i)
@@ -83,9 +83,25 @@ static void header_fields(chat_codec *codec, cgai_chat_model *model, const uint6
                                          (size_t)fields[5],
                                          (size_t)fields[6],
                                          fields[7],
-                                         1.0};
+                                         1.0,
+                                         0U};
         model->config = config;
+        model->protocol_version = (unsigned int)fields[1];
     }
+}
+
+/** @brief Transfer the explicit evidence budget present only in version two.
+ * @param codec Mutable cursor.
+ * @param model Mutable shell or local encoding copy. */
+static void codec_evidence(chat_codec *codec, cgai_chat_model *model) {
+    if (model->protocol_version < 2U)
+        return;
+    uint64_t evidence = model->config.evidence_window;
+    codec_integer(codec, &evidence);
+    if (evidence > 256U)
+        codec->ok = 0;
+    if (codec->reading && codec->ok)
+        model->config.evidence_window = (size_t)evidence;
 }
 
 /** @brief Transfer and validate the protocol header.
@@ -99,8 +115,8 @@ static void codec_header(chat_codec *codec, cgai_chat_model *model, uint64_t *vo
     codec_bytes(codec, magic, 8U);
     if (memcmp(magic, "CGAICHAT", 8U) != 0)
         codec->ok = 0;
-    uint64_t fields[9] = {1U,
-                          1U,
+    uint64_t fields[9] = {model->protocol_version,
+                          model->protocol_version,
                           model->config.embedding_dimensions,
                           model->config.hidden_dimensions,
                           model->config.centroid_count,
@@ -114,6 +130,7 @@ static void codec_header(chat_codec *codec, cgai_chat_model *model, uint64_t *vo
     codec_double(codec, &model->config.routing_temperature);
     codec_integer(codec, vocabulary);
     codec_integer(codec, parameters);
+    codec_evidence(codec, model);
     if (!cgai_chat_validate_config(&model->config, &model->network->config) || *vocabulary < 8U ||
         *vocabulary > CGAI_NEURAL_MAX_VOCABULARY || *parameters > CGAI_NEURAL_MAX_PARAMETERS)
         codec->ok = 0;
@@ -250,7 +267,8 @@ static void encode_model(chat_codec *codec, const cgai_chat_model *model) {
  * @param model Borrowed initialized model.
  * @return Total bytes including the fixed header. */
 static size_t encoded_size(const cgai_chat_model *model) {
-    size_t bytes = 104U + model->network->parameter_count * 8U;
+    size_t bytes =
+        (model->protocol_version >= 2U ? 112U : 104U) + model->network->parameter_count * 8U;
     for (size_t i = 0U; i < model->network->vocabulary_size; ++i)
         bytes += 8U + strlen(model->network->vocabulary[i]);
     return bytes;

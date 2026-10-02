@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 /** Dialogue encoding and artifact protocol, independent from legacy neural models. */
-#define CGAI_CHAT_PROTOCOL_VERSION 1U
+#define CGAI_CHAT_PROTOCOL_VERSION 2U
 /** Normalized word tokenizer version used in conversation artifacts. */
 #define CGAI_CHAT_TOKENIZER_VERSION 1U
 /** Maximum encoded artifact bytes accepted by the bounded codec. */
@@ -46,6 +46,7 @@ typedef struct cgai_chat_config {
     size_t response_window;      /**< Rolling preceding answer slots, at least one; sum <=256. */
     uint64_t seed;               /**< Initialization and example-shuffle seed. */
     double routing_temperature;  /**< Finite squared-distance scale, 0.01..100. */
+    size_t evidence_window; /**< New-model evidence slots; zero selects half, capped at prompt-4. */
 } cgai_chat_config;
 /** Immutable generation settings; this initial native API is synchronous. */
 typedef struct cgai_chat_options {
@@ -68,9 +69,11 @@ typedef struct cgai_chat_result {
     size_t dropped_messages; /**< Complete omitted history/evidence messages. */
     size_t unknown_tokens;   /**< Retained prompt words absent from training vocabulary. */
     cgai_chat_finish_reason finish_reason; /**< Explicit stopping condition. */
+    size_t evidence_tokens;  /**< Retained evidence IDs, including role/turn controls. */
+    size_t dropped_evidence; /**< Complete evidence messages omitted by either budget. */
 } cgai_chat_result;
 
-/** @brief Return a reproducible small conversation shape.
+/** @brief Return a reproducible shape with 160 prompt, 32 response and 80 evidence slots.
  * @return Configuration value requiring no cleanup. */
 cgai_chat_config cgai_chat_default_config(void);
 /** @brief Return conservative bounded inference settings.
@@ -82,7 +85,8 @@ cgai_chat_options cgai_chat_default_options(void);
  * @param examples Borrowed nonempty validated training examples.
  * @param count Number of independent examples, 1..10000.
  * @return Owned model or NULL with a diagnostic. Vocabulary and scalar parameter bounds
- * match the neural API; all examples must obey the shared prompt limit. */
+ * match the neural API; all examples must retain their current question and all evidence.
+ * New models use protocol two; loading protocol one preserves its original formatter. */
 cgai_chat_model *cgai_chat_create(const cgai_chat_config *config, const cgai_chat_example *examples,
                                   size_t count);
 /** @brief Release a conversation model and all owned storage.
@@ -95,7 +99,8 @@ void cgai_chat_destroy(cgai_chat_model *model);
  * @param training Borrowed Adam settings, or NULL for defaults.
  * @return OK on completion, ERROR with diagnostic. One optimizer spans every record and
  * epoch in this call; another call starts fresh moments, not exact checkpoint resume.
- * BOS padding embeddings stay fixed while lexical embeddings and other weights learn. */
+ * BOS padding embeddings stay fixed while lexical embeddings and other weights learn.
+ * Protocol-two examples with omitted evidence fail before any weight update. */
 cgai_status cgai_chat_train(cgai_chat_model *model, const cgai_chat_example *examples, size_t count,
                             const cgai_neural_training *training);
 /** @brief Score only current assistant words and answer-ending EOS without mutation.
@@ -111,13 +116,16 @@ cgai_status cgai_chat_evaluate(const cgai_chat_model *model, const cgai_chat_exa
  * @param model Borrowed immutable model.
  * @param messages Borrowed alternating complete history and final user question; optional
  * evidence messages may appear between turns. The current question is never truncated.
+ * Protocol two admits evidence immediately before it in input priority order, before history.
  * @param count Message count, 1..1024.
  * @param options Borrowed settings, or NULL for defaults.
  * @param output Borrowed writable text buffer; terminated prefix remains on capacity error.
  * @param output_size Capacity in bytes including NUL, positive.
  * @param result Borrowed writable usage/stopping result; published only on success.
  * @return OK on EOS, repetition or limit; ERROR for malformed history or oversized question.
- * Older complete turns and evidence are dropped to fit; output excludes all role controls. */
+ * Older complete turns and evidence are dropped to fit; output excludes all role controls.
+ * Evidence omissions and retained unknown words are reported even for zero-token replies.
+ * Protocol one keeps its newest-first quarter-prompt evidence budget after loading. */
 cgai_status cgai_chat_reply(const cgai_chat_model *model, const cgai_chat_message *messages,
                             size_t count, const cgai_chat_options *options, char *output,
                             size_t output_size, cgai_chat_result *result);
@@ -145,6 +153,11 @@ void cgai_chat_buffer_free(uint8_t *data);
  * @return OK for a valid model, ERROR with diagnostic for NULL. */
 cgai_status cgai_chat_metadata(const cgai_chat_model *model, cgai_chat_config *config,
                                size_t *vocabulary_size, size_t *parameter_count);
+/** @brief Inspect the artifact and prompt protocol used by this model.
+ * @param model Borrowed model, or NULL.
+ * @return One for legacy formatting, two for explicit evidence budgets, zero for NULL.
+ * Encoding preserves this version; loading an old artifact does not upgrade its formatter. */
+unsigned int cgai_chat_protocol_version(const cgai_chat_model *model);
 #ifdef __cplusplus
 }
 #endif

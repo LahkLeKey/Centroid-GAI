@@ -1,10 +1,12 @@
 import { fork } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import type { ChatDialogueMessage, ChatExample, ChatModelConfig, ChatSendRequest, ChatTrainingOptions } from '../../../shared/chat.ts';
+import type { ChatTrainingValidation } from '../../../shared/chat-quality.ts';
 
 export type ChatWorkerTask =
     | { kind: 'inspect'; payload: Buffer }
     | { kind: 'reply'; payload: Buffer; messages: readonly ChatDialogueMessage[]; options: Pick<ChatSendRequest, 'maxTokens' | 'temperature' | 'seed'> }
+    | { kind: 'validate'; payload: Buffer; validation: ChatTrainingValidation }
     | { kind: 'train'; examples: readonly ChatExample[]; config?: ChatModelConfig; training?: ChatTrainingOptions };
 export interface ChatWorkers {
     run<T>(task: ChatWorkerTask, signal?: AbortSignal): Promise<T>;
@@ -62,9 +64,9 @@ export class ProcessChatWorkers implements ChatWorkers {
     }
     private drain(): void {
         if (this.closed) return;
-        const training = [...this.active.keys()].filter((item) => item.task.kind === 'train').length;
+        const training = [...this.active.keys()].filter((item) => item.task.kind === 'train' || item.task.kind === 'validate').length;
         const inference = this.active.size - training;
-        const index = this.queued.findIndex((item) => item.task.kind === 'train' ? training < 1 : inference < 2);
+        const index = this.queued.findIndex((item) => item.task.kind === 'train' || item.task.kind === 'validate' ? training < 1 : inference < 2);
         if (index < 0) return;
         const pending = this.queued.splice(index, 1)[0]!;
         let child: ReturnType<typeof fork>;
@@ -87,7 +89,8 @@ export class ProcessChatWorkers implements ChatWorkers {
             child.kill('SIGKILL');
         };
         const cancel = () => finish(new ChatWorkerError('request cancelled', 409));
-        const timer = setTimeout(() => finish(new ChatWorkerError('native chat operation timed out', 504)), pending.task.kind === 'train' ? this.trainTimeoutMs : this.timeoutMs);
+        const timer = setTimeout(() => finish(new ChatWorkerError('native chat operation timed out', 504)),
+            pending.task.kind === 'train' || pending.task.kind === 'validate' ? this.trainTimeoutMs : this.timeoutMs);
         this.active.set(pending, cancel);
         pending.signal?.addEventListener('abort', cancel, { once: true });
         child.once('error', (error) => finish(error));

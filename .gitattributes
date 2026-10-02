@@ -3,3 +3,17 @@
 knowledge/**/*.gz -text -filter
 knowledge/**/*.json text eol=lf
 knowledge/**/*.md text eol=lf
+# Release manifests hash exact JSON bytes, including line endings, on every OS.
+data/chat/releases/**/*.json text eol=lf
+models/neural/**/*.txt text eol=lf
+models/neural/**/*.tsv text eol=lf
+models/neural/**/*.cmake text eol=lf
+models/scholarly/**/*.txt text eol=lf
+models/scholarly/**/*.tsv text eol=lf
+models/scholarly/**/*.cgnn -text -filter
+data/research/autotrain.json text eol=lf
+data/gameplay/**/*.tsv text eol=lf
+models/gameplay/**/*.txt text eol=lf
+models/gameplay/**/*.tsv text eol=lf
+models/gameplay/**/*.cgnn -text -filter
+models/gameplay/**/*.cggp text eol=lf -filter

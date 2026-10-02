@@ -139,6 +139,7 @@ void cgai_neural_destroy(cgai_neural_model *model) {
             free(model->vocabulary[i]);
     }
     free(model->vocabulary);
+    cgai_neural_reset_training(model);
     free(model->parameters);
     free(model);
 }
@@ -149,4 +150,27 @@ void cgai_neural_destroy(cgai_neural_model *model) {
 size_t cgai_neural_vocabulary_size(const cgai_neural_model *model) {
     /* Step 1: Return a value, retaining all ownership in the model. */
     return model ? model->vocabulary_size : 0U;
+}
+
+/** @brief Clear continuation moments and counters before fresh optimization.
+ * @param model Borrowed mutable initialized model; weights remain unchanged. */
+void cgai_neural_reset_training(cgai_neural_model *model) {
+    /* Step 1: Release model-owned optimizer state without changing learned parameters. */
+    free(model->adam_first);
+    free(model->adam_second);
+    model->adam_first = NULL;
+    model->adam_second = NULL;
+    model->training_step = 0U;
+    model->training_epochs = 0U;
+    model->training_shuffle = 0U;
+}
+
+/** @brief Report accumulated continuation passes and target updates without mutation.
+ * @param model Borrowed handle, or NULL.
+ * @return Current counters, or both zero for NULL or a fresh model. */
+cgai_neural_progress cgai_neural_get_progress(const cgai_neural_model *model) {
+    /* Step 1: Return counters by value while retaining all ownership in the model. */
+    const cgai_neural_progress progress = {model ? model->training_epochs : 0U,
+                                           model ? model->training_step : 0U};
+    return progress;
 }

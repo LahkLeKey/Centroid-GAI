@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import type { Conversation } from '../../../shared/chat.ts';
 import type { RepositoryInvestigation } from '../../../shared/repository.ts';
@@ -93,7 +92,17 @@ test('research scores enforce bounded results, explicit limitations and clearing
 });
 
 test('eight research development chains stay separate and reject stale relationship gold or malformed requests', () => {
-    const suite = JSON.parse(readFileSync(new URL('../../../../examples/chat/repository-research-v1.json', import.meta.url), 'utf8')) as RepositoryResearchSuite;
+    const suite: RepositoryResearchSuite = { version: 1, purpose: 'repository-research-development',
+        description: 'Isolated research contract fixture.', scenarios: Array.from({ length: 8 }, (_, index) => ({
+            id: `research-${index}`, group: 'context', split: 'development', description: 'Synthetic research schema control.',
+            turns: Array.from({ length: 4 }, () => ({ content: 'Inspect dependencies of src/service.ts.',
+                repositoryResearch: { kind: 'impact', target: 'src/service.ts' },
+                expected: { outcome: 'supported', investigation: { kind: 'impact', target: 'src/service.ts', findings: [
+                    { kind: 'target', path: 'src/service.ts', quote: "import { core }" },
+                    { kind: 'dependency', path: 'src/service.ts', relatedPath: 'src/core.ts', quote: "import { core }" },
+                ] } },
+            })),
+        })) };
     const byPath = new Map<string, string[]>();
     function include(path: string, quote = 'A source fixture.') { byPath.set(path, [...(byPath.get(path) ?? []), quote]); }
     for (const scenario of suite.scenarios) for (const turn of scenario.turns) {

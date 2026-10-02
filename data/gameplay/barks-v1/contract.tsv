@@ -1,0 +1,35 @@
+key	value
+contract_version	1
+task_name	barks-v1
+input_order	event danger relationship setting
+target_mode	independent-next-token-v1
+outputs	abstain greetwarm greetplain warnhostile threatcalm threaturgent victory discover retreat
+no_line_marker	-
+family_dimensions	event danger relationship
+split_rule	danger*3+relationship: 0 development; 1 test; 2..5 training
+training_cases	48
+development_cases	12
+test_cases	12
+embedding_dimensions	16
+hidden_dimensions	16
+centroid_count	16
+context_window	4
+seed	42
+routing_temperature	1
+learning_rate	0.01
+gradient_clip	5
+initial_epochs	200
+additional_epochs	20
+maximum_model_bytes	262144
+maximum_session_bytes	65536
+maximum_p95_us	500
+maximum_p99_us	1000
+benchmark_samples	2048
+benchmark_session_pool	4
+benchmark_workers	1
+minimum_development_accuracy	0.95
+minimum_test_accuracy	0.95
+minimum_development_improvement	0.000001
+test_regression_tolerance	0.000000001
+data_provenance	authored synthetic rules; no scraped text
+latency_scope	measured on report hardware; no universal frame guarantee

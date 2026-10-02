@@ -52,6 +52,15 @@ static void codec_roundtrip(cgai_chat_model *model) {
     TEST_CHECK(memcmp(copy->network->parameters, model->network->parameters,
                       model->network->parameter_count * sizeof(double)) == 0,
                "codec changed weights");
+    TEST_CHECK(copy->protocol_version == model->protocol_version &&
+                   copy->config.evidence_window == model->config.evidence_window,
+               "codec changed the formatter version or evidence budget");
+    uint8_t *again = NULL;
+    size_t again_size = 0U;
+    TEST_CHECK(cgai_chat_encode(copy, &again, &again_size), cgai_last_error());
+    TEST_CHECK(size == again_size && memcmp(bytes, again, size) == 0,
+               "codec changed artifact bytes");
+    cgai_chat_buffer_free(again);
     cgai_chat_buffer_free(bytes);
     cgai_chat_destroy(copy);
 }
@@ -163,7 +172,7 @@ static void force_token(cgai_chat_model *model, cgai_token_id token) {
  * @param question Borrowed valid current question. */
 static void failed_output(cgai_chat_model *model, const cgai_chat_message *question) {
     char output[2] = "x";
-    cgai_chat_result result = {99U, 98U, 97U, 96U, CGAI_CHAT_FINISH_CANCEL};
+    cgai_chat_result result = {99U, 98U, 97U, 96U, CGAI_CHAT_FINISH_CANCEL, 95U, 94U};
     TEST_CHECK(!cgai_chat_reply(model, question, 1U, NULL, output, sizeof(output), &result),
                "accepted insufficient output capacity");
     TEST_CHECK(output[0] == '\0' && result.generated_tokens == 99U &&
@@ -250,12 +259,115 @@ static void public_regressions(cgai_chat_model *model) {
     learned_dialogues();
 }
 
+/** @brief Convert a new test artifact into the exact legacy layout without changing weights.
+ * @param model Borrowed version-two fixture.
+ * @return Owned decoded version-one fixture. */
+static cgai_chat_model *legacy_fixture(const cgai_chat_model *model) {
+    uint8_t *bytes = NULL;
+    size_t size = 0U;
+    TEST_CHECK(cgai_chat_encode(model, &bytes, &size), cgai_last_error());
+    bytes[8U] = 1U;
+    bytes[16U] = 1U;
+    memmove(bytes + 104U, bytes + 112U, size - 112U);
+    cgai_chat_model *legacy = cgai_chat_decode(bytes, size - 8U);
+    cgai_chat_buffer_free(bytes);
+    TEST_CHECK(legacy != NULL && cgai_chat_protocol_version(legacy) == 1U,
+               "legacy artifact failed to decode");
+    return legacy;
+}
+
+/** @brief Preserve current evidence priority/order and the frozen legacy quarter-window policy.
+ * @param model Borrowed 24-slot prompt fixture with a 12-slot evidence budget. */
+static void evidence_versions(cgai_chat_model *model) {
+    const cgai_chat_message messages[] = {
+        {CGAI_CHAT_USER, "question"},
+        {CGAI_CHAT_ASSISTANT, "answer"},
+        {CGAI_CHAT_EVIDENCE, "question question question question"},
+        {CGAI_CHAT_EVIDENCE, "answer answer answer answer"},
+        {CGAI_CHAT_USER, "question"}};
+    cgai_chat_prompt_data prompt = {0};
+    TEST_CHECK(cgai_chat_format(model, messages, 5U, &prompt), cgai_last_error());
+    TEST_CHECK(prompt.evidence == 12U && prompt.dropped_evidence == 0U && prompt.count == 22U,
+               "current evidence was not retained within its explicit budget");
+    TEST_CHECK(prompt.tokens[7U].value == cgai_neural_lookup(model->network, "question").value &&
+                   prompt.tokens[13U].value == cgai_neural_lookup(model->network, "answer").value,
+               "current evidence input order changed");
+    cgai_chat_model *legacy = legacy_fixture(model);
+    TEST_CHECK(cgai_chat_format(legacy, messages, 5U, &prompt), cgai_last_error());
+    TEST_CHECK(prompt.evidence == 6U && prompt.dropped_evidence == 1U && prompt.dropped == 1U &&
+                   prompt.tokens[7U].value == cgai_neural_lookup(model->network, "answer").value,
+               "legacy newest-first quarter-window evidence formatting changed");
+    codec_roundtrip(legacy);
+    cgai_chat_destroy(legacy);
+    codec_roundtrip(model);
+}
+
+/** @brief Report oversized evidence, vocabulary gaps, and priority without partial truncation.
+ * @param model Borrowed 24-slot prompt fixture with a 12-slot evidence budget. */
+static void evidence_accounting(cgai_chat_model *model) {
+    const cgai_chat_message messages[] = {
+        {CGAI_CHAT_EVIDENCE, "question question question question"},
+        {CGAI_CHAT_EVIDENCE, "answer answer answer answer"},
+        {CGAI_CHAT_EVIDENCE, "unknownname"},
+        {CGAI_CHAT_USER, "question"}};
+    cgai_chat_prompt_data prompt = {0};
+    TEST_CHECK(cgai_chat_format(model, messages, 4U, &prompt), cgai_last_error());
+    TEST_CHECK(prompt.evidence == 12U && prompt.dropped_evidence == 1U && prompt.unknown == 0U &&
+                   prompt.tokens[1U].value == cgai_neural_lookup(model->network, "question").value,
+               "lower-priority evidence displaced the first source or polluted unknown counts");
+    const cgai_chat_message unknown[] = {{CGAI_CHAT_EVIDENCE, "unknownname"},
+                                         {CGAI_CHAT_USER, "question"}};
+    cgai_chat_result result = {0};
+    const cgai_chat_options options = {0U, 0.0, 42U};
+    char output[1];
+    TEST_CHECK(cgai_chat_reply(model, unknown, 2U, &options, output, sizeof(output), &result),
+               cgai_last_error());
+    TEST_CHECK(result.evidence_tokens == 3U && result.dropped_evidence == 0U &&
+                   result.unknown_tokens == 1U,
+               "reply omitted evidence or unknown-name diagnostics");
+}
+
+/** @brief Reject training on evidence omitted by the formatter and report whole-message drops.
+ * @param model Borrowed small fixture. */
+static void oversized_evidence(cgai_chat_model *model) {
+    const char *content[] = {
+        "question question question question question question question question question question "
+        "question",
+        "question question question question question question question question question question "
+        "question question question question question question question question question"};
+    for (size_t i = 0U; i < 2U; ++i) {
+        const cgai_chat_message messages[] = {{CGAI_CHAT_EVIDENCE, content[i]},
+                                              {CGAI_CHAT_USER, "question"}};
+        cgai_chat_prompt_data prompt = {0};
+        TEST_CHECK(cgai_chat_format(model, messages, 2U, &prompt), cgai_last_error());
+        TEST_CHECK(prompt.evidence == 0U && prompt.dropped_evidence == 1U && prompt.dropped == 1U,
+                   "oversized evidence was truncated or silently dropped");
+        const cgai_chat_example example = {messages, 2U, "answer"};
+        const cgai_neural_training training = {1U, 0.003, 5.0};
+        TEST_CHECK(!cgai_chat_train(model, &example, 1U, &training),
+                   "training accepted an example with omitted evidence");
+    }
+}
+
+/** @brief Exercise versioned evidence budgets and diagnostic publication. */
+static void evidence_regressions(void) {
+    const cgai_chat_message question = {CGAI_CHAT_USER, "question"};
+    const cgai_chat_example example = {&question, 1U, "answer"};
+    const cgai_chat_config config = {2U, 3U, 3U, 24U, 1U, 42U, 1.0, 12U};
+    cgai_chat_model *model = cgai_chat_create(&config, &example, 1U);
+    TEST_CHECK(model != NULL && cgai_chat_protocol_version(model) == 2U, cgai_last_error());
+    evidence_versions(model);
+    evidence_accounting(model);
+    oversized_evidence(model);
+    cgai_chat_destroy(model);
+}
+
 /** @brief Verify immutable prompt context, controls and artifact predictions.
  * @return Zero after all release-build assertions pass. */
 int main(void) {
     const cgai_chat_message question = {CGAI_CHAT_USER, "question"};
     const cgai_chat_example example = {&question, 1U, "answer"};
-    const cgai_chat_config config = {2U, 3U, 3U, 8U, 1U, 42U, 1.0};
+    const cgai_chat_config config = {2U, 3U, 3U, 8U, 1U, 42U, 1.0, 0U};
     cgai_chat_model *model = cgai_chat_create(&config, &example, 1U);
     TEST_CHECK(model != NULL, cgai_last_error());
     cgai_chat_prompt_data prompt = {0};
@@ -270,6 +382,7 @@ int main(void) {
     structural_prompt(model);
     codec_roundtrip(model);
     public_regressions(model);
+    evidence_regressions();
     cgai_chat_destroy(model);
     return 0;
 }

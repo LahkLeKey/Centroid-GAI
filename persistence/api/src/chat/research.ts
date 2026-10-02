@@ -5,6 +5,7 @@ import { loadRepositoryIndex, retrievalTerms } from '../knowledge/retrieval.ts';
 import { MemoryService } from './memory.ts';
 import { abortable, fetchPublic, publicUrl, readableText, type PublicPage } from './public-fetch.ts';
 import { chatText } from './service.ts';
+import { evidenceUnits } from './evidence.ts';
 
 export interface SearchResult { url: string; title: string }
 export interface SearchProvider { name: string; search(query: string, signal: AbortSignal): Promise<readonly SearchResult[]> }
@@ -40,8 +41,16 @@ export function relevantExcerpt(text: string, query: string): string | null {
     const terms = [...new Set(retrievalTerms(query))];
     if (!terms.length) return null;
     let best: string | null = null, score = 0;
-    for (let offset = 0; offset < text.length; offset += 800) {
-        const excerpt = text.slice(offset, offset + 1600);
+    const units = evidenceUnits(text);
+    // Keep complete source units. Cutting at character 1600 can remove a qualifier or negation.
+    for (let index = 0; index < units.length; index++) {
+        const unit = units[index]!;
+        if (unit.text.length > 1600) continue;
+        let start = unit.start, end = unit.end;
+        const previous = units[index - 1], next = units[index + 1];
+        if (previous && end - previous.start <= 1600) start = previous.start;
+        if (next && next.end - start <= 1600) end = next.end;
+        const excerpt = text.slice(start, end);
         const words = new Set(retrievalTerms(excerpt));
         const matched = terms.filter((term) => words.has(term)).length;
         if (matched > score && matched >= Math.ceil(terms.length / 2)) { best = excerpt; score = matched; }
@@ -139,7 +148,7 @@ export class ResearchService {
             if (input.rememberSources && sources.length) {
                 try {
                     bounded.throwIfAborted();
-                    memoryIds = (await this.memory.sources(key, applicability, sources, conversationId, bounded)).map((entry) => entry.id);
+                    memoryIds = (await this.memory.sources(key, applicability, sources, conversationId, bounded, query)).map((entry) => entry.id);
                 } catch {
                     bounded.throwIfAborted();
                     memoryReason = '; source excerpts could not be saved to memory';

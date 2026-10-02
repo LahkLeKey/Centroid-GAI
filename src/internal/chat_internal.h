@@ -13,15 +13,18 @@
 #define CGAI_CHAT_CONTROL_COUNT 4U
 /** Owned wrapper; the network retains the existing differentiable centroid parameter layout. */
 struct cgai_chat_model {
-    cgai_chat_config config;    /**< Copied immutable conversation dimensions. */
-    cgai_neural_model *network; /**< Owned neural parameters and frozen vocabulary. */
+    cgai_chat_config config;       /**< Copied immutable conversation dimensions. */
+    cgai_neural_model *network;    /**< Owned neural parameters and frozen vocabulary. */
+    unsigned int protocol_version; /**< Artifact and formatter version, one or two. */
 };
 /** Bounded complete prompt, left padded independently from answer context. */
 typedef struct cgai_chat_prompt_data {
     cgai_token_id tokens[CGAI_NEURAL_MAX_CONTEXT]; /**< Initialized persistent prompt slots. */
-    size_t count;   /**< Retained nonpadding IDs including role/turn controls. */
-    size_t dropped; /**< Complete omitted message count. */
-    size_t unknown; /**< Retained lexical UNK occurrences. */
+    size_t count;            /**< Retained nonpadding IDs including role/turn controls. */
+    size_t dropped;          /**< Complete omitted message count. */
+    size_t unknown;          /**< Retained lexical UNK occurrences. */
+    size_t evidence;         /**< Retained evidence IDs including role/turn controls. */
+    size_t dropped_evidence; /**< Complete omitted evidence messages. */
 } cgai_chat_prompt_data;
 /** Independent prepared dialogue; answer includes one supervised EOS. */
 typedef struct cgai_chat_record {

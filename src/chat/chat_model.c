@@ -5,7 +5,7 @@
 #include <string.h>
 
 cgai_chat_config cgai_chat_default_config(void) {
-    const cgai_chat_config config = {8U, 16U, 16U, 48U, 8U, 42U, 1.0};
+    const cgai_chat_config config = {8U, 16U, 16U, 160U, 32U, 42U, 1.0, 0U};
     return config;
 }
 
@@ -18,6 +18,8 @@ cgai_status cgai_chat_validate_config(const cgai_chat_config *config, cgai_neura
     if (config == NULL || config->prompt_window < 4U || config->prompt_window > 255U ||
         config->response_window == 0U || config->response_window > 256U - config->prompt_window)
         return cgai_fail("invalid chat prompt or response window");
+    if (config->evidence_window > config->prompt_window - 4U)
+        return cgai_fail("evidence window must leave four prompt slots for the question");
     const cgai_neural_config shape = {config->embedding_dimensions,
                                       config->hidden_dimensions,
                                       config->centroid_count,
@@ -119,6 +121,11 @@ static cgai_chat_model *create_from_corpus(const cgai_chat_config *config, const
     int ok = model != NULL && model->network != NULL;
     if (ok) {
         model->config = *config;
+        model->protocol_version = CGAI_CHAT_PROTOCOL_VERSION;
+        if (model->config.evidence_window == 0U)
+            model->config.evidence_window = config->prompt_window / 2U < config->prompt_window - 4U
+                                                ? config->prompt_window / 2U
+                                                : config->prompt_window - 4U;
         ok = cgai_chat_validate_config(config, &model->network->config) &&
              cgai_neural_build_vocabulary(model->network, corpus) && initialize_chat(model);
     }
@@ -173,12 +180,32 @@ cgai_status cgai_chat_metadata(const cgai_chat_model *model, cgai_chat_config *c
     return CGAI_STATUS_OK;
 }
 
+unsigned int cgai_chat_protocol_version(const cgai_chat_model *model) {
+    return model == NULL ? 0U : model->protocol_version;
+}
+
 void cgai_chat_destroy_dataset(cgai_chat_dataset *dataset) {
     if (dataset->records != NULL)
         for (size_t i = 0U; i < dataset->count; ++i)
             free(dataset->records[i].answer);
     free(dataset->records);
     memset(dataset, 0, sizeof(*dataset));
+}
+
+/** @brief Prepare one complete evidence-conditioned prompt and independent answer target.
+ * @param model Borrowed immutable model.
+ * @param example Borrowed supervised example.
+ * @param record Mutable zeroed record receiving answer ownership, including on failure.
+ * @return OK or ERROR; new protocols reject omitted evidence before training. */
+static cgai_status prepare_record(const cgai_chat_model *model, const cgai_chat_example *example,
+                                  cgai_chat_record *record) {
+    if (!cgai_chat_format(model, example->messages, example->message_count, &record->prompt))
+        return CGAI_STATUS_ERROR;
+    if (model->protocol_version >= 2U && record->prompt.dropped_evidence != 0U)
+        return cgai_fail("chat example evidence exceeds the configured prompt or evidence window");
+    record->answer =
+        cgai_neural_sequence(model->network, example->answer, &record->count, &record->unknown);
+    return record->answer != NULL ? CGAI_STATUS_OK : CGAI_STATUS_ERROR;
 }
 
 /** @brief Map a validated dataset to independent causal records.
@@ -192,12 +219,7 @@ static cgai_status prepare_records(const cgai_chat_model *model, const cgai_chat
     /* Step 2: Prepare every independent target before training mutates weights. */
     for (size_t i = 0U; i < dataset->count; ++i) {
         cgai_chat_record *record = &dataset->records[i];
-        if (!cgai_chat_format(model, examples[i].messages, examples[i].message_count,
-                              &record->prompt))
-            return CGAI_STATUS_ERROR;
-        record->answer = cgai_neural_sequence(model->network, examples[i].answer, &record->count,
-                                              &record->unknown);
-        if (record->answer == NULL)
+        if (!prepare_record(model, &examples[i], record))
             return CGAI_STATUS_ERROR;
         total += record->count;
         if (total > CGAI_NEURAL_MAX_TOKENS)

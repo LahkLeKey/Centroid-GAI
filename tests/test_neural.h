@@ -4,6 +4,8 @@
 
 #include "internal/neural_math.h"
 #include "test_utils.h"
+/** @brief Check reusable generation, deterministic work budgets and resource accounting. */
+void cgai_test_neural_session(void);
 
 /** @brief Create an owned small deterministic model for numerical checks.
  *

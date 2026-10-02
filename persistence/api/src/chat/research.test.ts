@@ -6,19 +6,40 @@ import { dirname, join, resolve } from 'node:path';
 import type { MemoryDocument } from '../../../shared/research.ts';
 import { sha256 } from '../evaluation/codebase-data.ts';
 import { MemoryService } from './memory.ts';
-import { ResearchService } from './research.ts';
+import { ResearchService, relevantExcerpt } from './research.ts';
 
-function memory() {
+function memory(clock = Date.now) {
     let document: MemoryDocument | null = null;
     return new MemoryService({ async getMemory() { return structuredClone(document); },
         async saveMemory(value, revision) { if ((document?.revision ?? 0) !== revision) return false;
-            document = structuredClone(value); return true; } }, 'owner');
+            document = structuredClone(value); return true; } }, 'owner', clock);
 }
 const input = { requestId: 'research', revision: 0, content: 'private centroid question',
     publicQuery: 'public centroid facts', rememberSources: true };
 const { publicQuery: _query, ...cachedInput } = input;
 const hit = { url: 'https://example.com/source', title: 'Original source' };
 const page = { url: 'https://example.com/canonical', contentType: 'text/plain', text: 'Public centroid facts are source excerpts.' };
+
+test('public excerpt selection preserves complete qualifiers rather than clipping at a byte window', () => {
+    const qualified = `Centroid training ${'requires reviewed data '.repeat(85)}and is not automatic.`;
+    assert.equal(relevantExcerpt(qualified, 'centroid training'), null);
+    const text = 'Unrelated introduction. Centroid training is not automatic. It requires reviewed examples.';
+    const excerpt = relevantExcerpt(text, 'centroid training');
+    assert.ok(excerpt?.includes('Centroid training is not automatic.'));
+    assert.ok(text.includes(excerpt!));
+});
+
+test('explicit volatile public queries use short freshness even when the private cache key is neutral', async () => {
+    const time = Date.parse('2026-10-01T12:00:00Z');
+    const records = memory(() => time);
+    const research = new ResearchService(records, { name: 'fixture', async search() { return [hit]; } }, undefined,
+        async () => ({ ...page, text: 'The latest centroid price is 10 credits.' }), 100, () => time);
+    await research.answer({ ...input, content: 'check this topic', publicQuery: 'latest centroid price' }, 'conversation', new AbortController().signal);
+    const saved = (await records.read()).records[0]!;
+    assert.equal(saved.queryKey, 'check this topic');
+    assert.equal(saved.freshnessPolicy, 'volatile-v1');
+    assert.equal(Date.parse(saved.expiresAt!), time + 300000);
+});
 
 test('an unsupported hello world automatically researches only the current message, remembers sources on request, then uses cache', async () => {
     const records = memory();

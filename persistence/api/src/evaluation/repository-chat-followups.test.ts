@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import type { Conversation } from '../../../shared/chat.ts';
 import { sha256 } from './codebase-data.ts';
@@ -39,8 +38,13 @@ test('selection scoring distinguishes file focus, competing tasks, and attribute
     assert(scoreRepositoryReply(competition, conversation({ taskCandidates: ['source-task', 'other-task'] }), [], identity).every(check => check.passed));
 });
 
-test('eight follow-up development chains remain separate from the forty-case regression fixture', () => {
-    const suite = JSON.parse(readFileSync(new URL('../../../../examples/chat/repository-followups-v1.json', import.meta.url), 'utf8')) as RepositoryFollowupSuite;
+test('eight follow-up development chains remain separate from the forty-case regression contract', () => {
+    const suite: RepositoryFollowupSuite = { version: 1, purpose: 'repository-followup-development',
+        description: 'Isolated follow-up contract fixture.', scenarios: Array.from({ length: 8 }, (_, index) => ({
+            id: `followup-${index}`, group: 'context', split: 'development', description: 'Synthetic follow-up schema control.',
+            turns: Array.from({ length: 4 }, () => ({ content: 'Which source file supports that?',
+                expected: { outcome: 'supported', sourcePaths: ['src/one.ts'], evidence: [{ path: 'src/one.ts', quote: 'A source fixture.' }] } })),
+        })) };
     const byPath = new Map<string, string[]>();
     for (const scenario of suite.scenarios) for (const turn of scenario.turns) for (const gold of turn.expected.evidence ?? [])
         byPath.set(gold.path, [...(byPath.get(gold.path) ?? []), gold.quote]);

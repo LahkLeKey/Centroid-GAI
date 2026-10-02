@@ -37,6 +37,10 @@ typedef struct cgai_neural_workspace {
  * @return New caller-owned workspace, or NULL after cleaning up any partial allocation.
  */
 cgai_neural_workspace *cgai_neural_workspace_create(const cgai_neural_model *model);
+/** @brief Count requested workspace heap bytes without allocating.
+ * @param model Borrowed initialized model, or NULL.
+ * @return Scratch owner and numeric allocation bytes, or zero on invalid shape/overflow. */
+size_t cgai_neural_workspace_bytes(const cgai_neural_model *model);
 
 /**
  * @brief Free an owned workspace without releasing or changing its borrowed model.

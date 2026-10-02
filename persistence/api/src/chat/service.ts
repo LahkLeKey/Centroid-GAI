@@ -1,11 +1,15 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { ChatCreateRequest, ChatMessage, ChatReply, ChatSendRequest, ChatSendResponse, ChatTrainRequest, ChatTrainingJob, Conversation } from '../../../shared/chat.ts';
+import type { ChatQualityReport } from '../../../shared/chat-quality.ts';
+import type { ResearchAnswer } from '../../../shared/research.ts';
 import type { ChatTrainResult } from '../chat-native.ts';
 import type { ChatStore } from './store.ts';
 import { ChatWorkerError, type ChatWorkers } from './workers.ts';
 import type { ResearchService } from './research.ts';
 import type { RepositoryService } from './repository.ts';
 import { validRepositoryResearch } from './repository-investigation.ts';
+import { checkGroundedReply, groundingFallback, selectEvidence } from './grounding.ts';
+import { validateTrainingValidation } from './training-quality.ts';
 import type { RepositoryKnowledgeInfo, RepositorySnapshotIdentity, RepositorySwitchRequest } from '../../../shared/repository.ts';
 
 export class ChatServiceError extends Error {
@@ -266,13 +270,7 @@ export class ChatService {
                 signal.throwIfAborted();
                 if (!artifact || fingerprintBytes(artifact.payload) !== conversation.modelChecksum)
                     throw new Error('missing or corrupt pinned chat artifact');
-                const history = conversation.messages.filter((message) => message.status === 'complete');
-                const reply = await this.workers.run<ChatReply>({ kind: 'reply', payload: artifact.payload,
-                    messages: [...history, { role: 'user', content: input.content }], options: input }, signal);
-                signal.throwIfAborted();
-                completed = { ...assistant, status: 'complete', content: reply.content, finishReason: reply.finishReason,
-                    usage: { generatedTokens: reply.generatedTokens, promptTokens: reply.promptTokens,
-                        droppedMessages: reply.droppedMessages, unknownTokens: reply.unknownTokens } };
+                completed = await this.groundedReply(assistant, conversation, input, artifact, signal);
             }
         } catch (error) {
             const cancelled = signal.aborted;
@@ -283,6 +281,36 @@ export class ChatService {
             { ...user, status: completed.status }, completed],
             completed.status === 'complete' && completed.repositoryState ? { repositoryState: completed.repositoryState } : {});
         return { conversation: result, requestId: input.requestId };
+    }
+    /** Factual neural output is limited to verifiable complete source quotations. */
+    private async groundedReply(assistant: ChatMessage, conversation: Conversation, input: ChatSendRequest,
+        artifact: import('./store.ts').StoredChatArtifact, signal: AbortSignal): Promise<ChatMessage> {
+        const answer: ResearchAnswer = this.research ? await this.research.answer(input, conversation.id, signal) : {
+            content: 'No evidence service is configured. I cannot support a factual answer.', sources: [], memoryIds: [],
+            research: { status: 'unavailable', mode: 'abstained', reason: 'evidence service unavailable',
+                provider: null, queries: 0, fetched: 0, elapsedMs: 0 },
+        };
+        signal.throwIfAborted();
+        const selection = selectEvidence(input.content, answer.sources, artifact.metadata);
+        const fallback: ChatMessage = { ...assistant, ...answer, status: 'complete',
+            finishReason: answer.research.mode === 'clarification' ? 'clarification' : answer.sources.length ? 'sources' : 'abstained',
+            grounding: groundingFallback(selection.reason, selection, !answer.sources.length),
+            usage: { generatedTokens: 0, promptTokens: 0, droppedMessages: 0, unknownTokens: 0, evidenceTokens: 0, droppedEvidence: 0 } };
+        if (!selection.entries.length) return fallback;
+        const history = conversation.messages.filter(message => message.status === 'complete')
+            .map(({ role, content }) => ({ role, content }));
+        const reply = await this.workers.run<ChatReply>({ kind: 'reply', payload: artifact.payload,
+            messages: [...history, ...selection.messages, { role: 'user', content: input.content }], options: input }, signal);
+        signal.throwIfAborted();
+        const checked = checkGroundedReply(reply, selection);
+        const usage = { generatedTokens: reply.generatedTokens, promptTokens: reply.promptTokens,
+            droppedMessages: reply.droppedMessages, unknownTokens: reply.unknownTokens,
+            ...(reply.evidenceTokens === undefined ? {} : { evidenceTokens: reply.evidenceTokens }),
+            ...(reply.droppedEvidence === undefined ? {} : { droppedEvidence: reply.droppedEvidence }) };
+        if (checked.content === undefined || checked.sources === undefined)
+            return { ...fallback, grounding: checked.grounding, usage };
+        return { ...fallback, content: checked.content, sources: checked.sources, grounding: checked.grounding,
+            finishReason: reply.finishReason, usage, research: { ...answer.research, mode: 'neural' } };
     }
     async cancel(id: string, requestId: string): Promise<Conversation> {
         await this.conversation(id);
@@ -305,7 +333,7 @@ export class ChatService {
     private async queueTraining(input: ChatTrainRequest): Promise<ChatTrainingJob> {
         if (this.jobs.size + this.trainingAdmissions >= 16) throw new ChatServiceError('training queue is full', 429);
         chatText(input?.name, 'name', 200);
-        trainingSettings(input.config, 'config', ['embeddingDimensions', 'hiddenDimensions', 'centroidCount', 'promptWindow', 'responseWindow', 'routingTemperature']);
+        trainingSettings(input.config, 'config', ['embeddingDimensions', 'hiddenDimensions', 'centroidCount', 'promptWindow', 'responseWindow', 'evidenceWindow', 'routingTemperature']);
         trainingSettings(input.training, 'training', ['epochs', 'learningRate']);
         if (!Array.isArray(input.examples) || !input.examples.length || input.examples.length > 10000 ||
             Buffer.byteLength(JSON.stringify(input)) > 16 * 1024 * 1024) throw new ChatServiceError('invalid bounded training dataset');
@@ -318,6 +346,8 @@ export class ChatService {
             if (dialogues.has(identity)) throw new ChatServiceError('duplicate training dialogue');
             dialogues.add(identity);
         }
+        try { input = { ...structuredClone(input), validation: validateTrainingValidation(input.examples, input.validation) }; }
+        catch (error) { throw new ChatServiceError(error instanceof Error ? error.message : 'invalid development validation'); }
         const job: ChatTrainingJob = { id: randomUUID(), modelName: input.name, status: 'queued', createdAt: now(), updatedAt: now() };
         ++this.trainingAdmissions;
         try {
@@ -333,6 +363,9 @@ export class ChatService {
         } finally { --this.trainingAdmissions; }
     }
     private async runTraining(job: ChatTrainingJob, input: ChatTrainRequest): Promise<void> {
+        let candidateChecksum: string | undefined;
+        let measured: Pick<ChatTrainingJob, 'quality' | 'metrics'> = {};
+        let published: ChatTrainingJob['model'];
         try {
             await this.store.saveJob({ ...job, status: 'running', updatedAt: now() });
             this.assertOpen();
@@ -340,13 +373,29 @@ export class ChatService {
                 ...(input.config === undefined ? {} : { config: input.config }), ...(input.training === undefined ? {} : { training: input.training }) });
             this.assertOpen();
             const payload = Buffer.from(result.payload);
-            const model = await this.store.publishModel(input.name, { payload, checksumSha256: fingerprintBytes(payload),
-                metadata: result.metadata, createdAt: now(), provenance: { ...input.provenance,
-                    datasetSha256: fingerprint(input.examples), protocolVersion: 1, tokenizerVersion: 1,
-                    training: input.training ?? {}, trainingMetrics: result.after } });
-            await this.store.saveJob({ ...job, status: 'complete', model, updatedAt: now(), metrics: { before: result.before, after: result.after } });
+            candidateChecksum = fingerprintBytes(payload);
+            const artifact = { payload, checksumSha256: fingerprintBytes(payload),
+                metadata: result.metadata, createdAt: now(), provenance: { user: input.provenance ?? null, createdByJobId: job.id,
+                    datasetSha256: fingerprint(input.examples), protocolVersion: result.metadata.protocolVersion,
+                    tokenizerVersion: result.metadata.tokenizerVersion,
+                    training: input.training ?? {}, trainingMetrics: result.after } };
+            await this.store.saveArtifact(artifact);
+            this.assertOpen();
+            const quality = await this.workers.run<ChatQualityReport>({ kind: 'validate', payload, validation: input.validation });
+            this.assertOpen();
+            measured = { quality, metrics: { before: result.before, after: result.after } };
+            if (!quality.passed) {
+                await this.store.saveJob({ ...job, ...measured, candidateChecksum, updatedAt: now(), status: 'rejected',
+                    error: 'candidate failed the development quality gate; model head was not changed' });
+                return;
+            }
+            published = await this.store.publishModel(input.name, artifact);
+            await this.store.saveJob({ ...job, ...measured, candidateChecksum, updatedAt: now(), status: 'complete', model: published });
         } catch (error) {
-            await this.store.saveJob({ ...job, status: 'error', updatedAt: now(), error: error instanceof Error ? error.message : 'training failed' });
+            const detail = error instanceof Error ? error.message : 'training failed';
+            await this.store.saveJob({ ...job, ...measured, ...(candidateChecksum ? { candidateChecksum } : {}),
+                ...(published ? { model: published } : {}), status: 'error', updatedAt: now(),
+                error: published ? `Validated model was published, but recording the completed job failed: ${detail}` : detail });
         }
     }
     async close(): Promise<void> {

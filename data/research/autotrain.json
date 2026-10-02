@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "stateDirectory": "../../models/scholarly",
+  "intervalSeconds": 21600,
+  "cycleBudgetMs": 600000,
+  "nativeBudgetMs": 180000,
+  "requestDelayMs": 1000,
+  "requestLimit": 100,
+  "policy": {
+    "queries": [
+      "\"machine learning\" AND OPEN_ACCESS:Y AND IN_EPMC:Y sort_cited:y",
+      "\"language model\" AND OPEN_ACCESS:Y AND IN_EPMC:Y sort_cited:y"
+    ],
+    "paperLimit": 12,
+    "maximumCorpusPapers": 24,
+    "minimumPapers": 6,
+    "minimumReferences": 2,
+    "maximumPassagesPerPaper": 32,
+    "baselineEpochs": 1,
+    "epochsPerCycle": 1,
+    "learningRate": 0.005,
+    "minimumDevelopmentImprovement": 0.000001,
+    "maximumUnknownRate": 0.25,
+    "maximumTestRegression": 0.0000000001
+  }
+}

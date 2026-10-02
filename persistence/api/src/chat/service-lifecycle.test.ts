@@ -4,20 +4,21 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { FileChatStore } from './file-store.ts';
-import { ChatService, ChatServiceError, fingerprintBytes } from './service.ts';
+import { ChatServiceError, fingerprintBytes } from './service.ts';
+import { NeuralFixtureService as ChatService, fixtureValidation } from './service-fixture.ts';
 import type { ChatReply, ChatSendRequest } from '../../../shared/chat.ts';
 import type { ChatWorkers, ChatWorkerTask } from './workers.ts';
 
 const reply: ChatReply = { content: 'reply', finishReason: 'eos', generatedTokens: 1, promptTokens: 2, droppedMessages: 0, unknownTokens: 0 };
-const training = { name: 'test', examples: [{ messages: [{ role: 'user' as const, content: 'question' }], answer: 'answer' }] };
+const training = { name: 'test', examples: [{ messages: [{ role: 'user' as const, content: 'question' }], answer: 'answer' }], validation: fixtureValidation };
 const immediate = () => new Promise<void>((resolve) => setImmediate(resolve));
 async function fixture(run: (task: ChatWorkerTask, signal?: AbortSignal) => Promise<unknown>) {
     const directory = await mkdtemp(join(tmpdir(), 'cgai-lifecycle-'));
     const store = await FileChatStore.open(join(directory, 'store.json'));
     const payload = Buffer.from('test model');
     await store.publishModel('test', { payload, checksumSha256: fingerprintBytes(payload), provenance: null,
-        createdAt: new Date().toISOString(), metadata: { engineKind: 'neural-centroid-chat', formatVersion: 1,
-            protocolVersion: 1, tokenizerVersion: 1, config: {}, vocabularySize: 8, parameterCount: 100 } });
+        createdAt: new Date().toISOString(), metadata: { engineKind: 'neural-centroid-chat', formatVersion: 2,
+            protocolVersion: 2, tokenizerVersion: 1, config: {}, vocabularySize: 8, parameterCount: 100 } });
     const workers: ChatWorkers = { run: async <T>(task: ChatWorkerTask, signal?: AbortSignal) => await run(task, signal) as T, close() {} };
     const service = new ChatService(store, workers, 'owner');
     return { store, service, workers, async close() { await service.close(); await store.close(); await rm(directory, { recursive: true, force: true }); } };

@@ -56,6 +56,20 @@ static int cgai_neural_workspace_size(const cgai_neural_model *model, size_t *co
     return *count <= SIZE_MAX / sizeof(double);
 }
 
+/** @brief Count requested workspace heap bytes without allocating.
+ * @param model Borrowed initialized model, or NULL.
+ * @return Scratch owner and numeric allocation bytes, or zero on invalid shape/overflow. */
+size_t cgai_neural_workspace_bytes(const cgai_neural_model *model) {
+    /* Step 1: Reuse the allocator's checked numeric slice calculation. */
+    size_t count = 0U;
+    size_t bytes = 0U;
+    if (model == NULL || !cgai_neural_workspace_size(model, &count))
+        return 0U;
+    /* Step 2: Include the separate pointer owner in the requested heap total. */
+    return cgai_size_add(sizeof(cgai_neural_workspace), count * sizeof(double), &bytes) ? bytes
+                                                                                        : 0U;
+}
+
 /**
  * @brief Divide one allocated scratch buffer into nonoverlapping shape-specific slices.
  *

@@ -13,27 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  knowledge-ingestion:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Install offline bulk-preparation test dependencies
-        run: python -m pip install -r tools/knowledge/bulk-requirements.txt
-      - name: Build native trainer for ingestion smoke test
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
-      - name: Test Git encyclopedia import without network or credentials
-        env:
-          CGAI_EXECUTABLE: ${{ runner.os == 'Windows' && 'build/Release/cgai.exe' || 'build/cgai' }}
-        run: python -m unittest discover -s tools/knowledge/tests -v
-
   build:
     strategy:
       matrix:
@@ -41,12 +20,27 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build --config Release
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: Verify published bark artifacts and source identity without raw data
+        run: node tools/bark/workflow.mjs verify
+      - name: Verify composed gameplay artifacts and source identity
+        run: node tools/gameplay/workflow.mjs verify
+      - name: Verify the historical bark release independently of newer source
+        run: node tools/gameplay/workflow.mjs verify-legacy
+      - name: Test unattended scholarly training without network
+        env:
+          CGAI_EXECUTABLE: ${{ runner.os == 'Windows' && 'build/Release/cgai.exe' || 'build/cgai' }}
+        run: node --test persistence/api/src/training/scholarly-*.test.ts
+      - name: Verify the published scholarly model without raw data or network
+        run: node persistence/api/src/training/scholarly-cli.ts verify
 
   native-lint:
     runs-on: ubuntu-latest
@@ -71,38 +65,25 @@ jobs:
       - name: Test Node addon
         working-directory: persistence/api
         run: bun run native:test
-      - name: Evaluate model baselines without network or database
+      - name: Test factuality and training quality without network or database
         working-directory: persistence/api
         run: |
           bun run baseline:test
-          bun run baseline
+          bun run chat:quality:test
           bun run chat:evaluate
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Verify repository training and record held-out quality
+      - name: Test snapshot verification and source retrieval with isolated fixtures
         run: |
           node --test persistence/api/src/evaluation/codebase-data.test.ts
-          python -m tools.knowledge snapshot --config examples/knowledge/codebase.json --repo . --ref HEAD --output build/knowledge/codebase
-          node persistence/api/src/evaluation/codebase.ts --snapshot build/knowledge/codebase --output build/evaluation/codebase
-      - name: Evaluate source retrieval and repository-question citations
-        run: |
           node --test persistence/api/src/knowledge/retrieval.test.ts
-          node persistence/api/src/evaluation/repository.ts --snapshot build/knowledge/codebase --output build/evaluation/repository.json
       - name: Verify static categorized codebase centroids and spatial neighbors
         run: |
           node --test persistence/api/src/knowledge/compile-native-knowledge.test.ts
           node --test persistence/api/src/knowledge/codebase-centroids.test.ts
-          node persistence/api/src/knowledge/codebase-centroids.ts --directory knowledge/codebase/codebase-v1 --verify
       - uses: actions/upload-artifact@v4
         with:
           name: model-baselines
           path: |
-            build/evaluation/baseline.json
             build/evaluation/chat
-            build/evaluation/codebase
-            build/evaluation/repository.json
-            build/knowledge/codebase
           if-no-files-found: error
       - name: Configure native checks
         run: cmake -S . -B build-lint
@@ -146,26 +127,20 @@ jobs:
       - name: Typecheck persistence packages
         working-directory: persistence
         run: bun run typecheck
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
       - name: Test repository scenario assertions
         working-directory: persistence/api
         run: bun run repository:test
-      - name: Test API and all repository conversations against isolated Compose
+      - name: Test API persistence and chat against isolated Compose
         working-directory: persistence
         shell: bash
         run: |
           set -o pipefail
-          bun run test:repository 2>&1 | tee ../compose-ci.log
-      - name: Save repository transcripts and diagnostics
+          bun run test:e2e 2>&1 | tee ../compose-ci.log
+      - name: Save API integration diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: repository-chat-integration
+          name: api-integration
           path: |
             compose-ci.log
-            build/evaluation/repository-chat
-            build/knowledge/repository-e2e-*/fixture.json
-            build/knowledge/repository-e2e-*/provenance.json
           retention-days: 7

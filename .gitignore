@@ -1,6 +1,10 @@
 /build/
+/build-*/
+/cmake-build-*/
 /out/
 *.cgai
+*.cgnn
+*.cggp
 *.obj
 *.o
 *.exe
@@ -8,6 +12,9 @@
 .vs/
 .vscode/
 .env
+.env.*
+!.env.example
+*.log
 node_modules/
 *.tsbuildinfo
 persistence/*/build/
@@ -15,4 +22,80 @@ examples/models/
 __pycache__/
 *.pyc
 /knowledge/**/*.lock
+# Data and model output are local unless explicitly admitted below.
+# Keep raw acquisition, generated datasets, reviews and training runs out of Git.
+/data/**
+/models/**
+
+# These small authored JSON fixtures are required by offline tests and evaluators.
+!/data/chat/
+!/data/chat/factual-dialogues-v2.json
+!/data/chat/learning-sanity-v1.json
+!/data/chat/train-request-v1.json
+# Research collection state stays local; only the authored policy is published.
+!/data/research/
+!/data/research/autotrain.json
+
+# The tiny authored ordering corpus is part of this pinned replay recipe.
+!/models/neural/
+!/models/neural/order-v1/
+!/models/neural/order-v1/train.txt
+!/models/neural/order-v1/heldout.txt
+!/models/neural/order-v1/checkpoint.txt
+!/models/neural/order-v1/metrics.tsv
+!/models/neural/order-v1/recipe.cmake
+!/models/neural/order-v1/toolchain.txt
+
+# Scholarly releases publish only named model artifacts and compact provenance.
+# New files are ignored until explicitly admitted here.
+!/models/scholarly/
+!/models/scholarly/current.tsv
+!/models/scholarly/toolchain.txt
+!/models/scholarly/releases/
+!/models/scholarly/releases/*/
+!/models/scholarly/releases/*/checkpoint.txt
+!/models/scholarly/releases/*/model.cgnn
+!/models/scholarly/releases/*/release.tsv
+!/models/scholarly/releases/*/citations.tsv
+!/models/scholarly/releases/*/metrics.tsv
+/models/scholarly/releases/.pending-*/
+
+# Gameplay data admits only the three authored contract-one fixture files.
+# Generated examples, acquisition payloads and future files stay local by default.
+!/data/gameplay/
+!/data/gameplay/barks-v1/
+!/data/gameplay/barks-v1/contract.tsv
+!/data/gameplay/barks-v1/catalog.tsv
+!/data/gameplay/barks-v1/scenarios.tsv
+# Publish only compact specialist artifacts, never raw traces or JSON state.
+!/models/gameplay/
+!/models/gameplay/barks-v1/
+!/models/gameplay/barks-v1/current.tsv
+!/models/gameplay/barks-v1/releases/
+!/models/gameplay/barks-v1/releases/*/
+!/models/gameplay/barks-v1/releases/*/checkpoint.txt
+!/models/gameplay/barks-v1/releases/*/model.cgnn
+!/models/gameplay/barks-v1/releases/*/report.tsv
+!/models/gameplay/barks-v1/releases/*/release.tsv
+/models/gameplay/barks-v1/releases/.pending-*/
+
+# Authored composed-network registry, catalog and frozen scenario contracts only.
+!/data/gameplay/composed-v1/
+!/data/gameplay/composed-v1/contract.tsv
+!/data/gameplay/composed-v1/tasks.tsv
+!/data/gameplay/composed-v1/modules.tsv
+!/data/gameplay/composed-v1/bark-catalog.tsv
+!/data/gameplay/composed-v1/bark-scenarios.tsv
+!/data/gameplay/composed-v1/intent-catalog.tsv
+!/data/gameplay/composed-v1/intent-scenarios.tsv
+# Source-controlled bundles contain only weights, continuation state and compact proof.
+!/models/gameplay/composed-v1/
+!/models/gameplay/composed-v1/current.tsv
+!/models/gameplay/composed-v1/releases/
+!/models/gameplay/composed-v1/releases/*/
+!/models/gameplay/composed-v1/releases/*/checkpoint.txt
+!/models/gameplay/composed-v1/releases/*/model.cggp
+!/models/gameplay/composed-v1/releases/*/report.tsv
+!/models/gameplay/composed-v1/releases/*/release.tsv
+/models/gameplay/composed-v1/releases/.pending-*/
 

@@ -5,6 +5,7 @@
 #include "internal/model_random.h"
 #include "internal/neural_internal.h"
 #include "internal/neural_math.h"
+#include "internal/size_utils.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,15 +23,24 @@ typedef struct neural_generation {
     size_t length;                  /**< Current text bytes, excluding NUL. */
     size_t fixed;                   /**< Persistent prefix size; zero for prototype generation. */
     size_t generated;               /**< Successfully emitted tokens. */
+    size_t forward_passes;          /**< Attempted forward calls, including EOS and failures. */
+    size_t prompt_tokens;           /**< Full prompt tokens before suffix truncation. */
+    size_t unknown_prompt_tokens;   /**< Unknown spellings across the full prompt. */
     cgai_token_id recent[16];       /**< Last emitted chat IDs in a bounded repetition ring. */
     cgai_chat_finish_reason finish; /**< EOS or requested length. */
 } neural_generation;
+
+/** Owned numerical scratch and resumable request borrowing an immutable model. */
+struct cgai_neural_session {
+    neural_generation request;            /**< Current caller-buffer and sampling state. */
+    cgai_neural_generation_finish finish; /**< Idle, running or terminal request state. */
+};
 
 /** @brief Prepare a BOS-padded suffix from a prompt without retaining its whole history.
  * @param request Borrowed mutable generation state.
  * @param prompt Borrowed prompt, which may be empty.
  * @return OK on preparation, ERROR otherwise; caller releases any workspace. */
-static cgai_status prepare_generation(neural_generation *request, const char *prompt) {
+static cgai_status prepare_context(neural_generation *request, const char *prompt) {
     /* Step 1: Map unknown words into the frozen vocabulary, discarding the appended EOS. */
     size_t count = 0U;
     size_t unknown = 0U;
@@ -38,8 +48,21 @@ static cgai_status prepare_generation(neural_generation *request, const char *pr
     if (sequence == NULL)
         return CGAI_STATUS_ERROR;
     cgai_neural_context(request->model, sequence, count - 1U, request->context);
+    request->prompt_tokens = count - 1U;
+    request->unknown_prompt_tokens = unknown;
     free(sequence);
-    /* Step 2: Allocate numerical scratch independently for each concurrent reader. */
+    return CGAI_STATUS_OK;
+}
+
+/** @brief Prepare context and scratch for a one-shot standalone request.
+ * @param request Borrowed request; owns workspace after successful allocation.
+ * @param prompt Borrowed terminated text, independent from the destination.
+ * @return OK on complete preparation, ERROR otherwise; caller releases workspace. */
+static cgai_status prepare_generation(neural_generation *request, const char *prompt) {
+    /* Step 1: Map the prompt before allocating numerical buffers. */
+    if (!prepare_context(request, prompt))
+        return CGAI_STATUS_ERROR;
+    /* Step 2: Give each independent request its own numerical scratch. */
     request->workspace = cgai_neural_workspace_create(request->model);
     return request->workspace != NULL ? CGAI_STATUS_OK : CGAI_STATUS_ERROR;
 }
@@ -149,26 +172,42 @@ static void advance_context(neural_generation *request, cgai_token_id token) {
         request->finish = CGAI_CHAT_FINISH_REPETITION;
 }
 
+/** @brief Attempt one allocation-free next-token prediction and append.
+ * @param request Borrowed prepared state retaining its immutable model and scratch.
+ * @return OK on token or EOS, ERROR with a terminal valid output prefix otherwise. */
+static cgai_status generate_next(neural_generation *request) {
+    /* Step 1: Count attempted work even when a numerical failure or EOS emits no token. */
+    ++request->forward_passes;
+    if (!cgai_neural_forward(request->model, request->context, request->workspace))
+        return CGAI_STATUS_ERROR;
+    const cgai_token_id token = select_token(request);
+    if (!cgai_token_id_is_valid(token))
+        return CGAI_STATUS_ERROR;
+    if (token.value == CGAI_TOKEN_EOS) {
+        request->finish = CGAI_CHAT_FINISH_EOS;
+        return CGAI_STATUS_OK;
+    }
+    /* Step 2: Append ordinary text before advancing the retained causal history. */
+    if (!append_token(request, request->model->vocabulary[token.value]))
+        return CGAI_STATUS_ERROR;
+    advance_context(request, token);
+    return CGAI_STATUS_OK;
+}
+
 /** @brief Generate a continuation by repeatedly conditioning on prior output.
  * @param request Borrowed prepared state.
- * @return OK at EOS or token limit, ERROR on numerical or output failure. */
-static cgai_status generate_tokens(neural_generation *request) {
-    /* Step 1: Recompute the context encoding after every emitted token. */
-    for (size_t i = 0U; i < request->max_tokens && request->finish != CGAI_CHAT_FINISH_REPETITION;
+ * @param budget Maximum attempted forward passes for this work quantum.
+ * @return OK at EOS, token or work limit, ERROR on numerical or output failure. */
+static cgai_status generate_tokens(neural_generation *request, size_t budget) {
+    /* Step 1: Bound both attempted network work and successfully emitted output. */
+    for (size_t i = 0U; i < budget && request->generated < request->max_tokens &&
+                        request->finish != CGAI_CHAT_FINISH_REPETITION;
          ++i) {
-        if (!cgai_neural_forward(request->model, request->context, request->workspace))
+        if (!generate_next(request))
             return CGAI_STATUS_ERROR;
-        const cgai_token_id token = select_token(request);
-        if (!cgai_token_id_is_valid(token))
-            return CGAI_STATUS_ERROR;
-        if (token.value == CGAI_TOKEN_EOS) {
-            request->finish = CGAI_CHAT_FINISH_EOS;
+        /* Step 2: EOS consumes work without appending text or shifting history. */
+        if (request->finish == CGAI_CHAT_FINISH_EOS)
             return CGAI_STATUS_OK;
-        }
-        /* Step 2: Keep EOS internal, append ordinary text, then advance causal history. */
-        if (!append_token(request, request->model->vocabulary[token.value]))
-            return CGAI_STATUS_ERROR;
-        advance_context(request, token);
     }
     return CGAI_STATUS_OK;
 }
@@ -200,11 +239,143 @@ cgai_status cgai_neural_generate(const cgai_neural_model *model, const char *pro
                                  .temperature = temperature,
                                  .state = seed != 0U ? seed : model->config.seed,
                                  .output = output,
-                                 .capacity = output_size};
+                                 .capacity = output_size,
+                                 .finish = CGAI_CHAT_FINISH_LIMIT};
     cgai_status status = prepare_generation(&request, prompt);
     if (status)
-        status = generate_tokens(&request);
+        status = generate_tokens(&request, max_tokens);
     cgai_neural_workspace_destroy(request.workspace);
+    return status;
+}
+
+/** @brief Count requested reusable generation heap bytes without allocating.
+ * @param model Borrowed initialized model, or NULL.
+ * @return Session and workspace bytes, or zero on invalid shape/overflow. */
+size_t cgai_neural_session_bytes(const cgai_neural_model *model) {
+    /* Step 1: Ask the allocator's shared workspace sizing helper for its exact payload. */
+    const size_t workspace = cgai_neural_workspace_bytes(model);
+    size_t bytes = 0U;
+    /* Step 2: Account for the request owner, including its fixed context arrays. */
+    return workspace != 0U && cgai_size_add(workspace, sizeof(cgai_neural_session), &bytes) ? bytes
+                                                                                            : 0U;
+}
+
+/** @brief Release scratch without releasing its borrowed model or caller output.
+ * @param session Owned session, or NULL; invalid after this call. */
+void cgai_neural_session_destroy(cgai_neural_session *session) {
+    /* Step 1: Accept constructor cleanup before a session owner exists. */
+    if (session == NULL)
+        return;
+    /* Step 2: Release the numerical owner followed by the resumable request. */
+    cgai_neural_workspace_destroy(session->request.workspace);
+    free(session);
+}
+
+/** @brief Allocate reusable scratch before scheduling gameplay work.
+ * @param model Borrowed immutable model that outlives its sessions.
+ * @param max_session_bytes Requested heap cap, or zero for no cap.
+ * @return Owned idle session, or NULL with a diagnostic. */
+cgai_neural_session *cgai_neural_session_create(const cgai_neural_model *model,
+                                                size_t max_session_bytes) {
+    /* Step 1: Check the complete requested payload before any allocation. */
+    cgai_error_clear();
+    const size_t bytes = cgai_neural_session_bytes(model);
+    if (bytes == 0U || (max_session_bytes != 0U && bytes > max_session_bytes)) {
+        cgai_fail("neural session exceeds its memory cap or has an invalid model");
+        return NULL;
+    }
+    cgai_neural_session *session = calloc(1U, sizeof(*session));
+    if (session == NULL) {
+        cgai_fail("could not allocate neural generation session");
+        return NULL;
+    }
+    /* Step 2: Allocate scratch once, retaining an immutable borrowed model. */
+    session->request.model = model;
+    session->request.workspace = cgai_neural_workspace_create(model);
+    if (session->request.workspace == NULL) {
+        cgai_neural_session_destroy(session);
+        return NULL;
+    }
+    return session;
+}
+
+/** @brief Start or replace a request using an existing numerical workspace.
+ * @param session Borrowed exclusive session.
+ * @param prompt Borrowed terminated text, independent from the destination.
+ * @param max_tokens Emitted token ceiling, at most one million.
+ * @param temperature Finite sampling temperature, 0..100.
+ * @param seed Local seed, or zero to use the model seed.
+ * @param output Borrowed writable buffer kept alive until replacement or completion.
+ * @param output_size Positive destination capacity including NUL.
+ * @return OK on preparation, ERROR on invalid arguments or terminal preparation failure. */
+cgai_status cgai_neural_session_begin(cgai_neural_session *session, const char *prompt,
+                                      size_t max_tokens, double temperature, uint64_t seed,
+                                      char *output, size_t output_size) {
+    /* Step 1: Reject malformed input without discarding the previous request. */
+    cgai_error_clear();
+    if (session == NULL || prompt == NULL || output == NULL || output_size == 0U ||
+        max_tokens > CGAI_NEURAL_MAX_TOKENS || !isfinite(temperature) || temperature < 0.0 ||
+        temperature > 100.0)
+        return cgai_fail("invalid neural session generation arguments");
+    const cgai_neural_model *model = session->request.model;
+    cgai_neural_workspace *workspace = session->request.workspace;
+    /* Step 2: Replace request state while keeping the numerical allocation. */
+    session->request = (neural_generation){.model = model,
+                                           .workspace = workspace,
+                                           .max_tokens = max_tokens,
+                                           .temperature = temperature,
+                                           .state = seed != 0U ? seed : model->config.seed,
+                                           .output = output,
+                                           .capacity = output_size,
+                                           .finish = CGAI_CHAT_FINISH_LIMIT};
+    session->finish = max_tokens == 0U ? CGAI_NEURAL_FINISH_LIMIT : CGAI_NEURAL_FINISH_RUNNING;
+    output[0] = '\0';
+    /* Step 3: Tokenize outside scheduled steps; preparation failure is terminal. */
+    if (max_tokens != 0U && !prepare_context(&session->request, prompt)) {
+        session->finish = CGAI_NEURAL_FINISH_ERROR;
+        return CGAI_STATUS_ERROR;
+    }
+    return CGAI_STATUS_OK;
+}
+
+/** @brief Advance a running session and choose its running or terminal state.
+ * @param session Borrowed running session with prepared context and scratch.
+ * @param budget Positive maximum attempted passes.
+ * @return OK after completed work, ERROR after a terminal failure. */
+static cgai_status advance_session(cgai_neural_session *session, size_t budget) {
+    /* Step 1: Keep numerical and capacity errors terminal after attempted work. */
+    const cgai_status status = generate_tokens(&session->request, budget);
+    if (!status)
+        session->finish = CGAI_NEURAL_FINISH_ERROR;
+    /* Step 2: Successful work either finishes or preserves the pending state. */
+    else if (session->request.finish == CGAI_CHAT_FINISH_EOS)
+        session->finish = CGAI_NEURAL_FINISH_EOS;
+    else if (session->request.generated == session->request.max_tokens)
+        session->finish = CGAI_NEURAL_FINISH_LIMIT;
+    return status;
+}
+
+/** @brief Advance at most a caller-selected quantum of complete forward passes.
+ * @param session Borrowed exclusive session retaining a live immutable model and output.
+ * @param max_forward_passes Work quantum; zero queries status.
+ * @param result Borrowed cumulative accounting, including terminal failures.
+ * @return OK for idle, running or completed work, ERROR for invalid input or failed work. */
+cgai_status cgai_neural_session_step(cgai_neural_session *session, size_t max_forward_passes,
+                                     cgai_neural_generation_result *result) {
+    /* Step 1: Require valid owners before publishing or advancing any state. */
+    cgai_error_clear();
+    if (session == NULL || result == NULL)
+        return cgai_fail("neural session step requires a session and result");
+    cgai_status status = CGAI_STATUS_OK;
+    if (session->finish == CGAI_NEURAL_FINISH_ERROR)
+        status = cgai_fail("neural session has failed; begin a new request");
+    /* Step 2: Count attempted passes independently from successfully appended tokens. */
+    if (session->finish == CGAI_NEURAL_FINISH_RUNNING && max_forward_passes != 0U)
+        status = advance_session(session, max_forward_passes);
+    /* Step 3: Always publish accounting for a valid session, including a failed forward. */
+    *result = (cgai_neural_generation_result){
+        session->finish, session->request.generated, session->request.forward_passes,
+        session->request.prompt_tokens, session->request.unknown_prompt_tokens};
     return status;
 }
 
@@ -230,11 +401,13 @@ cgai_status cgai_chat_reply(const cgai_chat_model *model, const cgai_chat_messag
                                  .finish = CGAI_CHAT_FINISH_LIMIT};
     cgai_chat_context(model, &prompt, NULL, 0U, request.context);
     request.workspace = cgai_neural_workspace_create(model->network);
-    cgai_status status = request.workspace ? generate_tokens(&request) : CGAI_STATUS_ERROR;
+    cgai_status status =
+        request.workspace ? generate_tokens(&request, options.max_tokens) : CGAI_STATUS_ERROR;
     cgai_neural_workspace_destroy(request.workspace);
     if (status) {
-        const cgai_chat_result completed = {request.generated, prompt.count, prompt.dropped,
-                                            prompt.unknown, request.finish};
+        const cgai_chat_result completed = {request.generated,      prompt.count,   prompt.dropped,
+                                            prompt.unknown,         request.finish, prompt.evidence,
+                                            prompt.dropped_evidence};
         *result = completed;
     }
     return status;

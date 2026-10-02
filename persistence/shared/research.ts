@@ -18,7 +18,8 @@ export interface MemoryRecord {
     readonly ownerId: string;
     readonly content: string;
     readonly sources: readonly ChatSource[];
-    readonly state: 'supported' | 'user-stated' | 'stale' | 'disputed';
+    /** supported is a legacy excerpt label, never a semantic verification result. */
+    readonly state: 'sourced' | 'supported' | 'user-stated' | 'stale' | 'disputed';
     readonly queryKey: string | null;
     readonly conversationId: string | null;
     readonly createdAt: string;
@@ -26,6 +27,7 @@ export interface MemoryRecord {
     readonly expiresAt: string | null;
     readonly applicability?: string;
     readonly supersedes?: string;
+    readonly freshnessPolicy?: 'volatile-v1' | 'daily-v1';
 }
 
 export interface MemoryDocument {

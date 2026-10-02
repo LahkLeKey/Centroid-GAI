@@ -53,7 +53,7 @@ int cgai_node_chat_read_examples(napi_env env, napi_value value, cgai_node_chat_
 void cgai_node_chat_free_examples(cgai_node_chat_examples *examples);
 /** @brief Read validated numeric configuration and optimizer settings.
  * @param env Borrowed runtime.
- * @param value Float64Array of D,H,K,prompt,response,routing,epochs,rate,clip.
+ * @param value Float64Array of D,H,K,prompt,response,routing,epochs,rate,clip,evidence.
  * @param seed Borrowed BigInt initialization seed.
  * @param config Writable model shape.
  * @param training Writable optimizer settings.

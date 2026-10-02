@@ -103,6 +103,11 @@ export class FileChatStore implements ChatStore {
         const value = this.document.artifacts[checksum];
         return value ? { ...structuredClone(value), payload: Buffer.from(value.payload, 'base64') } : null;
     }
+    async saveArtifact(artifact: StoredChatArtifact): Promise<void> {
+        await this.mutate(document => {
+            document.artifacts[artifact.checksumSha256] ??= { ...artifact, payload: artifact.payload.toString('base64') };
+        });
+    }
     async publishModel(name: string, artifact: StoredChatArtifact): Promise<ChatModelSummary> {
         return this.mutate((document) => {
             document.artifacts[artifact.checksumSha256] ??= { ...artifact, payload: artifact.payload.toString('base64') };

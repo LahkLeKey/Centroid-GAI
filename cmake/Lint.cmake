@@ -2,13 +2,18 @@
 find_program(CLANG_TIDY_EXECUTABLE NAMES clang-tidy)
 find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format)
 file(GLOB_RECURSE CGAI_CORE_LINT_SOURCES CONFIGURE_DEPENDS
-    "${PROJECT_SOURCE_DIR}/src/*.c" "${PROJECT_SOURCE_DIR}/tests/*.c")
+    "${PROJECT_SOURCE_DIR}/src/*.c" "${PROJECT_SOURCE_DIR}/tests/*.c"
+    "${PROJECT_SOURCE_DIR}/examples/*.c" "${PROJECT_SOURCE_DIR}/tools/bark/*.c"
+    "${PROJECT_SOURCE_DIR}/tools/gameplay/*.c")
 file(GLOB_RECURSE CGAI_NODE_LINT_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/persistence/api/native/*.c")
 file(GLOB_RECURSE CGAI_FORMAT_SOURCES CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/*.c" "${PROJECT_SOURCE_DIR}/src/*.h"
     "${PROJECT_SOURCE_DIR}/tests/*.c" "${PROJECT_SOURCE_DIR}/tests/*.h"
     "${PROJECT_SOURCE_DIR}/include/*.h"
+    "${PROJECT_SOURCE_DIR}/examples/*.c" "${PROJECT_SOURCE_DIR}/examples/*.h"
+    "${PROJECT_SOURCE_DIR}/tools/bark/*.c" "${PROJECT_SOURCE_DIR}/tools/bark/*.h"
+    "${PROJECT_SOURCE_DIR}/tools/gameplay/*.c" "${PROJECT_SOURCE_DIR}/tools/gameplay/*.h"
     "${PROJECT_SOURCE_DIR}/persistence/api/native/*.c"
     "${PROJECT_SOURCE_DIR}/persistence/api/native/*.h")
 list(FILTER CGAI_CORE_LINT_SOURCES EXCLUDE REGEX "/knowledge_catalog(\\.c$|/)")
@@ -31,7 +36,8 @@ find_path(CGAI_NODE_INCLUDE_DIR node_api.h
 if(CLANG_TIDY_EXECUTABLE)
     set(CGAI_LINT_FLAGS -x c -std=c11 -Wall -Wextra -Wpedantic -Wconversion
         -DCGAI_ABI_BUILD -D_CRT_SECURE_NO_WARNINGS
-        "-I${PROJECT_SOURCE_DIR}/include" "-I${PROJECT_SOURCE_DIR}/src")
+        "-I${PROJECT_SOURCE_DIR}/include" "-I${PROJECT_SOURCE_DIR}/src"
+        "-I${PROJECT_SOURCE_DIR}/tools/bark" "-I${PROJECT_SOURCE_DIR}/tools/gameplay")
     # Isolate translation units: Clang 18's va_list analyzer can retain invalid
     # state across files in a single clang-tidy invocation. Keep every check enabled.
     set(CGAI_CORE_LINT_COMMANDS)

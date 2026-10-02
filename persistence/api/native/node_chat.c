@@ -71,13 +71,15 @@ static napi_value metadata(napi_env env, const cgai_chat_model *model) {
     char json[1024];
     const int length = snprintf(
         json, sizeof(json),
-        "{\"engineKind\":\"neural-centroid-chat\",\"formatVersion\":1,\"protocolVersion\":1,"
+        "{\"engineKind\":\"neural-centroid-chat\",\"formatVersion\":%u,\"protocolVersion\":%u,"
         "\"tokenizerVersion\":1,\"vocabularySize\":%zu,\"parameterCount\":%zu,\"config\":{"
         "\"embeddingDimensions\":%zu,\"hiddenDimensions\":%zu,\"centroidCount\":%zu,"
-        "\"promptWindow\":%zu,\"responseWindow\":%zu,\"routingTemperature\":%.17g,\"seed\":\"%"
+        "\"promptWindow\":%zu,\"responseWindow\":%zu,\"evidenceWindow\":%zu,\"routingTemperature\":"
+        "%.17g,\"seed\":\"%"
         "llu\"}}",
-        vocabulary, parameters, config.embedding_dimensions, config.hidden_dimensions,
-        config.centroid_count, config.prompt_window, config.response_window,
+        cgai_chat_protocol_version(model), cgai_chat_protocol_version(model), vocabulary,
+        parameters, config.embedding_dimensions, config.hidden_dimensions, config.centroid_count,
+        config.prompt_window, config.response_window, config.evidence_window,
         config.routing_temperature, (unsigned long long)config.seed);
     napi_value result;
     if (length < 0 || (size_t)length >= sizeof(json) ||

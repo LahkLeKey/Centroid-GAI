@@ -4,9 +4,11 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ChatWorkerError, ProcessChatWorkers, type ChatWorkerTask } from './workers.ts';
+import type { ChatTrainingValidation } from '../../../shared/chat-quality.ts';
 
 const inspect = (label: string): ChatWorkerTask => ({ kind: 'inspect', payload: Buffer.from(label) });
 const train = (label: string): ChatWorkerTask => ({ kind: 'train', examples: [{ messages: [], answer: label }] });
+const validate = (label: string): ChatWorkerTask => ({ kind: 'validate', payload: Buffer.from(label), validation: { version: 1, cases: [] } as ChatTrainingValidation });
 async function fixture(timeoutMs = 5000) {
     const directory = await mkdtemp(join(tmpdir(), 'cgai-workers-'));
     const workerPath = join(directory, 'worker.cjs'), logPath = join(directory, 'started.jsonl');
@@ -70,6 +72,21 @@ test('worker failures and malformed IPC are contained, and timeouts terminate na
         assert.throws(() => process.kill(pid, 0), /ESRCH/);
         assert.equal((await context.workers.run<{ label: string }>(inspect('after-timeout'))).label, 'after-timeout');
     } finally { await context.close(); }
+});
+
+test('candidate validation shares the bounded training lane while replies remain available', { timeout: 15000 }, async () => {
+    const context = await fixture();
+    const controller = new AbortController();
+    const validation = assert.rejects(context.workers.run(validate('hold-validation'), controller.signal), /cancelled/);
+    try {
+        await context.waitForStarts(1);
+        const training = context.workers.run<{ label: string }>(train('after-validation'));
+        assert.equal((await context.workers.run<{ label: string }>(inspect('reply-during-validation'))).label, 'reply-during-validation');
+        assert.ok(!(await context.started()).some(entry => entry.label === 'after-validation'));
+        controller.abort();
+        await validation;
+        assert.equal((await training).label, 'after-validation');
+    } finally { await context.close(); await validation; }
 });
 
 test('queue capacity and shutdown settle every pending operation without starting it', { timeout: 15000 }, async () => {
