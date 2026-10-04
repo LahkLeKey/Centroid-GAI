@@ -20,12 +20,6 @@ cgai_neural_model *cgai_test_neural_fixture(void);
  * checks, then released. Assertions terminate before unsafe follow-up operations. */
 void cgai_test_neural_math(void);
 
-/** @brief Check reproducible training and held-out learning on an ordered task.
- *
- * A saved flat parameter block allows checking every parameter group for learning,
- * while two independent models establish reproducibility of initialization and fit. */
-void cgai_test_neural_training(void);
-
 /** @brief Check neural artifact round trips and malformed artifact rejection.
  *
  * The successful artifact is reused for corruption tests through a separately

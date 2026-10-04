@@ -1,9 +1,20 @@
 # Reviewed codebase brief
 
+Migration status: **Historical service inventory**. The task registry and
+source-service recommendations below are superseded by the active [C11 Life
+deliverables](centroid-next-deliverables.md). Removed snapshot tooling stays
+removed; useful native model/data requirements carry into the new trainer.
+
 This brief describes source contracts, not the result of a new test run. Read it
 from the selected committed snapshot. Dirty files and later commits are not visible
 until a new snapshot is prepared and selected. Source paths below are repository
 paths; citations use snapshot-normalized lines rather than checkout line numbers.
+
+Checkout reconciliation on October 3, 2026: the repository service and Compose
+overlay exist, but the referenced `tools/knowledge/` importer/capture sources and
+repository request/evaluation fixtures are absent. Those workflow references
+describe the retained design and require restoration or replacement. See the
+[documentation reconciliation](centroid-documentation-reconciliation.md).
 
 ## Purpose and architecture
 
@@ -66,8 +77,9 @@ SearXNG is configurable. `autoSearch: false` disables automatic public search fo
 message, and deployment setting `CGAI_SEARCH_PROVIDER=disabled` disables all public
 research. Queries never append private conversation history or repository excerpts.
 Remembered fetched sources require explicit `rememberSources: true`. Memory reuse
-requires owner, exact normalized question, applicability and freshness; source
-evidence has a one-day TTL. Explicit user statements remain user-attributed.
+requires owner, exact normalized question, applicability and freshness. Versioned
+source TTL heuristics use five minutes for volatile queries and one day otherwise,
+measured from fetch time. Explicit user statements remain user-attributed.
 Interactions do not change live neural weights.
 Sources: `persistence/api/src/chat/research.ts`, `persistence/api/src/chat/memory.ts`,
 `persistence/api/src/chat/public-fetch.ts`, `docs/chat-service.md`.

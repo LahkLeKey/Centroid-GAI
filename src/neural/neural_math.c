@@ -2,6 +2,7 @@
  */
 
 #include "internal/neural_math.h"
+#include "internal/centroid_contract.h"
 #include "internal/error.h"
 #include "internal/size_utils.h"
 

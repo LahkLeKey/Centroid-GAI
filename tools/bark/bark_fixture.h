@@ -2,7 +2,7 @@
 #ifndef CGAI_BARK_FIXTURE_H
 #define CGAI_BARK_FIXTURE_H
 
-#include "centroid_gai_bark.h"
+#include "bark/bark_contract.h"
 
 /** Number of complete, unique state requests in the version-one fixture. */
 #define BARK_FIXTURE_CASE_COUNT 72U

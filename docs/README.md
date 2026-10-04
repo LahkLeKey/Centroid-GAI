@@ -1,22 +1,33 @@
-# Centroid neural chatbot documentation
+# C11 centroid training documentation
 
-Build a chatbot around the project's C centroid neural network, with an HTTP API,
-curl workflows, and Docker Compose deployment. The neural prototype works through
-the CLI and conversation service today; measured conversational quality remains
-below the release goal.
+The active plan makes Centroid Life the new C11 training method and retires the
+old APIs, service stack and non-C executable workflows. Start with the next
+deliverables. Existing native models and the Life experiment are implementation
+inputs; older service guides are historical references. The migration and broader
+model-quality goals remain planned.
 
 ## Guides
 
 | Guide | Use it for |
 | --- | --- |
+| [Next deliverables](centroid-next-deliverables.md) | Execute the C11-only migration, Life trainer extraction, model adapters and quality gates |
 | [Architecture](architecture.md) | Understand the current components and intended conversation path |
-| [Chat service](chat-service.md) | Train chat models, use persistent conversations, configure research and memory, and review measured limitations |
-| [Repository chat](repository-chat.md) | Prepare committed codebase evidence, ask for next steps through curl, and run the HTTP scenario suite |
-| [Repository chat plan](repository-chat-plan.md) | Deliver codebase answers, a repeated next-step conversation loop, and a 40-scenario API suite |
+| [Chat service](chat-service.md) | Review retiring service behavior and retained native dialogue/quality lessons |
+| [Repository chat](repository-chat.md) | Review the retired source-service architecture and attribution lessons |
+| [Repository chat plan](repository-chat-plan.md) | Review historical requirements; its workflow is not restored |
 | [Neural network](neural-centroid.md) | Train and evaluate the implemented model; understand its mathematics and limits |
-| [HTTP API](api-contract.md) | Use the existing baseline endpoints and Compose workflow |
-| [Development](development.md) | Build, test, document, and work on the native and service code |
-| [Chatbot implementation plan](chatbot-plan.md) | Deliver the neural chatbot in testable milestones |
+| [Observable NPC pilot](npc-planner.md) | Review C11 observed memory and frozen pilot results |
+| [Iterative NPC training](npc-planner-v2.md) | Review accepted recovery-policy evidence and source identities |
+| [Hazard recovery and specialization](npc-planner-v3.md) | Review exploratory recovery and the recorded specialization rejection |
+| [Centroid Life](centroid-life.md) | Run a Conway variant where collisions train cell edits and can consolidate centroid identities |
+| [Native context](native-context.md) | Consume working code and LLM/activity notes through collision-gated lexical centroids and exact local checkpoints |
+| [Native source evolution](native-code-evolution.md) | Learn bounded C source choices from separate native training measurements and preserve development/confirmation gates |
+| [C11 Life training plan](centroid-training-parity-plan.md) | Define the world-driven training method and scoped capability evaluation |
+| [Documentation reconciliation](centroid-documentation-reconciliation.md) | See which existing requirements were retained, superseded or kept as historical evidence |
+| [NPC planner pilot epic](npc-planner-epic.md) | Plan a C11 policy that uses observable memory, completes multi-step goals and demonstrates independent gameplay improvement |
+| [HTTP API](api-contract.md) | Review the previous API being retired |
+| [Development](development.md) | Read existing native build conventions; old script/service paths are superseded |
+| [Chatbot implementation plan](chatbot-plan.md) | Review retained dialogue-quality requirements from the superseded roadmap |
 | [Research and memory](research-memory.md) | Design evidence-based search and persistent learning from interactions |
 
 ## Status vocabulary
@@ -25,11 +36,15 @@ below the release goal.
 request path. It does not by itself establish answer quality.
 
 **Partial** means declarations or components exist but are not connected into a
-working end-to-end feature. In particular, chat headers and shared TypeScript
-types do not establish a usable chat API.
+working end-to-end feature. A public declaration does not establish an implemented
+native feature or measured quality.
 
-**Planned** means a proposed implementation or acceptance criterion. Proposed chat
-routes, quality targets, and research policies are not current guarantees.
+**Planned** means a proposed implementation or acceptance criterion. The C11
+migration and capability targets are not current guarantees.
+
+**Retiring** means existing code or an interface superseded by the active plan.
+**Historical** means a preserved contract/result with its original scope, not an
+active implementation backlog.
 
 Read the [repository overview](../README.md) for the current status table. Keep
 these guides aligned with source changes and measured test results; do not carry

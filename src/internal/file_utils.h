@@ -3,7 +3,7 @@
 #ifndef CGAI_FILE_UTILS_H
 #define CGAI_FILE_UTILS_H
 
-#include "centroid_gai.h"
+#include "core_contract.h"
 
 #include <stddef.h>
 #include <stdint.h>

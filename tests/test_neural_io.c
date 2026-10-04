@@ -46,18 +46,14 @@ static void cgai_test_neural_same_inference(const cgai_neural_model *original,
     TEST_CHECK(before.unknown_tokens == after.unknown_tokens, "unknown accounting changed");
 }
 
-/** @brief Train, save, and load an artifact while preserving all model state.
+/** @brief Save and load seeded parameters while preserving all inference state.
  *
  * The caller retains the original model and output file; this helper releases
  * only its newly loaded model after verifying the complete flat parameter block.
- * @param model Borrowed mutable fixture trained before saving.
+ * @param model Borrowed initialized fixture saved without mutation.
  * @param path Borrowed temporary artifact path owned by the test runner. */
 static void cgai_test_neural_roundtrip(cgai_neural_model *model, const char *path) {
-    /* Step 1: Train a few epochs so serialization covers updated parameter groups. */
-    cgai_neural_training training = cgai_neural_default_training();
-    training.epochs = 3U;
-    TEST_CHECK(cgai_neural_train(model, "a b left a b left", &training) == CGAI_STATUS_OK,
-               cgai_last_error());
+    /* Step 1: Seeded initialization gives each parameter family nonzero codec coverage. */
     TEST_CHECK(cgai_neural_save(model, path) == CGAI_STATUS_OK, cgai_last_error());
     /* Step 2: Load independent ownership and compare persisted numeric state. */
     cgai_neural_model *loaded = cgai_neural_load(path);

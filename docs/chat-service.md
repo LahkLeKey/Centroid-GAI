@@ -1,5 +1,10 @@
 # Neural conversations, research and memory
 
+Migration status: **Retiring service**. Preserve the native structured-chat and
+data/quality lessons. The active [C11 Life deliverables](centroid-next-deliverables.md)
+remove HTTP, Node workers and database orchestration; commands below describe
+the previous stack, not the new training workflow.
+
 The service supports persistent conversations before any model has been trained.
 Public conversations check reusable memory, then research an unsupported
 message using Wikipedia. A fresh `hello world` message therefore triggers research.
@@ -7,8 +12,10 @@ Responses contain fetched excerpts and citations; they are not neural synthesis.
 
 Use `scope: "repository"` for offline codebase questions and next-step follow-ups.
 That scope pins verified source material, persists task context and never searches
-the Internet. See [Repository chat](repository-chat.md) for snapshot preparation,
-Compose startup, curl examples and the conversation scenario suite.
+the Internet. See [Repository chat](repository-chat.md) for the snapshot and
+conversation contracts. Its bootstrap/capture tools and referenced request and
+scenario fixtures are absent from this checkout. They stay removed, and that
+execution workflow is retired rather than restored or replaced.
 
 The C centroid network remains experimental. The new authored synthetic fixture
 in `data/chat/factual-dialogues-v2.json` scores **0/6 native exact responses and

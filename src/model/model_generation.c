@@ -1,6 +1,6 @@
 /** @file model_generation.c @brief Centroid-conditioned text generation. */
 
-#include "centroid_gai.h"
+#include "model/model_contract.h"
 
 #include "internal/cgai_internal.h"
 #include "internal/error.h"

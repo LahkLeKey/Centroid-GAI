@@ -1,0 +1,14 @@
+protocol	1
+scope	npc-pilot-sealed-audit-v1
+passed	0
+reasons	hazard-completion,survival
+completion	0.9270833333333334
+survival	0.9270833333333334
+cue_gain	0.5
+history_gain	0.125
+history_ci_lower	0.010416666666666666
+history_ci_upper	0.23958333333333334
+bootstrap_samples	10000
+bootstrap_seed	7331
+reference_gap	0.07291666666666663
+initialized_gain	0.9270833333333334

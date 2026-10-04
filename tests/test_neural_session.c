@@ -203,11 +203,11 @@ static void session_resource_optimizer(cgai_neural_model *model) {
     /* Step 1: Capture the weights-only shape before creating continuation state. */
     cgai_neural_resources before = {0};
     cgai_neural_resources after = {0};
-    cgai_neural_training training = cgai_neural_default_training();
-    training.epochs = 1U;
     TEST_CHECK(cgai_neural_get_resources(model, &before) == CGAI_STATUS_OK, cgai_last_error());
-    TEST_CHECK(cgai_neural_train_continue(model, "a b left", &training) == CGAI_STATUS_OK,
-               cgai_last_error());
+    model->adam_first = calloc(model->parameter_count, sizeof(*model->adam_first));
+    model->adam_second = calloc(model->parameter_count, sizeof(*model->adam_second));
+    TEST_CHECK(model->adam_first != NULL && model->adam_second != NULL,
+               "could not allocate owned resource-accounting fixture moments");
     TEST_CHECK(cgai_neural_get_resources(model, &after) == CGAI_STATUS_OK, cgai_last_error());
     /* Step 2: Optimizer accounting describes the resident handle rather than saved weights. */
     TEST_CHECK(after.optimizer_bytes == 2U * before.parameter_bytes &&

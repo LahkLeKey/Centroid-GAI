@@ -3,7 +3,7 @@
 #ifndef CGAI_ERROR_H
 #define CGAI_ERROR_H
 
-#include "centroid_gai.h"
+#include "core_contract.h"
 
 /**
  * @brief Reset the current thread's diagnostic to the empty state.
@@ -34,7 +34,7 @@ void cgai_error_set(const char *message);
  * current thread's diagnostic storage, so the caller's string need not outlive the call.
  *
  * @param message Non-NULL borrowed NUL-terminated diagnostic text.
- * @return Always CGAI_STATUS_ERROR; never an ABI status code.
+ * @return Always CGAI_STATUS_ERROR.
  */
 static inline cgai_status cgai_fail(const char *message) {
     /* Step 1: Copy the explanation into thread-local storage. */

@@ -1,5 +1,10 @@
 # Centroid chatbot architecture
 
+Migration status: **Superseded architecture**. Retain native ownership, model
+math, formatter and evidence lessons. The active [C11 Life
+deliverables](centroid-next-deliverables.md) retire the service layers and old
+public interfaces described below.
+
 C owns tokenization, centroid math, training, inference and artifact validation.
 The Node service owns HTTP validation, workers, persistence, retrieval, public
 fetching and memory admission. There is no browser application or transformer.
@@ -16,8 +21,10 @@ fetching and memory admission. There is no browser application or transformer.
 The gameplay encoder starts with category axes determined only by shape: when both
 embedding and hidden dimensions cover the total category count, its active category
 coordinates are `tanh(1)`; compressed configurations retain seeded dense encoder
-weights. All parameters remain trainable. The native task recipe separately seeds
-centroid class prototypes from training-only encoded states before joint AdamW.
+weights. All parameters support joint training; individual profiles may freeze
+shared representations, as the Life adapter does during local updates. The native
+task recipe separately seeds centroid class prototypes from training-only encoded
+states before joint AdamW.
 Neither initialization reads development or test targets.
 
 The formats are distinct. Renaming does not convert them. Neural parameter spaces

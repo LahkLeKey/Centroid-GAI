@@ -1,6 +1,6 @@
 /** @file neural_generation.c @brief Autoregressive neural continuation with bounded local history.
  */
-#include "internal/chat_internal.h"
+#include "neural_generation.h"
 #include "internal/error.h"
 #include "internal/model_random.h"
 #include "internal/neural_internal.h"
@@ -16,18 +16,18 @@ typedef struct neural_generation {
     cgai_neural_workspace *workspace;               /**< Owned inference buffers. */
     cgai_token_id context[CGAI_NEURAL_MAX_CONTEXT]; /**< Ordered current context. */
     size_t max_tokens;                              /**< Maximum output token count. */
-    double temperature;             /**< Sampling temperature, distinct from routing temperature. */
-    uint64_t state;                 /**< Local reproducible RNG state. */
-    char *output;                   /**< Borrowed destination. */
-    size_t capacity;                /**< Destination byte capacity, including NUL. */
-    size_t length;                  /**< Current text bytes, excluding NUL. */
-    size_t fixed;                   /**< Persistent prefix size; zero for prototype generation. */
-    size_t generated;               /**< Successfully emitted tokens. */
-    size_t forward_passes;          /**< Attempted forward calls, including EOS and failures. */
-    size_t prompt_tokens;           /**< Full prompt tokens before suffix truncation. */
-    size_t unknown_prompt_tokens;   /**< Unknown spellings across the full prompt. */
-    cgai_token_id recent[16];       /**< Last emitted chat IDs in a bounded repetition ring. */
-    cgai_chat_finish_reason finish; /**< EOS or requested length. */
+    double temperature;           /**< Sampling temperature, distinct from routing temperature. */
+    uint64_t state;               /**< Local reproducible RNG state. */
+    char *output;                 /**< Borrowed destination. */
+    size_t capacity;              /**< Destination byte capacity, including NUL. */
+    size_t length;                /**< Current text bytes, excluding NUL. */
+    size_t fixed;                 /**< Persistent prefix size; zero for standalone generation. */
+    size_t generated;             /**< Successfully emitted tokens. */
+    size_t forward_passes;        /**< Attempted forward calls, including EOS and failures. */
+    size_t prompt_tokens;         /**< Full prompt tokens before suffix truncation. */
+    size_t unknown_prompt_tokens; /**< Unknown spellings across the full prompt. */
+    cgai_token_id recent[16];     /**< Last emitted IDs in a bounded repetition ring. */
+    cgai_neural_encoded_finish finish; /**< EOS, requested length or suffix repetition. */
 } neural_generation;
 
 /** Owned numerical scratch and resumable request borrowing an immutable model. */
@@ -142,9 +142,9 @@ static int matches_period(const neural_generation *request, size_t period) {
     return 1;
 }
 
-/** @brief Detect four copies of a one-to-four-token suffix after eight chat tokens.
+/** @brief Detect four copies of a one-to-four-token suffix after eight emitted tokens.
  * @param request Borrowed generation state after emitting a token.
- * @return Nonzero for a repeated chat suffix; prototype continuations are unaffected. */
+ * @return Nonzero for a repeated suffix; standalone continuations are unaffected. */
 static int repeated_suffix(const neural_generation *request) {
     if (request->fixed == 0U || request->generated < 8U)
         return 0;
@@ -167,9 +167,9 @@ static void advance_context(neural_generation *request, cgai_token_id token) {
     if (request->fixed != 0U)
         request->recent[request->generated % 16U] = token;
     ++request->generated;
-    /* Step 2: Bound repetitive chat output without changing prototype continuations. */
+    /* Step 2: Bound repetitive fixed-prefix output without changing standalone continuations. */
     if (repeated_suffix(request))
-        request->finish = CGAI_CHAT_FINISH_REPETITION;
+        request->finish = CGAI_NEURAL_ENCODED_REPETITION;
 }
 
 /** @brief Attempt one allocation-free next-token prediction and append.
@@ -184,7 +184,7 @@ static cgai_status generate_next(neural_generation *request) {
     if (!cgai_token_id_is_valid(token))
         return CGAI_STATUS_ERROR;
     if (token.value == CGAI_TOKEN_EOS) {
-        request->finish = CGAI_CHAT_FINISH_EOS;
+        request->finish = CGAI_NEURAL_ENCODED_EOS;
         return CGAI_STATUS_OK;
     }
     /* Step 2: Append ordinary text before advancing the retained causal history. */
@@ -201,12 +201,12 @@ static cgai_status generate_next(neural_generation *request) {
 static cgai_status generate_tokens(neural_generation *request, size_t budget) {
     /* Step 1: Bound both attempted network work and successfully emitted output. */
     for (size_t i = 0U; i < budget && request->generated < request->max_tokens &&
-                        request->finish != CGAI_CHAT_FINISH_REPETITION;
+                        request->finish != CGAI_NEURAL_ENCODED_REPETITION;
          ++i) {
         if (!generate_next(request))
             return CGAI_STATUS_ERROR;
         /* Step 2: EOS consumes work without appending text or shifting history. */
-        if (request->finish == CGAI_CHAT_FINISH_EOS)
+        if (request->finish == CGAI_NEURAL_ENCODED_EOS)
             return CGAI_STATUS_OK;
     }
     return CGAI_STATUS_OK;
@@ -240,7 +240,7 @@ cgai_status cgai_neural_generate(const cgai_neural_model *model, const char *pro
                                  .state = seed != 0U ? seed : model->config.seed,
                                  .output = output,
                                  .capacity = output_size,
-                                 .finish = CGAI_CHAT_FINISH_LIMIT};
+                                 .finish = CGAI_NEURAL_ENCODED_LIMIT};
     cgai_status status = prepare_generation(&request, prompt);
     if (status)
         status = generate_tokens(&request, max_tokens);
@@ -327,7 +327,7 @@ cgai_status cgai_neural_session_begin(cgai_neural_session *session, const char *
                                            .state = seed != 0U ? seed : model->config.seed,
                                            .output = output,
                                            .capacity = output_size,
-                                           .finish = CGAI_CHAT_FINISH_LIMIT};
+                                           .finish = CGAI_NEURAL_ENCODED_LIMIT};
     session->finish = max_tokens == 0U ? CGAI_NEURAL_FINISH_LIMIT : CGAI_NEURAL_FINISH_RUNNING;
     output[0] = '\0';
     /* Step 3: Tokenize outside scheduled steps; preparation failure is terminal. */
@@ -348,7 +348,7 @@ static cgai_status advance_session(cgai_neural_session *session, size_t budget) 
     if (!status)
         session->finish = CGAI_NEURAL_FINISH_ERROR;
     /* Step 2: Successful work either finishes or preserves the pending state. */
-    else if (session->request.finish == CGAI_CHAT_FINISH_EOS)
+    else if (session->request.finish == CGAI_NEURAL_ENCODED_EOS)
         session->finish = CGAI_NEURAL_FINISH_EOS;
     else if (session->request.generated == session->request.max_tokens)
         session->finish = CGAI_NEURAL_FINISH_LIMIT;
@@ -379,36 +379,32 @@ cgai_status cgai_neural_session_step(cgai_neural_session *session, size_t max_fo
     return status;
 }
 
-cgai_status cgai_chat_reply(const cgai_chat_model *model, const cgai_chat_message *messages,
-                            size_t count, const cgai_chat_options *requested, char *output,
-                            size_t output_size, cgai_chat_result *result) {
-    const cgai_chat_options options = requested ? *requested : cgai_chat_default_options();
-    if (model == NULL || output == NULL || output_size == 0U || result == NULL ||
-        options.max_tokens > 4096U || !isfinite(options.temperature) || options.temperature < 0.0 ||
-        options.temperature > 100.0)
-        return cgai_fail("invalid chat generation arguments");
-    cgai_chat_prompt_data prompt = {0};
-    if (!cgai_chat_format(model, messages, count, &prompt))
-        return CGAI_STATUS_ERROR;
-    output[0] = '\0';
-    neural_generation request = {.model = model->network,
-                                 .max_tokens = options.max_tokens,
-                                 .temperature = options.temperature,
-                                 .state = options.seed ? options.seed : model->config.seed,
-                                 .output = output,
-                                 .capacity = output_size,
-                                 .fixed = model->config.prompt_window,
-                                 .finish = CGAI_CHAT_FINISH_LIMIT};
-    cgai_chat_context(model, &prompt, NULL, 0U, request.context);
-    request.workspace = cgai_neural_workspace_create(model->network);
-    cgai_status status =
-        request.workspace ? generate_tokens(&request, options.max_tokens) : CGAI_STATUS_ERROR;
+cgai_status cgai_neural_generate_encoded(const cgai_neural_model *model,
+                                         const cgai_neural_encoded_request *encoded,
+                                         cgai_neural_encoded_result *result) {
+    if (model == NULL || encoded == NULL || result == NULL || encoded->context == NULL ||
+        encoded->output == NULL || encoded->output_size == 0U ||
+        encoded->fixed >= model->config.context_window ||
+        encoded->max_tokens > CGAI_NEURAL_MAX_TOKENS || !isfinite(encoded->temperature) ||
+        encoded->temperature < 0.0 || encoded->temperature > 100.0)
+        return cgai_fail("invalid encoded neural generation arguments");
+    neural_generation request = {.model = model,
+                                 .max_tokens = encoded->max_tokens,
+                                 .temperature = encoded->temperature,
+                                 .state = encoded->seed ? encoded->seed : model->config.seed,
+                                 .output = encoded->output,
+                                 .capacity = encoded->output_size,
+                                 .fixed = encoded->fixed,
+                                 .finish = CGAI_NEURAL_ENCODED_LIMIT};
+    memcpy(request.context, encoded->context,
+           model->config.context_window * sizeof(*request.context));
+    request.output[0] = '\0';
+    request.workspace = cgai_neural_workspace_create(model);
+    const cgai_status status =
+        request.workspace ? generate_tokens(&request, encoded->max_tokens) : CGAI_STATUS_ERROR;
     cgai_neural_workspace_destroy(request.workspace);
-    if (status) {
-        const cgai_chat_result completed = {request.generated,      prompt.count,   prompt.dropped,
-                                            prompt.unknown,         request.finish, prompt.evidence,
-                                            prompt.dropped_evidence};
-        *result = completed;
-    }
+    if (status)
+        *result =
+            (cgai_neural_encoded_result){request.generated, request.forward_passes, request.finish};
     return status;
 }

@@ -1,7 +1,7 @@
 /** @file test_model_io.c @brief Unit tests for in-memory model serialization. */
 
-#include "centroid_gai.h"
 #include "internal/model_io.h"
+#include "model/model_contract.h"
 #include "test_utils.h"
 
 #include <stdlib.h>
@@ -47,12 +47,10 @@ static void test_decode_round_trip(const cgai_model *model, uint8_t *encoded, si
  * @return Zero after all codec checks pass.
  */
 int test_model_io(void) {
-    /* Step 1: Check missing input and construct a trained source fixture. */
+    /* Step 1: Check missing input and construct a seeded source fixture. */
     TEST_CHECK(cgai_model_decode(NULL, 0U) == NULL, "NULL model bytes were accepted");
     cgai_model *model = cgai_model_create(NULL);
     TEST_CHECK(model != NULL, cgai_last_error());
-    TEST_CHECK(cgai_model_train_text(model, "model bytes survive a round trip") == CGAI_STATUS_OK,
-               cgai_last_error());
 
     /* Step 2: Measure the artifact, allocate exactly enough bytes, and encode it. */
     size_t encoded_size = 0U;

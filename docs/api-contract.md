@@ -1,5 +1,9 @@
 # HTTP API: current baseline
 
+Migration status: **Retiring**. This records the previous HTTP API. The active
+[C11 Life deliverables](centroid-next-deliverables.md) remove these routes and old
+public interfaces; this contract is not a compatibility or restoration target.
+
 The product interface is HTTP/JSON, exercised through curl and Docker Compose.
 The router serves the original count-centroid `.cgai` engine and the separate
 neural conversation engine. This page describes the baseline routes; the
@@ -83,16 +87,18 @@ Temperature 0 selects greedy output; seed 0 uses the model's seed. HTTP 200 retu
 `{ name, prompt, continuation }`. Each request is independent: this route stores no
 conversation history and performs no neural training or learning from users.
 
-With a working stack, run from the repository root:
+Save the training and generation JSON bodies above as local `train.json` and
+`generate.json`, then run against a working stack:
 
 ```sh
-curl --fail-with-body -X POST http://localhost:3000/api/v1/models/demo/train -H "Content-Type: application/json" --data-binary @examples/api/train.json
-curl --fail-with-body -X POST http://localhost:3000/api/v1/models/demo/generate -H "Content-Type: application/json" --data-binary @examples/api/generate.json
+curl --fail-with-body -X POST http://localhost:3000/api/v1/models/demo/train -H "Content-Type: application/json" --data-binary @train.json
+curl --fail-with-body -X POST http://localhost:3000/api/v1/models/demo/generate -H "Content-Type: application/json" --data-binary @generate.json
 curl --fail-with-body http://localhost:3000/api/v1/models/demo --output demo.cgai
 ```
 
-Use `curl.exe` in Windows PowerShell if `curl` is an alias. The committed JSON
-request files avoid shell-specific quoting.
+Use `curl.exe` in Windows PowerShell if `curl` is an alias. Saving request bodies
+as local files avoids shell-specific quoting; the old `examples/api/` assets are
+not present in this checkout.
 
 ## Inspect and match
 

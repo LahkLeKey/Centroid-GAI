@@ -1,4 +1,4 @@
-/** @file bark_tool.h @brief Native bark training, scenario quality and latency reporting. */
+/** @file bark_tool.h @brief Native bark scenario quality and latency reporting. */
 #ifndef CGAI_BARK_TOOL_H
 #define CGAI_BARK_TOOL_H
 #include "bark_fixture.h"
@@ -40,28 +40,6 @@ typedef struct bark_performance {
     double maximum_us;   /**< Largest observed duration, not a worst-case guarantee. */
 } bark_performance;
 
-/** @brief Initialize the fixed small architecture using only training vocabulary.
- * @param path New checkpoint destination; existing contents are replaced.
- * @return OK on complete checkpoint write, ERROR otherwise. */
-cgai_status bark_tool_init(const char *path);
-/** @brief Continue independent supervised labels with preserved Adam and shuffle state.
- * @param input Borrowed checkpoint path.
- * @param output New checkpoint destination, different from input.
- * @param epochs Additional complete passes, 1..10000.
- * @param rate Finite positive Adam learning rate, at most one.
- * @return OK after complete training/save, ERROR otherwise. */
-cgai_status bark_tool_step(const char *input, const char *output, size_t epochs, double rate);
-/** @brief Recreate a checkpoint from its shape/seed and complete independent training recipe.
- * @param input Reference checkpoint whose counters determine the epoch count.
- * @param output New replay checkpoint destination.
- * @param rate Original Adam learning rate.
- * @return OK after replay save, ERROR otherwise; caller compares exact file bytes. */
-cgai_status bark_tool_replay(const char *input, const char *output, double rate);
-/** @brief Export weights only for the gameplay runtime.
- * @param input Borrowed continuation checkpoint.
- * @param output Inference artifact destination.
- * @return OK on complete export, ERROR otherwise. */
-cgai_status bark_tool_export(const char *input, const char *output);
 /** @brief Score frozen scenarios and host masks using reusable allocation-free inference.
  * @param model Borrowed immutable specialist.
  * @param quality Writable complete report, unchanged on error.

@@ -1,16 +1,30 @@
 # Delivering the centroid neural chatbot
 
+Migration status: **Superseded roadmap**. The active [C11 Life
+deliverables](centroid-next-deliverables.md) replace this HTTP/service sequence.
+Retain useful native dialogue, reviewed-data and independent quality requirements;
+retire old APIs and non-C executable workflows.
+
 This roadmap includes implemented infrastructure and remaining release gates.
-The [chat service guide](chat-service.md) is the executable feature contract.
+The [chat service guide](chat-service.md) documents the service feature contract.
 The target is a local chatbot using the C centroid neural network, accessed
 through HTTP/JSON with curl and Docker Compose. Start with short questions and
 follow-ups about this repository so that answers and evidence can be checked.
 Broader conversation is a later quality milestone.
 
-The [repository chat workflow](repository-chat.md) implements commit-pinned codebase
-information, cited next-step actions and durable follow-ups, with a 40-scenario
-HTTP suite. The [delivery plan](repository-chat-plan.md) records its acceptance
-gates and remaining extensions; the milestones below retain the broader roadmap.
+The [conflict training parity plan](centroid-training-parity-plan.md) proposes
+bringing Centroid Life's participant updates, verified supervision, replay and
+consolidation to composed, scholarly and chat models. It separates training
+feature parity from independently measured assistant capability and retains the
+relevant native and quality requirements from this roadmap.
+
+The repository service implements commit-pinned information, cited next steps and
+durable follow-ups. Its [workflow guide](repository-chat.md) and 40-scenario runner
+depend on bootstrap/capture tools and fixture files absent from this checkout.
+Those inputs remain removed and the service lane is retired. The
+[delivery plan](repository-chat-plan.md) retains the historical specification;
+the [documentation reconciliation](centroid-documentation-reconciliation.md)
+records current requirements and dependencies.
 
 ## First useful release
 
@@ -66,8 +80,9 @@ does not establish every release criterion.
 pass. A health request succeeds during bounded worker activity. Document the
 actual commands and remaining failures rather than bypassing checks.
 
-The standalone neural work in milestone 2 can proceed while the service shell
-is repaired. No HTTP route should advertise a neural operation it cannot execute.
+Standalone neural work can proceed while service baseline checks and missing
+repository workflow inputs are verified or restored. No HTTP route should
+advertise a neural operation it cannot execute.
 
 ## 2. Build a dialogue dataset and a fixed evaluation suite
 
@@ -98,12 +113,13 @@ basic reproduction before scaling experiments. During iteration, keep final-test
 prediction/scoring disabled with `--development-only`. Review rubric-action conflicts
 and corpus audit findings before publishing a new dataset version.
 
-## 3. Implement conversation conditioning and training
+## 3. Preserve conversation conditioning and extend training
 
-Complete the draft chat design with a persistent prompt input and a separate
-rolling answer input. The current user question must remain available throughout
-generation. Keep the combined context within the implemented allocation limits;
-choose window sizes through measured experiments.
+Persistent prompt conditioning and a separate rolling answer input are implemented.
+Preserve the current question throughout generation and keep combined context
+within measured allocation limits. Choose new window sizes through experiments.
+The parity plan adds continuation/checkpoints and participant training; these
+must preserve the existing formatter and supervision contract.
 
 Encode roles and turn boundaries as structural IDs. Marker-looking user text
 stays ordinary data. Use the same formatter and truncation rules for training and
@@ -120,23 +136,25 @@ examples remain independent; role-looking text cannot change structure; the
 question continues to affect predictions after the answer exceeds its rolling
 window. Record held-out answer quality and termination behavior after training.
 
-## 4. Publish versioned neural chat artifacts
+## 4. Preserve artifacts and add versioned training bundles
 
-Implement a bounded byte codec and Node wrapper for train, inspect, evaluate and
-reply. Validate sizes, shapes, vocabulary, numeric values and protocol versions
-before accepting an artifact. Keep baseline `.cgai`, prototype `.cgnn`, and the
-new chat format explicitly distinguishable. Changing the encoder or structural
-token layout requires a compatible version policy and usually retraining.
+The bounded inference codec and Node train/inspect/evaluate/reply wrapper are
+implemented. Preserve validation of sizes, shapes, vocabulary, numeric values
+and protocol versions. Keep `.cgai`, `.cgnn` and `.cgchat` distinguishable; new
+resumable training bundles require their own contract. Encoder or structural-token
+changes require a compatible version policy and usually retraining.
 
 Persist immutable artifacts by checksum. A model name may point to a newer
 version, but existing conversations remain pinned to their original checksum.
-Persist dataset/protocol identity and validation metrics with each trained model.
+Persist immutable training/dataset/protocol provenance with artifacts and keep
+candidate validation metrics in the durable training-job quality report. Rejected
+candidates and their reports remain inspectable without changing the model head.
 
 **Acceptance:** round trips preserve predictions; malformed/incompatible artifacts
 fail safely; the API cannot mix count-centroid models with neural weights. Training
 runs outside the request event loop with bounded queue length, memory and time.
 
-## 5. Deliver the HTTP conversation lifecycle
+## 5. Preserve the HTTP conversation lifecycle
 
 The following routes are implemented; see the [chat service](chat-service.md)
 for request bodies and operational restrictions:
@@ -146,14 +164,14 @@ for request bodies and operational restrictions:
 | `GET /api/v1/chat-models` | List compatible neural model versions |
 | `POST /api/v1/chat-models/train` | Submit a bounded training job |
 | `GET /api/v1/chat-jobs/:id` | Inspect training status, metrics and artifact identity |
-| `POST /api/v1/conversations` | Create a session pinned to a neural model checksum |
+| `POST /api/v1/conversations` | Create a model-free source session or a session pinned to a compatible neural model |
 | `GET /api/v1/conversations/:id` | Load authoritative session history |
 | `POST /api/v1/conversations/:id/messages` | Submit a message with request ID and expected revision |
 | `POST /api/v1/conversations/:id/cancel` | Cancel an identified active request |
 | `DELETE /api/v1/conversations/:id` | Remove the session and its messages |
 
-Match the shared types to the final route contract during implementation. Serialize
-sends within a session, make retries idempotent, and reject stale revisions.
+Keep shared types, native bridge and worker messages aligned with route changes.
+Serialize sends within a session, make retries idempotent, and reject stale revisions.
 Persist explicit pending, complete, cancelled and error states. A failed response
 must not become completed assistant context for the next turn. Cancellation must
 stop the worker, not just discard a result after computation finishes.
@@ -166,17 +184,20 @@ inference and disconnect propagation.
 restart/reload, duplicate retry, two isolated sessions, stale revision, cancellation,
 worker failure and database failure. Existing baseline API tests continue to pass.
 
-## 6. Ground answers and add persistent memory
+## 6. Extend grounded answers and persistent memory
 
-Connect repository passage retrieval to the conversation service. Retain exact
-excerpts and source identifiers independently of generated wording. Train and
-evaluate evidence use before enabling neural synthesis from arbitrary passages;
-until then, a retrieved excerpt is a source result, not a generated factual answer.
+Repository passage retrieval is connected to source conversations. Preserve exact
+excerpts and source identities independently of generated wording. Repository
+scope currently rejects neural model selection, so a neural repository pilot needs
+a versioned admission change preserving offline and snapshot constraints. Train
+and evaluate evidence use before enabling broader synthesis; retrieved excerpts
+remain source results rather than proof of generated-answer quality.
 
-Next implement the [research and memory design](research-memory.md): retrieve
-scoped memory, check answer support, research public sources when needed, return
-citations, and retain sourced knowledge under explicit retention rules. Network
-failure or insufficient evidence produces uncertainty rather than invented facts.
+Scoped memory, bounded public research, citations and retention controls are
+implemented. Carry forward the [research and memory design](research-memory.md)'s
+remaining calibrated support, fact-specific freshness, authenticated owner and
+training-removal requirements. Network failure or insufficient evidence produces
+uncertainty; storing a memory does not implicitly admit it into weight training.
 
 **Acceptance:** citations support the emitted claims; unrelated evidence does not
 create a confident answer; source corrections and deletion affect later retrieval;

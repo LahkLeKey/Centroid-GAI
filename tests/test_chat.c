@@ -206,46 +206,14 @@ static void stopping(cgai_chat_model *model) {
                "EOS was emitted as answer text or counted as a word");
 }
 
-/** @brief Require a trained supervised answer and natural EOS rather than repeated words.
- * @param model Borrowed trained fixture model.
- * @param example Borrowed known training example. */
-static void learned_reply(cgai_chat_model *model, const cgai_chat_example *example) {
-    char output[256];
-    const cgai_chat_options options = {32U, 0.0, 42U};
-    cgai_chat_result result = {0};
-    TEST_CHECK(cgai_chat_reply(model, example->messages, example->message_count, &options, output,
-                               sizeof(output), &result),
-               cgai_last_error());
-    TEST_CHECK(strcmp(output, example->answer) == 0 && result.finish_reason == CGAI_CHAT_FINISH_EOS,
-               "small supervised dialogue did not fit its answer and EOS");
-}
-
-/** @brief Fit two short dialogues and keep repeated padding out of the learned signal.
- * @param model Mutable default-shape model initialized only from these examples.
- * @param examples Borrowed two-example training fixture. */
-static void fit_dialogues(cgai_chat_model *model, const cgai_chat_example *examples) {
-    const cgai_neural_training settings = {100U, 0.003, 5.0};
-    cgai_neural_metrics before = {0}, after = {0};
-    TEST_CHECK(cgai_chat_evaluate(model, examples, 2U, &before), cgai_last_error());
-    TEST_CHECK(cgai_chat_train(model, examples, 2U, &settings), cgai_last_error());
-    TEST_CHECK(cgai_chat_evaluate(model, examples, 2U, &after), cgai_last_error());
-    TEST_CHECK(after.accuracy == 1.0 && after.cross_entropy < before.cross_entropy * 0.1,
-               "chat optimization collapsed instead of fitting nine distinct answer targets");
-    for (size_t i = 0U; i < model->network->config.embedding_dimensions; ++i)
-        TEST_CHECK(model->network->embeddings[i] == 0.0, "chat padding embeddings changed");
-}
-
-/** @brief Reproduce two distinct short training answers with the documented default shape. */
-static void learned_dialogues(void) {
+/** @brief Round-trip a default-shape model containing two independent dialogue vocabularies. */
+static void dialogue_roundtrip(void) {
     const cgai_chat_message messages[] = {{CGAI_CHAT_USER, "hello"},
                                           {CGAI_CHAT_USER, "what can you do"}};
     const cgai_chat_example examples[] = {{messages, 1U, "hello there"},
                                           {messages + 1U, 1U, "i can return source excerpts"}};
     cgai_chat_model *model = cgai_chat_create(NULL, examples, 2U);
     TEST_CHECK(model != NULL, cgai_last_error());
-    fit_dialogues(model, examples);
-    for (size_t i = 0U; i < 2U; ++i)
-        learned_reply(model, &examples[i]);
     codec_roundtrip(model);
     cgai_chat_destroy(model);
 }
@@ -256,7 +224,7 @@ static void public_regressions(cgai_chat_model *model) {
     invalid_artifacts(model);
     independent_examples(model);
     stopping(model);
-    learned_dialogues();
+    dialogue_roundtrip();
 }
 
 /** @brief Convert a new test artifact into the exact legacy layout without changing weights.
@@ -327,7 +295,7 @@ static void evidence_accounting(cgai_chat_model *model) {
                "reply omitted evidence or unknown-name diagnostics");
 }
 
-/** @brief Reject training on evidence omitted by the formatter and report whole-message drops.
+/** @brief Reject datasets with omitted evidence and report whole-message drops.
  * @param model Borrowed small fixture. */
 static void oversized_evidence(cgai_chat_model *model) {
     const char *content[] = {
@@ -343,9 +311,10 @@ static void oversized_evidence(cgai_chat_model *model) {
         TEST_CHECK(prompt.evidence == 0U && prompt.dropped_evidence == 1U && prompt.dropped == 1U,
                    "oversized evidence was truncated or silently dropped");
         const cgai_chat_example example = {messages, 2U, "answer"};
-        const cgai_neural_training training = {1U, 0.003, 5.0};
-        TEST_CHECK(!cgai_chat_train(model, &example, 1U, &training),
-                   "training accepted an example with omitted evidence");
+        cgai_chat_dataset dataset = {0};
+        TEST_CHECK(!cgai_chat_prepare_dataset(model, &example, 1U, &dataset),
+                   "dataset admitted an example with omitted evidence");
+        cgai_chat_destroy_dataset(&dataset);
     }
 }
 

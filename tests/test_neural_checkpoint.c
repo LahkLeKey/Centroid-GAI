@@ -257,14 +257,30 @@ static void check_save_preserves(cgai_neural_model *model, double *scalar, doubl
     free(before);
 }
 
-/** @brief Check trained checkpoints, corruption rejection and input newline portability.
+/** @brief Populate owned optimizer state directly for serialization checks.
+ * @param model Borrowed initialized fixture with absent moments. */
+static void optimizer_fixture(cgai_neural_model *model) {
+    const size_t count = model->parameter_count;
+    TEST_CHECK(count > 0U && count <= CGAI_NEURAL_MAX_PARAMETERS,
+               "invalid codec fixture parameter capacity");
+    model->adam_first = calloc(count, sizeof(*model->adam_first));
+    model->adam_second = calloc(count, sizeof(*model->adam_second));
+    TEST_CHECK(model->adam_first != NULL && model->adam_second != NULL,
+               "could not allocate owned codec fixture moments");
+    for (size_t i = 0U; i < count; ++i) {
+        model->adam_first[i] = 0.01 * (double)(i + 1U);
+        model->adam_second[i] = 0.02 * (double)(i + 1U);
+    }
+    model->training_step = 6U;
+    model->training_epochs = 3U;
+    model->training_shuffle = 7U;
+}
+
+/** @brief Check populated checkpoints, corruption rejection and input newline portability.
  * @param model Borrowed mutable initialized model. */
-static void check_trained(cgai_neural_model *model) {
-    /* Step 1: Populate real continuation moments and exercise their exact text round trip. */
-    cgai_neural_training training = cgai_neural_default_training();
-    training.epochs = 2U;
-    TEST_CHECK(cgai_neural_train_continue(model, checkpoint_corpus, &training) == CGAI_STATUS_OK,
-               cgai_last_error());
+static void check_populated(cgai_neural_model *model) {
+    /* Step 1: Explicit fixture moments exercise their exact text round trip. */
+    optimizer_fixture(model);
     check_roundtrip(model);
     size_t count = 0U;
     uint8_t *bytes = read_checkpoint(checkpoint_path, &count);
@@ -310,7 +326,7 @@ int main(void) {
                "null checkpoint model accepted");
     check_roundtrip(model);
     /* Step 2: Check trained moments, malformed inputs, float extremes and partial state. */
-    check_trained(model);
+    check_populated(model);
     check_extremes(model);
     /* Step 3: Release model and every test-owned file after successful checks. */
     cgai_neural_destroy(model);

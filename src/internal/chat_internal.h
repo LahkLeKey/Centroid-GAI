@@ -1,7 +1,7 @@
 /** @file chat_internal.h @brief Conversation ownership and shared dataset formatting. */
 #ifndef CGAI_CHAT_INTERNAL_H
 #define CGAI_CHAT_INTERNAL_H
-#include "centroid_gai_chat.h"
+#include "chat/chat_contract.h"
 #include "neural_math.h"
 /** Maximum training records per operation. */
 #define CGAI_CHAT_MAX_EXAMPLES 10000U

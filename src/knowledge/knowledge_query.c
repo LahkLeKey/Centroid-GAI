@@ -1,7 +1,7 @@
 /** @file knowledge_query.c @brief Reusable native queries over compiled centroid knowledge. */
-#include "centroid_gai_knowledge.h"
 #include "internal/error.h"
 #include "internal/knowledge_module.h"
+#include "knowledge/knowledge_contract.h"
 #include <stdlib.h>
 #include <string.h>
 

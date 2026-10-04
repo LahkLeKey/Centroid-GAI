@@ -247,9 +247,28 @@ static void roundtrip_special_scalars(cgai_gameplay_model *model) {
     cgai_gameplay_destroy(loaded);
 }
 
+/** @brief Populate owned optimizer state directly for serialization checks.
+ * @param model Borrowed initialized fixture with absent moments. */
+static void optimizer_fixture(cgai_gameplay_model *model) {
+    const size_t count = 38U;
+    TEST_CHECK(model->parameter_count == count, "codec fixture layout no longer has 38 scalars");
+    double *first = calloc(38U, sizeof(*first));
+    double *second = calloc(38U, sizeof(*second));
+    TEST_CHECK(first != NULL && second != NULL, "could not allocate owned codec fixture moments");
+    for (size_t i = 0U; i < count; ++i) {
+        first[i] = 0.01 * (double)(i + 1U);
+        second[i] = 0.02 * (double)(i + 1U);
+    }
+    model->adam_first = first;
+    model->adam_second = second;
+    model->training_step = 6U;
+    model->training_epochs = 3U;
+    model->training_shuffle = 7U;
+}
+
 /** @brief Validate fresh zero-moment checkpoints and populated exact continuation decoding.
  * @param model Borrowed mutable fixture. */
-static void roundtrip_training(cgai_gameplay_model *model) {
+static void roundtrip_optimizer(cgai_gameplay_model *model) {
     /* Step1: Untrained checkpoints contain absent moments and unchanged zero progress. */
     TEST_CHECK(cgai_gameplay_checkpoint_save(model, checkpoint_path) == CGAI_STATUS_OK,
                cgai_last_error());
@@ -258,11 +277,8 @@ static void roundtrip_training(cgai_gameplay_model *model) {
                    fresh->training_step == 0U && fresh->training_epochs == 0U,
                "fresh checkpoint introduced optimizer state");
     cgai_gameplay_destroy(fresh);
-    /* Step2: Complete independent Adam steps make all optimizer/progress fields meaningful. */
-    const cgai_gameplay_example examples[] = {{{{0U}}, 0U, 0U}, {{{1U}}, 0U, 1U}};
-    const cgai_gameplay_training training = {3U, 0.01, 5.0, 0.05};
-    TEST_CHECK(cgai_gameplay_train_continue(model, examples, 2U, &training) == CGAI_STATUS_OK,
-               cgai_last_error());
+    /* Step2: Explicit fixture moments exercise all optimizer/progress fields. */
+    optimizer_fixture(model);
     TEST_CHECK(cgai_gameplay_checkpoint_save(model, checkpoint_path) == CGAI_STATUS_OK,
                cgai_last_error());
     cgai_gameplay_model *loaded = cgai_gameplay_checkpoint_load(checkpoint_path);
@@ -289,7 +305,7 @@ int main(void) {
     /* Step1: Generate valid native fixtures and check exact portable scalar/Adam roundtrips. */
     cgai_gameplay_model *model = codec_fixture();
     roundtrip_special_scalars(model);
-    roundtrip_training(model);
+    roundtrip_optimizer(model);
     cgai_gameplay_destroy(model);
     const codec_bytes artifact = read_bytes(artifact_path);
     const codec_bytes checkpoint = read_bytes(checkpoint_path);

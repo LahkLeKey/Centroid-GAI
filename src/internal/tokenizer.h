@@ -3,7 +3,7 @@
 #ifndef CGAI_TOKENIZER_H
 #define CGAI_TOKENIZER_H
 
-#include "centroid_gai.h"
+#include "core_contract.h"
 
 #include <stddef.h>
 

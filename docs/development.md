@@ -1,5 +1,10 @@
 # Development
 
+Migration status: the active [C11 Life deliverables](centroid-next-deliverables.md)
+replace service/script workflows with native library, CLI and test executables.
+Existing build commands below describe the previous checkout; Node, TypeScript,
+Python helpers and deleted-workflow restoration are not part of the new backlog.
+
 The centroid neural model connects to persistent conversations through the native
 bridge and bounded API workers. See the [implementation plan](chatbot-plan.md)
 for remaining acceptance criteria. Commands below run from the repository root
@@ -27,15 +32,18 @@ To run only the neural suites:
 ctest --test-dir build/dev -C Release -R neural --output-on-failure
 ```
 
-The separate original engine remains useful as a baseline:
+The separate original engine remains useful as a baseline. Save a small UTF-8
+training corpus as `baseline-train.txt` before running these commands:
 
 ```sh
-./build/dev/cgai train examples/tiny_corpus.txt build/dev/baseline.cgai 12
+./build/dev/cgai train baseline-train.txt build/dev/baseline.cgai 12
 ./build/dev/cgai generate build/dev/baseline.cgai "centroid models" 30 0 42
 ```
 
-These `.cgai` artifacts are different from neural `.cgnn` artifacts. Existing
-centroid merge operations apply to the baseline engine, not learned neural weights.
+These `.cgai` artifacts are different from neural `.cgnn` artifacts. Baseline
+CLI/HTTP composition operates on count models. The isolated Life adapter has a
+separate gated neural consolidation implementation; standalone/chat APIs do not
+gain that operation through baseline composition.
 
 ## Develop the service
 
@@ -67,6 +75,8 @@ The Docker build supplies Python and the native compiler.
 | --- | --- |
 | Neural math/training/artifacts | Native neural tests, gradient checks, held-out metrics, CLI round trips |
 | C model or ABI | Full CTest suite and relevant Node addon tests |
+| Observable NPC pilot | `ctest --test-dir build/dev -C Release -R centroid_gai_npc --output-on-failure`; offline `node tools/npc/workflow.mjs verify-evidence`; accepted heads additionally require `verify` and compatible-toolchain `npc_replay` |
+| Iterative NPC recovery | `ctest --test-dir build/dev -C Release -R centroid_gai_npc_v2 --output-on-failure`; offline `node tools/npc_v2/workflow.mjs verify-delivery`; accepted heads additionally require compatible-toolchain `npc_v2_replay` |
 | HTTP/persistence behavior | Typecheck, native tests, API tests against migrated PostgreSQL |
 | Knowledge compiler | `node --test persistence/api/src/knowledge/compile-native-knowledge.test.ts` |
 | Repository retrieval | `node --test persistence/api/src/knowledge/retrieval.test.ts` |
@@ -77,15 +87,20 @@ From `persistence/`, `bun run test:e2e` builds an isolated Compose project, test
 the HTTP API, and removes its own containers and database volume. Default test
 ports are 3100 (API) and 55432 (PostgreSQL); override with `CGAI_E2E_API_PORT` and
 `CGAI_E2E_POSTGRES_PORT`. The regular development stack and its volume are separate.
-The suite includes exact answers from the two-example training fixture, health during work, transcript retries,
-revision conflicts, isolated sessions, memory controls and service restart/reload.
+The suite includes independent candidate validation and rejection, persisted
+quality reports, health during work, transcript retries, revision conflicts,
+isolated sessions, memory controls and service restart/reload. Demo-answer fit is
+a native training diagnostic, not the HTTP publication gate.
 It runs test files sequentially so the restart test cannot interrupt baseline tests.
 The normal runner and CI disable external research and verify its disabled status.
-`bun run test:repository` adds the repository Compose overlay and all 40 codebase
-scenarios after the API tests. It creates independent A/B fixture commits from
-allowlisted current files, records their origin and removes its isolated services.
-See [repository chat](repository-chat.md) for reports and production snapshot
-preparation. Those test fixture commits do not modify the developer branch.
+The `bun run test:repository` wrapper is intended to add the repository overlay
+and 40-scenario regression suite, preparing independent A/B fixture commits from
+allowlisted sources. Its `tools.knowledge.e2e_repository` module and scenario
+JSON inputs are absent from this checkout. This lane is retired, with no
+restoration or replacement planned. See the
+[documentation reconciliation](centroid-documentation-reconciliation.md) for the
+dependency inventory and [repository chat](repository-chat.md) for its contracts.
+Fixture preparation must not modify the developer branch.
 Set `CGAI_E2E_RESEARCH_LIVE=1` to additionally exercise a real Wikipedia lookup for
 `hello world` from a conversation with no model, then verify memory reuse. This
 opt-in check requires Internet access and provider availability.
@@ -99,10 +114,11 @@ source snapshot from the same committed revision as the question suite after
 documentation changes. The Git importer excludes dirty and untracked files;
 an older snapshot requires its matching historical suite.
 
-CI includes cross-platform C builds, knowledge-ingestion checks, native analysis,
+CI configures cross-platform C builds, knowledge-ingestion checks, native analysis,
 documentation generation, and an API/PostgreSQL integration job. It has no browser
 build or browser test job. The [workflow](../.github/workflows/ci.yml) is the
-executable source of truth for commands and pinned versions.
+source of truth for configured commands and pinned versions. A configured step
+whose input/tool is missing is not a passing check.
 
 ## C implementation and documentation conventions
 

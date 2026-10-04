@@ -1,151 +1,50 @@
-name: CI
-
+name: C11 Life
 on:
   push:
   pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
-  build:
+  native:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Configure
+      - name: Configure C11 runtime
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build build --config Release --parallel
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
-      - name: Verify published bark artifacts and source identity without raw data
-        run: node tools/bark/workflow.mjs verify
-      - name: Verify composed gameplay artifacts and source identity
-        run: node tools/gameplay/workflow.mjs verify
-      - name: Verify the historical bark release independently of newer source
-        run: node tools/gameplay/workflow.mjs verify-legacy
-      - name: Test unattended scholarly training without network
-        env:
-          CGAI_EXECUTABLE: ${{ runner.os == 'Windows' && 'build/Release/cgai.exe' || 'build/cgai' }}
-        run: node --test persistence/api/src/training/scholarly-*.test.ts
-      - name: Verify the published scholarly model without raw data or network
-        run: node persistence/api/src/training/scholarly-cli.ts verify
-
-  native-lint:
+      - name: Install native package
+        run: cmake --install build --config Release --prefix build/install
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.3.9'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Install Clang tools
-        run: |
-          sudo apt-get update && sudo apt-get install --yes clang-tidy
-          python -m pip install clang-format==21.1.0
-      - name: Build Node addon and download matching headers
-        working-directory: persistence
-        run: bun install --frozen-lockfile --ignore-scripts
-      - name: Build native addon
-        working-directory: persistence/api
-        run: bun run native:build
-      - name: Test Node addon
-        working-directory: persistence/api
-        run: bun run native:test
-      - name: Test factuality and training quality without network or database
-        working-directory: persistence/api
-        run: |
-          bun run baseline:test
-          bun run chat:quality:test
-          bun run chat:evaluate
-      - name: Test snapshot verification and source retrieval with isolated fixtures
-        run: |
-          node --test persistence/api/src/evaluation/codebase-data.test.ts
-          node --test persistence/api/src/knowledge/retrieval.test.ts
-      - name: Verify static categorized codebase centroids and spatial neighbors
-        run: |
-          node --test persistence/api/src/knowledge/compile-native-knowledge.test.ts
-          node --test persistence/api/src/knowledge/codebase-centroids.test.ts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: model-baselines
-          path: |
-            build/evaluation/chat
-          if-no-files-found: error
-      - name: Configure native checks
+      - name: Install native tooling
+        run: sudo apt-get update && sudo apt-get install --yes clang-tidy clang-format
+      - name: Configure
         run: cmake -S . -B build-lint
-      - name: Lint all C sources and check formatting
-        run: cmake --build build-lint --target cgai_lint cgai_format_check
-
-  documentation:
+      - name: Check C11
+        run: cmake --build build-lint --target life_lint life_format_check
+      - name: Build source evolution CLI
+        run: cmake --build build-lint --target cgai_life_evolve --parallel
+      - name: Test source evolution
+        run: ./build-lint/cgai_life_evolve --out build-lint/evolution-check --candidates 2 --steps 64
+  sanitizers:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Install Doxygen
-        run: sudo apt-get update && sudo apt-get install --yes doxygen
-      - name: Test documentation input filtering
-        run: python -m unittest discover -s tools/docs -v
-      - name: Configure documentation
-        run: cmake -S . -B build-docs -DCGAI_BUILD_DOCS=ON -DCGAI_BUILD_TESTS=OFF
-      - name: Enforce documentation standard
-        run: cmake --build build-docs --target docs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: api-documentation
-          path: build-docs/docs/html
-          if-no-files-found: error
-
-  api-integration:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      CGAI_API_URL: http://127.0.0.1:3000
-      CGAI_CHAT_API_TOKEN: isolated-ci-test-token
-      CGAI_SEARCH_PROVIDER: disabled
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.3.9'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Install workspace dependencies
-        working-directory: persistence
-        run: bun install --frozen-lockfile --ignore-scripts
-      - name: Typecheck persistence packages
-        working-directory: persistence
-        run: bun run typecheck
-      - name: Test repository scenario assertions
-        working-directory: persistence/api
-        run: bun run repository:test
-      - name: Test API persistence and chat against isolated Compose
-        working-directory: persistence
-        shell: bash
-        run: |
-          set -o pipefail
-          bun run test:e2e 2>&1 | tee ../compose-ci.log
-      - name: Save API integration diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-integration
-          path: |
-            compose-ci.log
-          retention-days: 7
+      - name: Configure instrumented C11
+        run: cmake -S . -B build-sanitizers -DCMAKE_BUILD_TYPE=Debug -DCGAI_ENABLE_SANITIZERS=ON
+      - name: Build
+        run: cmake --build build-sanitizers --parallel
+      - name: Test
+        run: ctest --test-dir build-sanitizers --output-on-failure

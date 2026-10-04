@@ -1,5 +1,10 @@
 # Centroid neural network
 
+Migration direction: retain the C11 model math, inference and format contracts
+as inputs to the [Life training deliverables](centroid-next-deliverables.md).
+Existing public training APIs, script workflows and CLI training commands are
+retiring; the new Life engine becomes the production mutation authority.
+
 The working neural prototype learns token embeddings, an ordered context encoder,
 centroid positions, and token distributions through backpropagation. It predicts
 the next token from a fixed window, then feeds generated tokens back into that
@@ -46,6 +51,14 @@ specialist every frame is an engine scheduling choice that needs its own benchma
 Treat numerical budget values as targets until measurements establish them.
 
 ### Composed centroid gameplay network
+
+The [observable NPC pilot](npc-planner.md) extends this foundation with complete
+episodes, bounded observed memory and independent family evaluation. Its separate
+`npc-pilot-v1` profile implements the [six-milestone epic](npc-planner-epic.md)
+through a deterministic C11 simulator, teacher, training tool, comparative
+evaluation, performance benchmark and sealed release workflow.
+The [v2 recovery profile](npc-planner-v2.md) adds successive-policy training
+trajectories, independent detour families and authoritative reference replay.
 
 The [composed C11 API](../include/centroid_gai_gameplay.h) owns one shared encoder,
 learned outer routing centroids and an internal expert bank for each specialist.

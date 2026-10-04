@@ -17,16 +17,10 @@
 
 /** Maximum supported embedding dimensions. */
 #define CGAI_MAX_DIMENSIONS ((size_t)4096U)
-/** Decimal dimension limit for schema string construction. */
-#define CGAI_MAX_DIMENSIONS_TEXT "4096"
 /** Maximum supported centroid count. */
 #define CGAI_MAX_CENTROID_COUNT ((size_t)65536U)
-/** Decimal centroid limit for schema string construction. */
-#define CGAI_MAX_CENTROID_COUNT_TEXT "65536"
 /** Maximum supported context window. */
 #define CGAI_MAX_CONTEXT_WINDOW ((size_t)65536U)
-/** Decimal context limit for schema string construction. */
-#define CGAI_MAX_CONTEXT_WINDOW_TEXT "65536"
 /** Maximum serialized token length in bytes. */
 #define CGAI_MAX_TOKEN_BYTES ((size_t)4096U)
 
@@ -48,11 +42,6 @@
 #define CGAI_INITIAL_TOKEN_CAPACITY ((size_t)32U)
 /** Initial vocabulary allocation measured in token pointers. */
 #define CGAI_INITIAL_VOCABULARY_CAPACITY ((size_t)16U)
-
-/** Maximum CLI generation length. */
-#define CGAI_MAX_GENERATION_TOKENS ((size_t)1000000U)
-/** Conservative CLI output storage reserved per generated token. */
-#define CGAI_OUTPUT_BYTES_PER_TOKEN ((size_t)128U)
 
 /** First byte value treated as non-ASCII by the tokenizer. */
 #define CGAI_NON_ASCII_BYTE ((unsigned char)128U)

@@ -1,7 +1,7 @@
 /** @file gameplay_internal.h @brief Private hierarchical centroid ownership and numerical work. */
 #ifndef CGAI_GAMEPLAY_INTERNAL_H
 #define CGAI_GAMEPLAY_INTERNAL_H
-#include "centroid_gai_gameplay.h"
+#include "gameplay/gameplay_contract.h"
 
 /** Maximum trainable scalar count, bounding all parameter allocations. */
 #define CGAI_GAMEPLAY_MAX_PARAMETERS 2000000U

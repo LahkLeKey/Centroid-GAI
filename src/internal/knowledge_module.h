@@ -1,7 +1,7 @@
 /** @file knowledge_module.h @brief Private contract implemented by each compiled category. */
 #ifndef CGAI_KNOWLEDGE_MODULE_H
 #define CGAI_KNOWLEDGE_MODULE_H
-#include "centroid_gai_knowledge.h"
+#include "knowledge/knowledge_contract.h"
 
 extern const size_t cgai_knowledge_catalog_cluster_count; /**< Distinct exact vectors. */
 /** Build aggregate metadata for all canonical clusters in one pass.

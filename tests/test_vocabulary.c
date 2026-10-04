@@ -1,8 +1,8 @@
 /** @file test_vocabulary.c @brief Unit tests for vocabulary growth and lookup. */
 
-#include "centroid_gai.h"
 #include "internal/cgai_internal.h"
 #include "internal/vocabulary.h"
+#include "model/model_contract.h"
 #include "test_utils.h"
 
 #include <stdio.h>

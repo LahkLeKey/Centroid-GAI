@@ -44,30 +44,6 @@ static void cgai_test_neural_bad_config(void) {
     cgai_neural_destroy(NULL);
 }
 
-/** @brief Reject invalid operations without consuming the valid fixture.
- *
- * Invalid numeric controls and empty training sequences must report failure.
- * @param model Borrowed initialized fixture which remains owned by its caller. */
-static void cgai_test_neural_bad_training(cgai_neural_model *model) {
-    /* Step 1: Reject invalid learning controls before updating the model. */
-    cgai_neural_training training = cgai_neural_default_training();
-    training.learning_rate = NAN;
-    TEST_CHECK(cgai_neural_train(model, "a", &training) == CGAI_STATUS_ERROR,
-               "NaN learning rate accepted");
-    training = cgai_neural_default_training();
-    training.epochs = 0U;
-    TEST_CHECK(cgai_neural_train(model, "a", &training) == CGAI_STATUS_ERROR,
-               "zero epochs accepted");
-    training = cgai_neural_default_training();
-    training.gradient_clip = 0.0;
-    TEST_CHECK(cgai_neural_train(model, "a", &training) == CGAI_STATUS_ERROR, "zero clip accepted");
-    /* Step 2: Reject missing handles and empty sequences. */
-    TEST_CHECK(cgai_neural_train(model, "", NULL) == CGAI_STATUS_ERROR,
-               "empty training sequence accepted");
-    TEST_CHECK(cgai_neural_train(NULL, "a", NULL) == CGAI_STATUS_ERROR,
-               "null training handle accepted");
-}
-
 /** @brief Check generation limits, buffers, and an empty prompt.
  *
  * A zero-token request must return an empty terminated string. Invalid calls are
@@ -132,13 +108,11 @@ int main(void) {
     /* Step 1: Check public validation and ownership using a compact model. */
     cgai_test_neural_bad_config();
     cgai_neural_model *model = cgai_test_neural_fixture();
-    cgai_test_neural_bad_training(model);
     cgai_test_neural_generation(model);
     cgai_test_neural_evaluation(model);
     cgai_neural_destroy(model);
-    /* Step 2: Exercise calculus, actual learning, and durable model state. */
+    /* Step 2: Exercise calculus, inference scheduling and durable model state. */
     cgai_test_neural_math();
-    cgai_test_neural_training();
     cgai_test_neural_io();
     cgai_test_neural_session();
     return 0;

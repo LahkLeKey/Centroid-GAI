@@ -1,8 +1,8 @@
 /** @file neural_internal.h @brief Owned neural parameters and shared vocabulary helpers. */
 #ifndef CGAI_NEURAL_INTERNAL_H
 #define CGAI_NEURAL_INTERNAL_H
-#include "centroid_gai_neural.h"
-#include "cgai_internal.h"
+#include "neural/neural_contract.h"
+#include "token_contract.h"
 #include "tokenizer.h"
 /** Maximum frozen vocabulary entries, including controls. */
 #define CGAI_NEURAL_MAX_VOCABULARY 8192U

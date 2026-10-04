@@ -1,5 +1,10 @@
 # Research and memory
 
+Migration status: the service implementation described below is retiring under
+the [C11 Life deliverables](centroid-next-deliverables.md). Source support,
+training admission, correction and retention requirements carry into the native
+data contract; network providers and database memory are not rebuilt here.
+
 Status: the initial source-result implementation is connected to the
 [chat service](chat-service.md): local retrieval, scoped persistent memory,
 explicit support routing, Wikipedia/SearXNG providers and a bounded public fetcher.
@@ -63,11 +68,14 @@ recalibrate when the model, tokenizer or domain changes.
 
 ## Bounded public research
 
-Add a provider adapter returning URLs, titles, snippets and available dates.
-Provider selection, credentials and spending limits are deployment configuration;
-credentials stay on the server. A starting budget is two queries and five fetched
-pages per turn, with byte limits, a total deadline, cancellation and daily quotas.
-Tune these limits using measured latency, cost and answer quality.
+Provider adapters return URLs and titles; the research layer separately fetches
+pages and extracts source excerpts. Fuller publication/update date metadata remains
+a future requirement. Provider selection, credentials and
+spending limits are deployment configuration; credentials stay on the server.
+The current policy allows one query and five page attempts per turn, with a
+15-second deadline, 512 KiB response limit, four redirects and 100 persisted
+owner queries per UTC day. The older two-query starting proposal is superseded.
+Tune future limits using measured latency, cost and answer quality.
 
 The implemented default is Wikipedia, without an API key; a configured SearXNG
 endpoint extends search beyond the encyclopedia. Set `CGAI_SEARCH_PROVIDER=disabled`

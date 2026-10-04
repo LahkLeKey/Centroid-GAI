@@ -1,9 +1,9 @@
 /** @file model_composition.c @brief Non-mutating model unions and weighted compaction. */
-#include "centroid_gai.h"
 #include "internal/constants.h"
 #include "internal/error.h"
 #include "internal/model_centroid.h"
 #include "internal/model_validation.h"
+#include "model/model_contract.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>

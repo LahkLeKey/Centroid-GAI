@@ -13,14 +13,6 @@ cgai_neural_config cgai_neural_default_config(void) {
     return config;
 }
 
-/** @brief Return default Adam settings.
- * @return Settings value needing no cleanup. */
-cgai_neural_training cgai_neural_default_training(void) {
-    /* Step 1: Choose conservative steps for the small default network. */
-    const cgai_neural_training training = {20U, 0.01, 5.0};
-    return training;
-}
-
 /** @brief Bound every dimension before computing allocation sizes.
  * @param config Borrowed non-NULL configuration.
  * @return OK on supported dimensions and routing scale, ERROR otherwise. */
@@ -163,14 +155,4 @@ void cgai_neural_reset_training(cgai_neural_model *model) {
     model->training_step = 0U;
     model->training_epochs = 0U;
     model->training_shuffle = 0U;
-}
-
-/** @brief Report accumulated continuation passes and target updates without mutation.
- * @param model Borrowed handle, or NULL.
- * @return Current counters, or both zero for NULL or a fresh model. */
-cgai_neural_progress cgai_neural_get_progress(const cgai_neural_model *model) {
-    /* Step 1: Return counters by value while retaining all ownership in the model. */
-    const cgai_neural_progress progress = {model ? model->training_epochs : 0U,
-                                           model ? model->training_step : 0U};
-    return progress;
 }

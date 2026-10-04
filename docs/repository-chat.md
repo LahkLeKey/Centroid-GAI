@@ -1,11 +1,25 @@
 # Repository conversations
 
+Migration status: **Retired scope for the new plan**. The active
+[C11 Life deliverables](centroid-next-deliverables.md) do not restore or rebuild
+the repository snapshot/service workflow. The attribution and evidence lessons
+below remain historical design inputs.
+
 The API can answer codebase questions without training a neural model or contacting
 a public search provider. It returns exact source excerpts from a verified Git
 snapshot and uses `docs/codebase-tasks.json` for proposed next actions. The reviewed
 [codebase brief](codebase-brief.md) is the starting inventory of implemented behavior
 and known limits. Answers use deterministic retrieval; they do not establish neural
 generalization.
+
+Checkout readiness on October 3, 2026: the TypeScript repository service and
+Compose overlay exist, but `tools/knowledge/`, its inclusion-policy file and the
+referenced request/scenario/question fixtures are absent. Preparation, capture
+and fixture-based commands below are intended workflow, not currently runnable
+instructions. These inputs stay removed and the workflow is retired; the
+[documentation reconciliation](centroid-documentation-reconciliation.md) lists
+the dependencies. A separately supplied valid snapshot can still serve the
+implemented repository contracts.
 
 ## Prepare committed evidence and start Compose
 

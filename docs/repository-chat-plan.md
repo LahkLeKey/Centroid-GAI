@@ -1,11 +1,19 @@
 # Repository chat and development-loop plan
 
-Status: repository snapshots, offline conversation scope, reviewed next-step
-actions, durable context, explicit snapshot switching and the 40-scenario HTTP
-runner are implemented. Use the [repository chat guide](repository-chat.md) for
-current commands. Acceptance is measured by each generated `report.json`; the
-presence of a scenario or route alone is not a passing result. Streaming,
-server/native memory instrumentation and calibrated factual support remain open.
+Migration status: **Superseded roadmap**. The active [C11 Life
+deliverables](centroid-next-deliverables.md) retire this service workflow. Removed
+tools and fixtures are neither restored nor replaced.
+
+Status: repository snapshot loading, offline scope, reviewed next-step actions,
+durable context, explicit snapshot switching and HTTP runner code are implemented.
+The referenced bootstrap/capture tools and scenario inputs are absent from this
+checkout; the incomplete workflow is now retired. Use the
+[repository chat guide](repository-chat.md) for contracts and the
+[documentation reconciliation](centroid-documentation-reconciliation.md) for
+current dependencies. The baseline and implementation sequence below preserve
+the historical specification. Acceptance requires captured results, rather than
+the presence of a route or script. Streaming, total server/native memory
+instrumentation and calibrated factual support remain open.
 
 ## Target interaction
 

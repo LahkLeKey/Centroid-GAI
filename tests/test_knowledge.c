@@ -1,6 +1,5 @@
-/** @file test_knowledge.c @brief Compiled knowledge query, ownership, and ABI regressions. */
-#include "centroid_gai_abi.h"
-#include "centroid_gai_knowledge.h"
+/** @file test_knowledge.c @brief Compiled knowledge query and native ownership regressions. */
+#include "knowledge/knowledge_contract.h"
 #include "test_utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -115,28 +114,6 @@ static void check_invalid(cgai_static_knowledge_index *index) {
                "missing context accepted");
 }
 
-/** Check ABI ownership, bounded output, and error reset behavior. */
-static void check_abi(void) {
-    cgai_abi_knowledge_index *index = NULL;
-    cgai_abi_buffer json = {0};
-    TEST_CHECK(cgai_abi_knowledge_open(&index) == CGAI_ABI_OK, "ABI open failed");
-    TEST_CHECK(cgai_abi_knowledge_catalog(&json) == CGAI_ABI_OK, "ABI catalog failed");
-    TEST_CHECK(strstr((const char *)json.data, "native-core") != NULL, "stable category absent");
-    cgai_abi_buffer_free(&json);
-    TEST_CHECK(cgai_abi_knowledge_page(UINT32_MAX, 10U, &json) == CGAI_ABI_OK, "empty page failed");
-    TEST_CHECK(strstr((const char *)json.data, "\"items\":[]") != NULL, "invalid empty page");
-    cgai_abi_buffer_free(&json);
-    TEST_CHECK(cgai_abi_knowledge_neighbors(index, cgai_static_knowledge_centroid_at(0U)->id, 3U,
-                                            UINT32_MAX, &json) == CGAI_ABI_OK,
-               "ABI query failed");
-    cgai_abi_buffer_free(&json);
-    TEST_CHECK(cgai_abi_knowledge_neighbors(index, NULL, 3U, UINT32_MAX, &json) != CGAI_ABI_OK &&
-                   json.data == NULL && json.size == 0U,
-               "ABI error did not reset output");
-    cgai_abi_knowledge_close(index);
-    cgai_abi_knowledge_close(NULL);
-}
-
 /** Verify all category-local rows resolve to the same native global records.
  * @param category Valid category index.
  */
@@ -215,7 +192,7 @@ static void check_manual_baseline(cgai_static_knowledge_index *index) {
     check_manual_features();
 }
 
-/** Run native query and ABI integration regressions.
+/** Run native query and ownership regressions.
  * @return Zero after all checks pass.
  */
 int main(void) {
@@ -227,6 +204,5 @@ int main(void) {
     check_invalid(index);
     cgai_static_knowledge_close(index);
     cgai_static_knowledge_close(NULL);
-    check_abi();
     return 0;
 }

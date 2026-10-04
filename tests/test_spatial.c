@@ -1,8 +1,7 @@
-/** @file test_spatial.c @brief Independent exhaustive, lifetime, and ABI checks for spatial
+/** @file test_spatial.c @brief Independent exhaustive and lifetime checks for spatial
  * indexes. */
-#include "centroid_gai_abi.h"
-#include "centroid_gai_knowledge.h"
-#include "centroid_gai_spatial.h"
+#include "knowledge/knowledge_contract.h"
+#include "spatial/spatial_contract.h"
 #include "test_utils.h"
 #include <math.h>
 #include <stdlib.h>
@@ -180,32 +179,6 @@ static void test_invalid_construction(void) {
     cgai_spatial_destroy(NULL);
 }
 
-/**
- * @brief Exercise the shared-library ownership and JSON boundary independently of Node.
- */
-static void test_spatial_abi(void) {
-    /* Step 1: Create a one-row owner and query through fixed-width ABI declarations. */
-    const double vector[] = {1.0, 2.0};
-    const uint32_t category = 2U;
-    cgai_abi_spatial_index *index = NULL;
-    TEST_CHECK(cgai_abi_spatial_create(vector, &category, 1U, 2U, &index) == CGAI_ABI_OK,
-               "ABI create failed");
-    cgai_abi_buffer output = {0};
-    TEST_CHECK(cgai_abi_spatial_query(index, vector, 5U, UINT32_MAX, UINT32_MAX, &output) ==
-                   CGAI_ABI_OK,
-               "ABI query failed");
-    TEST_CHECK(strstr((const char *)output.data, "\"index\":0,\"squaredDistance\":0") != NULL,
-               "ABI JSON mismatch");
-    cgai_abi_buffer_free(&output);
-    /* Step 2: Invalid queries return empty descriptors and leave owner lifetime explicit. */
-    TEST_CHECK(cgai_abi_spatial_query(index, vector, 0U, UINT32_MAX, UINT32_MAX, &output) ==
-                   CGAI_ABI_ERROR,
-               "ABI accepted bad limit");
-    TEST_CHECK(output.data == NULL && output.size == 0U, "ABI failure output not empty");
-    cgai_abi_spatial_destroy(index);
-    cgai_abi_spatial_destroy(NULL);
-}
-
 /** @brief Exercise the compiled static knowledge table and its native exact-query index. */
 static void test_compiled_metadata(void) {
     const size_t count = cgai_static_knowledge_centroid_count();
@@ -281,7 +254,6 @@ int main(void) {
     test_exact_queries();
     test_ties_and_failures();
     test_invalid_construction();
-    test_spatial_abi();
     test_compiled_metadata();
     test_compiled_rows();
     test_compiled_vector_query();

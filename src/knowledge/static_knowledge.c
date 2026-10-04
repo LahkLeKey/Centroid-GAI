@@ -1,6 +1,6 @@
 /** @file static_knowledge.c @brief Accessors and native index construction for compiled knowledge.
  */
-#include "centroid_gai_knowledge.h"
+#include "knowledge/knowledge_contract.h"
 
 #include "internal/error.h"
 #include "internal/knowledge_module.h"

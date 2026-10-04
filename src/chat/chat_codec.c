@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+_Static_assert(sizeof(double) == 8U && DBL_MANT_DIG == 53 && DBL_MAX_EXP == 1024,
+               "Chat artifacts require binary64 doubles");
+
 /** Bounded cursor; failure is sticky and no operation crosses the buffer. */
 typedef struct chat_codec {
     uint8_t *data; /**< Borrowed input or output bytes. */
@@ -52,10 +55,6 @@ static void codec_integer(chat_codec *codec, uint64_t *value) {
  * @param value Writable scalar. */
 static void codec_double(chat_codec *codec, double *value) {
     uint64_t bits = 0U;
-    if (sizeof(double) != 8U || DBL_MANT_DIG != 53 || DBL_MAX_EXP != 1024) {
-        codec->ok = 0;
-        return;
-    }
     if (!codec->reading)
         memcpy(&bits, value, sizeof(bits));
     codec_integer(codec, &bits);

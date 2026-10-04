@@ -1,7 +1,7 @@
 /** @file spatial.h @brief Private owned spatial storage and bounded query workspace. */
 #ifndef CGAI_INTERNAL_SPATIAL_H
 #define CGAI_INTERNAL_SPATIAL_H
-#include "centroid_gai_spatial.h"
+#include "spatial/spatial_contract.h"
 
 /** One tree node; a leaf has at most eight rows and no child nodes. */
 typedef struct cgai_spatial_node {

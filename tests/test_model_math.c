@@ -1,11 +1,11 @@
 /** @file test_model_math.c @brief Unit tests for embedding and centroid math. */
 
-#include "centroid_gai.h"
 #include "internal/cgai_internal.h"
 #include "internal/model_centroid.h"
 #include "internal/model_embedding.h"
 #include "internal/model_random.h"
 #include "internal/vocabulary.h"
+#include "model/model_contract.h"
 #include "test_utils.h"
 
 #include <math.h>
@@ -34,7 +34,7 @@ static void test_random_sequence(void) {
  * A BOS/UNKNOWN history exercises reserved-token embeddings. Squared length is accumulated in
  * double precision and must be finite and positive before the nearest-centroid result is checked.
  *
- * @param model Borrowed trained fixture configured for eight dimensions.
+ * @param model Borrowed explicit centroid fixture configured for eight dimensions.
  */
 static void test_context_embedding(const cgai_model *model) {
     /* Step 1: Build a short history from reserved IDs and prepare dimension-sized stack arrays. */
@@ -57,7 +57,7 @@ static void test_context_embedding(const cgai_model *model) {
 /**
  * @brief Build a small fixture for context, centroid, and RNG checks.
  *
- * Training initializes the centroid rows required by nearest-centroid lookup. The test helpers
+ * The fixture initializes the centroid row required by nearest-centroid lookup. The test helpers
  * borrow the model, while the runner retains responsibility for cleanup. RNG testing uses its own
  * state variables and does not alter model state.
  *
@@ -68,11 +68,11 @@ int test_model_math(void) {
     cgai_config config = cgai_default_config();
     config.dimensions = 8U;
     config.centroid_count = 3U;
-    /* Step 2: Create and train the model before testing nearest-centroid behavior. */
+    /* Step 2: Create a model and set an explicit centroid for the nearest-row check. */
     cgai_model *model = cgai_model_create(&config);
     TEST_CHECK(model != NULL, cgai_last_error());
-    TEST_CHECK(cgai_model_train_text(model, "red fox blue bird") == CGAI_STATUS_OK,
-               cgai_last_error());
+    model->initialized_centroids = 1U;
+    model->centroids[0] = 1.0f;
 
     /* Step 3: Run context/centroid checks and independent RNG reproducibility checks. */
     test_context_embedding(model);

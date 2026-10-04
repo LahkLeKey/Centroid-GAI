@@ -1,6 +1,6 @@
 /** @file model_file.c @brief Filesystem persistence for serialized models. */
 
-#include "centroid_gai.h"
+#include "model/model_contract.h"
 
 #include "internal/error.h"
 #include "internal/file_utils.h"

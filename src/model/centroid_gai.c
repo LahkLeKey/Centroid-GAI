@@ -1,6 +1,6 @@
 /** @file centroid_gai.c @brief Model lifecycle and configuration operations. */
 
-#include "centroid_gai.h"
+#include "model/model_contract.h"
 
 #include "internal/cgai_internal.h"
 #include "internal/constants.h"
@@ -15,7 +15,7 @@
  *
  * The configuration is a small value structure, not a heap allocation. Returning it copies the
  * fields to the caller, who may adjust them before creating a model. The named constants keep
- * defaults in one place for the CLI, core API, and ABI adapter.
+ * defaults in one place for retained count-model construction.
  *
  * @return A configuration value requiring no cleanup.
  */

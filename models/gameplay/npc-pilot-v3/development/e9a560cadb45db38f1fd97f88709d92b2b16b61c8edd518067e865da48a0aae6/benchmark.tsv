@@ -1,0 +1,24 @@
+schema	npc-benchmark-v1
+hardware	Intel Core i5-12400F; Windows x64; MSVC 19.38 Release C11
+compiler	msvc 1938
+build_flags	/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG C11 extensions-off
+standard	c11
+fp_rounding	0
+workers	1
+clock	monotonic-raw-ticks
+warmup	256
+parameters	15744
+model_bytes	126744
+optimizer_bytes	0
+neural_session_bytes	7432
+adapter_bytes	40
+session_bytes	7472
+allocator_overhead	excluded-platform-dependent
+policy_stack_estimate_bytes	288
+benchmark_stack_bytes	18952
+simulator_timing	excluded
+observation_workload	train-first32-familyvariant-boundedteacher-prefix-replay-stamps-v1
+static_contract_bytes	288
+timing	normal	2048	4	1	12.5	15.9	18.800000000000001	52.700000000000003
+timing	fallback	2048	4	1	0	0.10000000000000001	0.10000000000000001	4.4000000000000004
+timing	serial32	2048	32	1	432.60000000000002	588.20000000000005	771.70000000000005	5475.6000000000004

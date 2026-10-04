@@ -1,0 +1,12 @@
+schema	npc-comparator-v3
+kind	builtin-planner
+provider	centroid-c11
+model_snapshot	observation-planner-v3
+prompt_sha256	62860e5530ce5a3230a65e01e73c086e4f37f214c4e3c04a677d5c22a2b97832
+memory_policy	observed-bounded-adapter-history-only-v3
+observation_schema	npc16-history8-11-v3
+action_schema_sha256	ef6df6dbc76b4576c60239284bc7413b45c94d082029bd6464d749cc0175349d
+maximum_decisions	64
+decision_budget	one-legal-action-per-observation-v3
+source_identity_sha256	b9b327c69a42861b319f7d23c6a34cc0394805061f1b78f6c7dc61a40d624b6c
+comparator_sha256	7f0c022a7ffa79365ea7d4bc55c2a3d059d5d4bab6d61f33ff2705b6303aed3b

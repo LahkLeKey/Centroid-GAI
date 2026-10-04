@@ -1,7 +1,7 @@
 /** @file bark_internal.h @brief Owned contract-one catalog token maps and selection scratch. */
 #ifndef CGAI_BARK_INTERNAL_H
 #define CGAI_BARK_INTERNAL_H
-#include "centroid_gai_bark.h"
+#include "bark/bark_contract.h"
 #include "neural_math.h"
 /** Immutable owned model and vocabulary lookup tables. */
 struct cgai_bark_model {

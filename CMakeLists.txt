@@ -1,402 +1,185 @@
 cmake_minimum_required(VERSION 3.20)
-project(centroid_gai VERSION 0.4.0 LANGUAGES C)
+project(centroid_life VERSION 3.0.0 LANGUAGES C)
 
-option(CGAI_BUILD_TESTS "Build the test suite" ON)
-option(CGAI_BUILD_DOCS "Build API documentation with Doxygen" OFF)
-option(CGAI_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
-
-# Require ISO C11 for every library, executable, and test target.
+option(CGAI_BUILD_TESTS "Build native C11 tests" ON)
+option(CGAI_BUILD_DOCS "Build native API documentation" OFF)
+option(CGAI_ENABLE_SANITIZERS "Enable address and undefined behavior sanitizers" OFF)
+option(CGAI_BUILD_EVOLUTION_TOOLS "Build C11 Life-driven source candidate tools" ON)
+set(CGAI_MUTATION_SOURCE_FILE "" CACHE FILEPATH "Isolated gameplay initialization candidate")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(GNUInstallDirs)
+
+function(cgai_enable_sanitizers target scope)
+    if(CGAI_ENABLE_SANITIZERS AND NOT MSVC)
+        target_compile_options(${target} ${scope} -fsanitize=address,undefined -fno-omit-frame-pointer)
+        target_link_options(${target} ${scope} -fsanitize=address,undefined)
+    endif()
+endfunction()
 
 function(cgai_enable_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4)
+        target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
     else()
         target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
     endif()
+    cgai_enable_sanitizers(${target} PRIVATE)
 endfunction()
 
-include(cmake/Lint.cmake)
-
-# Each knowledge catalog category is an independent C translation unit.
-file(GLOB CGAI_KNOWLEDGE_CATALOG_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/knowledge/knowledge_catalog/*.c")
-file(GLOB CGAI_GAMEPLAY_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/gameplay/*.c")
-
-add_library(centroid_gai
-    src/bark/bark_model.c
-    src/bark/bark_session.c
-    src/chat/chat_codec.c
-    src/chat/chat_evaluation.c
-    src/chat/chat_model.c
-    src/chat/chat_prompt.c
-    src/core/error.c
-    src/core/file_utils.c
-    src/core/json_writer.c
-    src/core/model_random.c
-    src/core/tokenizer.c
-    src/core/vocabulary.c
-    src/knowledge/knowledge_catalog.c
-    src/knowledge/knowledge_clusters.c
-    src/knowledge/knowledge_query.c
-    src/knowledge/static_knowledge.c
-    src/model/centroid_gai.c
-    src/model/model_centroid.c
-    src/model/model_composition.c
-    src/model/model_decode.c
-    src/model/model_embedding.c
-    src/model/model_encode.c
-    src/model/model_file.c
-    src/model/model_generation.c
-    src/model/model_generation_workspace.c
-    src/model/model_sampling.c
-    src/model/model_training.c
-    src/neural/neural_evaluation.c
-    src/neural/neural_checkpoint.c
-    src/neural/neural_file.c
-    src/neural/neural_generation.c
-    src/neural/neural_math.c
-    src/neural/neural_model.c
-    src/neural/neural_resources.c
-    src/neural/neural_training.c
-    src/neural/neural_vocabulary.c
-    src/spatial/spatial_index.c
-    src/spatial/spatial_query.c
-    ${CGAI_KNOWLEDGE_CATALOG_SOURCES}
-    ${CGAI_GAMEPLAY_SOURCES}
-)
-add_library(centroid_gai::centroid_gai ALIAS centroid_gai)
-set_target_properties(centroid_gai PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(centroid_gai
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-target_compile_features(centroid_gai PUBLIC c_std_11)
-
-cgai_enable_warnings(centroid_gai)
-
-add_library(centroid_gai_abi SHARED
-    src/abi/abi.c
-    src/abi/abi_buffer.c
-    src/abi/abi_config.c
-    src/abi/abi_generation.c
-    src/abi/abi_inspection.c
-    src/abi/abi_knowledge.c
-    src/abi/abi_metadata.c
-    src/abi/abi_model.c
-    src/abi/abi_serialization.c
-    src/abi/abi_spatial.c
-)
-add_library(centroid_gai::abi ALIAS centroid_gai_abi)
-target_compile_features(centroid_gai_abi PUBLIC c_std_11)
-target_compile_definitions(centroid_gai_abi PRIVATE CGAI_ABI_BUILD)
-target_include_directories(centroid_gai_abi
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-target_link_libraries(centroid_gai_abi PRIVATE centroid_gai::centroid_gai)
-cgai_enable_warnings(centroid_gai_abi)
-
-if(WIN32)
-    target_compile_definitions(centroid_gai PRIVATE _CRT_SECURE_NO_WARNINGS)
-else()
-    target_link_libraries(centroid_gai PUBLIC m)
-endif()
-
-if(CGAI_ENABLE_SANITIZERS AND NOT MSVC)
-    target_compile_options(centroid_gai PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
-    target_link_options(centroid_gai PUBLIC -fsanitize=address,undefined)
-endif()
-
-add_executable(cgai
-    src/cli/cli.c
-    src/cli/cli_arguments.c
-    src/cli/cli_generation.c
-    src/cli/cli_knowledge.c
-    src/cli/cli_neural_arguments.c
-    src/cli/cli_neural_candidate.c
-    src/cli/cli_neural_checkpoint.c
-    src/cli/cli_neural_evaluation.c
-    src/cli/cli_neural_generation.c
-    src/cli/cli_neural_training.c
-    src/cli/cli_neural_step.c
-    src/cli/cli_training.c
-    src/cli/main.c
-)
-target_include_directories(cgai PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-cgai_enable_warnings(cgai)
-target_link_libraries(cgai PRIVATE centroid_gai::centroid_gai)
-add_executable(cgai_gameplay_demo examples/gameplay_generation.c)
-target_link_libraries(cgai_gameplay_demo PRIVATE centroid_gai::centroid_gai)
-cgai_enable_warnings(cgai_gameplay_demo)
-add_executable(cgai_bark_demo examples/bark_selector.c)
-target_link_libraries(cgai_bark_demo PRIVATE centroid_gai::centroid_gai)
-cgai_enable_warnings(cgai_bark_demo)
-add_executable(cgai_bark_tool tools/bark/bark_main.c tools/bark/bark_training.c
-    tools/bark/bark_report.c tools/bark/bark_evaluation.c tools/bark/bark_benchmark.c
-    tools/bark/bark_fixture.c)
-target_include_directories(cgai_bark_tool PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/tools/bark)
-target_link_libraries(cgai_bark_tool PRIVATE centroid_gai::centroid_gai)
-cgai_enable_warnings(cgai_bark_tool)
-if(WIN32)
-    target_compile_definitions(cgai_bark_tool PRIVATE _CRT_SECURE_NO_WARNINGS)
-endif()
-include(cmake/NeuralModel.cmake)
-file(GLOB CGAI_GAMEPLAY_TOOL_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay/*.c")
-add_executable(cgai_gameplay_tool ${CGAI_GAMEPLAY_TOOL_SOURCES})
-target_include_directories(cgai_gameplay_tool PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay)
-target_link_libraries(cgai_gameplay_tool PRIVATE centroid_gai::centroid_gai)
-cgai_enable_warnings(cgai_gameplay_tool)
-add_executable(cgai_composed_demo examples/composed_gameplay.c tools/gameplay/gameplay_tasks.c)
-target_include_directories(cgai_composed_demo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay)
-target_link_libraries(cgai_composed_demo PRIVATE centroid_gai::centroid_gai)
-cgai_enable_warnings(cgai_composed_demo)
-if(WIN32)
-    target_compile_definitions(cgai_gameplay_tool PRIVATE _CRT_SECURE_NO_WARNINGS)
-endif()
-if(CGAI_NODE_EXECUTABLE)
-    foreach(action IN ITEMS train verify replay)
-        add_custom_target(bark_${action}
-            COMMAND "${CGAI_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bark/workflow.mjs"
-                ${action} --tool "$<TARGET_FILE:cgai_bark_tool>"
-                --work "${CMAKE_CURRENT_BINARY_DIR}/bark"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            COMMENT "Running the deterministic bark ${action} workflow"
-            VERBATIM)
-    endforeach()
-    add_dependencies(bark_train cgai_bark_tool)
-    add_dependencies(bark_replay cgai_bark_tool)
-    foreach(action IN ITEMS train verify replay)
-        add_custom_target(gameplay_${action}
-            COMMAND "${CGAI_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay/workflow.mjs"
-                ${action} --tool "$<TARGET_FILE:cgai_gameplay_tool>"
-                --work "${CMAKE_CURRENT_BINARY_DIR}/gameplay"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" VERBATIM)
-    endforeach()
-    add_dependencies(gameplay_train cgai_gameplay_tool)
-    add_dependencies(gameplay_verify cgai_gameplay_tool)
-    add_dependencies(gameplay_replay cgai_gameplay_tool)
-endif()
-if(WIN32)
-    target_compile_definitions(cgai PRIVATE _CRT_SECURE_NO_WARNINGS)
-endif()
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-set(CGAI_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/centroid_gai)
-configure_package_config_file(
-    cmake/centroid_gaiConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/centroid_gaiConfig.cmake
-    INSTALL_DESTINATION ${CGAI_CMAKE_INSTALL_DIR}
-)
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/centroid_gaiConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-install(TARGETS centroid_gai centroid_gai_abi cgai
-    EXPORT centroid_gaiTargets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT centroid_gaiTargets
-    NAMESPACE centroid_gai::
-    DESTINATION ${CGAI_CMAKE_INSTALL_DIR}
-)
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/centroid_gaiConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/centroid_gaiConfigVersion.cmake
-    DESTINATION ${CGAI_CMAKE_INSTALL_DIR}
-)
-install(FILES README.md LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/centroid_gai)
-install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/centroid_gai)
-
-if(CGAI_BUILD_DOCS)
-    find_package(Doxygen REQUIRED)
-    find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
-    set(DOXYGEN_INPUT_FILTER
-        "\\\"${Python3_EXECUTABLE}\\\" \\\"${CMAKE_CURRENT_SOURCE_DIR}/tools/docs/doxygen_filter.py\\\"")
-    if(WIN32)
-        # cmd.exe needs a command before a quoted executable passed through popen.
-        string(PREPEND DOXYGEN_INPUT_FILTER "call ")
+set(LIFE_GAMEPLAY_MODEL_SOURCE src/gameplay/gameplay_model.c)
+if(CGAI_MUTATION_SOURCE_FILE)
+    get_filename_component(LIFE_GAMEPLAY_MODEL_SOURCE "${CGAI_MUTATION_SOURCE_FILE}" REALPATH)
+    if(NOT EXISTS "${LIFE_GAMEPLAY_MODEL_SOURCE}" OR IS_DIRECTORY "${LIFE_GAMEPLAY_MODEL_SOURCE}")
+        message(FATAL_ERROR "CGAI_MUTATION_SOURCE_FILE must name an existing C source candidate")
     endif()
-    set(DOXYGEN_INPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/docs)
-    configure_file(Doxyfile.in Doxyfile @ONLY)
-    add_custom_target(docs
-        COMMAND "${CMAKE_COMMAND}"
-            "-DDOXYGEN_EXECUTABLE=${DOXYGEN_EXECUTABLE}"
-            "-DDOXYGEN_CONFIG=${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
-            "-DPython3_EXECUTABLE=${Python3_EXECUTABLE}"
-            "-DDOXYGEN_INPUT_DIR=${DOXYGEN_INPUT_DIR}"
-            "-DDOXYGEN_XML_DIR=${DOXYGEN_OUTPUT_DIR}/xml"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DoxygenRun.cmake"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating Centroid-GAI API documentation"
-        VERBATIM
-    )
 endif()
+set(LIFE_NUMERICAL_SOURCES
+    src/core/error.c
+    src/core/model_random.c
+    ${LIFE_GAMEPLAY_MODEL_SOURCE}
+    src/gameplay/gameplay_session.c
+    src/gameplay/gameplay_forward.c
+    src/gameplay/gameplay_backward.c
+    src/gameplay/gameplay_codec.c)
+set(LIFE_RUNTIME_SOURCES
+    src/life/life_world.c
+    src/life/life_policy.c
+    src/life/life_optimizer.c
+    src/life/life_training.c
+    src/life/life_events.c
+    src/life/life_io.c
+    src/life/life_api.c
+    src/life/life_context.c
+    src/life/life_context_feedback.c
+    src/life/life_context_io.c
+    src/life/life_domain.c
+    src/life/life_domain_round.c
+    src/life/life_domain_state.c
+    src/life/life_domain_io.c
+    src/life/life_probe.c
+    src/life/life_adapter.c
+    src/life/life_npc_world.c
+    src/life/life_npc.c
+    src/life/life_npc_state.c
+    src/life/life_npc_io.c
+    src/life/life_npc_evaluation.c)
+add_library(centroid_life STATIC ${LIFE_NUMERICAL_SOURCES} ${LIFE_RUNTIME_SOURCES})
+add_library(centroid_life::centroid_life ALIAS centroid_life)
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/public")
+configure_file(include/centroid_life.h public/centroid_life.h COPYONLY)
+configure_file(include/centroid_life_domain.h public/centroid_life_domain.h COPYONLY)
+configure_file(include/centroid_life_npc.h public/centroid_life_npc.h COPYONLY)
+set(LIFE_NPC_RECIPE_SOURCES ${LIFE_NUMERICAL_SOURCES} ${LIFE_RUNTIME_SOURCES}
+    include/centroid_life.h include/centroid_life_domain.h include/centroid_life_npc.h
+    src/life/life_npc.h src/life/life_npc_world.h src/life/life_adapter.h src/life/life_probe.h)
+set(LIFE_NPC_RECIPE_IDENTITIES "native-life-npc-recipe1")
+foreach(source IN LISTS LIFE_NPC_RECIPE_SOURCES)
+    get_filename_component(source_path "${source}" ABSOLUTE
+        BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    file(SHA256 "${source_path}" source_identity)
+    string(APPEND LIFE_NPC_RECIPE_IDENTITIES "${source}:${source_identity}\n")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${source_path}")
+endforeach()
+string(SHA256 LIFE_NPC_RECIPE_IDENTITY "${LIFE_NPC_RECIPE_IDENTITIES}")
+target_compile_definitions(centroid_life PRIVATE
+    CGAI_LIFE_NPC_RECIPE_SHA="${LIFE_NPC_RECIPE_IDENTITY}")
+target_include_directories(centroid_life
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/public>
+           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE include src src/life src/gameplay)
+set_target_properties(centroid_life PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_features(centroid_life PUBLIC c_std_11)
+cgai_enable_warnings(centroid_life)
+if(NOT WIN32)
+    target_link_libraries(centroid_life PUBLIC m)
+endif()
+cgai_enable_sanitizers(centroid_life PUBLIC)
+
+add_executable(cgai_life tools/life/life_main.c)
+target_include_directories(cgai_life PRIVATE include src src/life)
+target_link_libraries(cgai_life PRIVATE centroid_life::centroid_life)
+cgai_enable_warnings(cgai_life)
+
+add_executable(cgai_life_probe tools/life/life_domain_main.c)
+target_link_libraries(cgai_life_probe PRIVATE centroid_life::centroid_life)
+cgai_enable_warnings(cgai_life_probe)
+add_executable(cgai_life_npc tools/life/life_npc_main.c)
+target_link_libraries(cgai_life_npc PRIVATE centroid_life::centroid_life)
+cgai_enable_warnings(cgai_life_npc)
+
+set(LIFE_CONTEXT_TOOL_SOURCES tools/context/context_main.c tools/context/context_repository.c)
+add_library(centroid_context_repository STATIC tools/context/context_repository.c)
+target_include_directories(centroid_context_repository PRIVATE include tools/context)
+target_link_libraries(centroid_context_repository PUBLIC centroid_life::centroid_life)
+cgai_enable_warnings(centroid_context_repository)
+add_executable(cgai_context tools/context/context_main.c)
+target_include_directories(cgai_context PRIVATE include tools/context)
+target_link_libraries(cgai_context PRIVATE centroid_context_repository)
+cgai_enable_warnings(cgai_context)
+
+add_executable(cgai_life_example examples/life_training.c)
+target_link_libraries(cgai_life_example PRIVATE centroid_life::centroid_life)
+cgai_enable_warnings(cgai_life_example)
 
 if(CGAI_BUILD_TESTS)
     enable_testing()
-    if(CGAI_NODE_EXECUTABLE)
-        file(GLOB CGAI_GAMEPLAY_WORKFLOW_TESTS CONFIGURE_DEPENDS
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay/*.test.mjs")
-        add_test(NAME centroid_gai_gameplay_workflow COMMAND ${CMAKE_COMMAND} -E env
-            "CGAI_GAMEPLAY_TOOL=$<TARGET_FILE:cgai_gameplay_tool>"
-            "CGAI_COMPOSED_DEMO=$<TARGET_FILE:cgai_composed_demo>"
-            "${CGAI_NODE_EXECUTABLE}" --test ${CGAI_GAMEPLAY_WORKFLOW_TESTS})
-        set_tests_properties(centroid_gai_gameplay_workflow PROPERTIES
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" TIMEOUT 900)
-        add_test(NAME centroid_gai_gameplay_release COMMAND "${CGAI_NODE_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay/workflow.mjs" verify
-            --tool "$<TARGET_FILE:cgai_gameplay_tool>")
-        set_tests_properties(centroid_gai_gameplay_release PROPERTIES
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" TIMEOUT 120)
-        add_test(NAME centroid_gai_gameplay_legacy COMMAND "${CGAI_NODE_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay/workflow.mjs" verify-legacy)
-        set_tests_properties(centroid_gai_gameplay_legacy PROPERTIES
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-        add_test(NAME centroid_gai_bark_workflow COMMAND ${CMAKE_COMMAND} -E env
-            "CGAI_BARK_TOOL=$<TARGET_FILE:cgai_bark_tool>"
-            "${CGAI_NODE_EXECUTABLE}" --test
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/bark/workflow.test.mjs"
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/bark/git-policy.test.mjs")
-        set_tests_properties(centroid_gai_bark_workflow PROPERTIES
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" TIMEOUT 120)
-        add_test(NAME centroid_gai_bark_release COMMAND "${CGAI_NODE_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/bark/workflow.mjs" verify
-            --tool "$<TARGET_FILE:cgai_bark_tool>")
-        set_tests_properties(centroid_gai_bark_release PROPERTIES
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-    endif()
-    foreach(suite IN ITEMS math core codec)
-        add_executable(centroid_gai_gameplay_${suite}_tests
-            tests/test_gameplay_${suite}.c tests/test_utils.c)
-        target_include_directories(centroid_gai_gameplay_${suite}_tests PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/src)
-        target_link_libraries(centroid_gai_gameplay_${suite}_tests PRIVATE centroid_gai::centroid_gai)
-        cgai_enable_warnings(centroid_gai_gameplay_${suite}_tests)
-        add_test(NAME centroid_gai_gameplay_${suite} COMMAND centroid_gai_gameplay_${suite}_tests)
+    add_test(NAME centroid_life_public_consumer COMMAND cgai_life_example)
+    foreach(suite IN ITEMS world policy training io api events context feedback domain groups npc npc_domain npc_geometry)
+        add_executable(centroid_life_${suite}_tests
+            tools/life/tests/test_${suite}.c tests/test_utils.c)
+        target_include_directories(centroid_life_${suite}_tests PRIVATE
+            tests include src src/life)
+        target_link_libraries(centroid_life_${suite}_tests PRIVATE centroid_life::centroid_life)
+        cgai_enable_warnings(centroid_life_${suite}_tests)
+        add_test(NAME centroid_life_${suite} COMMAND centroid_life_${suite}_tests
+            "${CMAKE_CURRENT_BINARY_DIR}")
     endforeach()
-    add_executable(centroid_gai_gameplay_tasks_tests tests/test_gameplay_tasks.c
-        tools/gameplay/gameplay_tasks.c tests/test_utils.c)
-    target_include_directories(centroid_gai_gameplay_tasks_tests PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay)
-    target_link_libraries(centroid_gai_gameplay_tasks_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_gameplay_tasks_tests)
-    add_test(NAME centroid_gai_gameplay_tasks COMMAND centroid_gai_gameplay_tasks_tests
-        ${CMAKE_CURRENT_SOURCE_DIR}/data/gameplay/composed-v1)
-    add_executable(centroid_gai_gameplay_quality_tests tests/test_gameplay_quality.c
-        tools/gameplay/gameplay_evaluation.c tools/gameplay/gameplay_tasks.c tests/test_utils.c)
-    target_include_directories(centroid_gai_gameplay_quality_tests PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay)
-    target_link_libraries(centroid_gai_gameplay_quality_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_gameplay_quality_tests)
-    add_test(NAME centroid_gai_gameplay_quality COMMAND centroid_gai_gameplay_quality_tests)
-    add_executable(centroid_gai_gameplay_initialization_tests tests/test_gameplay_initialization.c
-        tools/gameplay/gameplay_initialization.c tools/gameplay/gameplay_tasks.c tests/test_utils.c)
-    target_include_directories(centroid_gai_gameplay_initialization_tests PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tools/gameplay)
-    target_link_libraries(centroid_gai_gameplay_initialization_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_gameplay_initialization_tests)
-    add_test(NAME centroid_gai_gameplay_initialization COMMAND centroid_gai_gameplay_initialization_tests)
-    add_executable(centroid_gai_bark_tests tests/test_bark.c tests/test_utils.c)
-    target_include_directories(centroid_gai_bark_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(centroid_gai_bark_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_bark_tests)
-    add_test(NAME centroid_gai_bark COMMAND centroid_gai_bark_tests)
-    add_executable(centroid_gai_bark_fixture_tests tests/test_bark_fixture.c
-        tools/bark/bark_fixture.c tests/test_utils.c)
-    target_include_directories(centroid_gai_bark_fixture_tests PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/bark)
-    target_link_libraries(centroid_gai_bark_fixture_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_bark_fixture_tests)
-    add_test(NAME centroid_gai_bark_fixture COMMAND centroid_gai_bark_fixture_tests
-        ${CMAKE_CURRENT_SOURCE_DIR}/data/gameplay/barks-v1)
-    add_executable(centroid_gai_bark_quality_tests tests/test_bark_quality.c
-        tools/bark/bark_evaluation.c tools/bark/bark_fixture.c tests/test_utils.c)
-    target_include_directories(centroid_gai_bark_quality_tests PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tools/bark)
-    target_link_libraries(centroid_gai_bark_quality_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_bark_quality_tests)
-    add_test(NAME centroid_gai_bark_quality COMMAND centroid_gai_bark_quality_tests)
-    add_executable(centroid_gai_chat_tests tests/test_chat.c tests/test_utils.c)
-    target_link_libraries(centroid_gai_chat_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_chat_tests)
-    add_test(NAME centroid_gai_chat COMMAND centroid_gai_chat_tests)
-    add_executable(centroid_gai_neural_tests tests/test_neural.c tests/test_neural_math.c
-        tests/test_neural_training.c tests/test_neural_io.c tests/test_neural_session.c
+    add_executable(centroid_context_repository_tests tools/context/tests/test_repository.c
         tests/test_utils.c)
-    target_include_directories(centroid_gai_neural_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(centroid_gai_neural_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_neural_tests)
-    add_test(NAME centroid_gai_neural_tests COMMAND centroid_gai_neural_tests)
-    add_test(NAME centroid_gai_neural_cli_tests COMMAND ${CMAKE_COMMAND}
-        -DCGAI_EXE=$<TARGET_FILE:cgai> -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_neural_cli.cmake)
-    foreach(suite IN ITEMS resume checkpoint examples)
-        add_executable(centroid_gai_neural_${suite}_tests
-            tests/test_neural_${suite}.c tests/test_utils.c)
-        target_include_directories(centroid_gai_neural_${suite}_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-        target_link_libraries(centroid_gai_neural_${suite}_tests PRIVATE centroid_gai::centroid_gai)
-        cgai_enable_warnings(centroid_gai_neural_${suite}_tests)
-        add_test(NAME centroid_gai_neural_${suite} COMMAND centroid_gai_neural_${suite}_tests)
-    endforeach()
-    add_test(NAME centroid_gai_neural_workflow COMMAND ${CMAKE_COMMAND}
-        -DCGAI_EXE=$<TARGET_FILE:cgai> -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_neural_workflow.cmake)
-    add_test(NAME centroid_gai_neural_candidate COMMAND ${CMAKE_COMMAND}
-        -DCGAI_EXE=$<TARGET_FILE:cgai> -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_neural_candidate.cmake)
-    add_test(NAME centroid_gai_neural_model_validate COMMAND ${CMAKE_COMMAND}
-        -DCGAI_EXE=$<TARGET_FILE:cgai>
-        -DCGAI_MODEL_DIR=${CGAI_MODEL_DIR}
-        -DCGAI_MODEL_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}/model-validation
-        -DCGAI_MODEL_ACTION=validate -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/NeuralModelRun.cmake)
-    add_executable(centroid_gai_tests tests/test_centroid_gai.c tests/test_utils.c)
-    target_link_libraries(centroid_gai_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_tests)
-    add_test(NAME centroid_gai_tests COMMAND centroid_gai_tests)
+    target_include_directories(centroid_context_repository_tests PRIVATE
+        tests include src src/life tools/context)
+    target_link_libraries(centroid_context_repository_tests PRIVATE centroid_context_repository)
+    cgai_enable_warnings(centroid_context_repository_tests)
+    add_test(NAME centroid_context_repository COMMAND centroid_context_repository_tests
+        "${CMAKE_CURRENT_BINARY_DIR}")
+    add_executable(centroid_life_cli_tests tools/life/tests/test_cli.c)
+    cgai_enable_warnings(centroid_life_cli_tests)
+    add_test(NAME centroid_life_cli COMMAND centroid_life_cli_tests
+        "$<TARGET_FILE:cgai_life>" "${CMAKE_CURRENT_BINARY_DIR}/cli-check")
+    set_tests_properties(centroid_life_cli PROPERTIES TIMEOUT 180)
+    include(cmake/InferenceTests.cmake)
+    target_include_directories(centroid_life_npc_geometry_tests PRIVATE tools/npc)
+    target_link_libraries(centroid_life_npc_geometry_tests PRIVATE centroid_npc_v3_geometry)
+endif()
 
-    add_executable(centroid_gai_abi_tests tests/test_abi.c tests/test_utils.c)
-    target_link_libraries(centroid_gai_abi_tests PRIVATE centroid_gai::abi)
-    cgai_enable_warnings(centroid_gai_abi_tests)
-    add_test(NAME centroid_gai_abi_tests COMMAND centroid_gai_abi_tests)
-    add_executable(centroid_gai_spatial_tests tests/test_spatial.c tests/test_utils.c)
-    target_link_libraries(centroid_gai_spatial_tests PRIVATE centroid_gai::centroid_gai centroid_gai::abi)
-    cgai_enable_warnings(centroid_gai_spatial_tests)
-    add_test(NAME centroid_gai_spatial_tests COMMAND centroid_gai_spatial_tests)
-    add_executable(centroid_gai_knowledge_tests tests/test_knowledge.c tests/test_utils.c)
-    target_link_libraries(centroid_gai_knowledge_tests PRIVATE centroid_gai::centroid_gai centroid_gai::abi)
-    cgai_enable_warnings(centroid_gai_knowledge_tests)
-    add_test(NAME centroid_gai_knowledge_tests COMMAND centroid_gai_knowledge_tests)
-    add_test(NAME centroid_gai_knowledge_cli_tests COMMAND ${CMAKE_COMMAND}
-        -DCGAI_EXE=$<TARGET_FILE:cgai> -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_knowledge_cli.cmake)
+include(cmake/Evolution.cmake)
+include(cmake/Lint.cmake)
+include(CMakePackageConfigHelpers)
+set(LIFE_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/centroid_life)
+configure_package_config_file(cmake/centroid_lifeConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/centroid_lifeConfig.cmake
+    INSTALL_DESTINATION ${LIFE_CMAKE_INSTALL_DIR})
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/centroid_lifeConfigVersion.cmake
+    VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+install(TARGETS centroid_life cgai_life cgai_context cgai_life_probe cgai_life_npc EXPORT centroid_lifeTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES include/centroid_life.h include/centroid_life_domain.h include/centroid_life_npc.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT centroid_lifeTargets NAMESPACE centroid_life::
+    DESTINATION ${LIFE_CMAKE_INSTALL_DIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/centroid_lifeConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/centroid_lifeConfigVersion.cmake
+    DESTINATION ${LIFE_CMAKE_INSTALL_DIR})
 
-    add_executable(centroid_gai_unit_tests
-        tests/test_runner.c
-        tests/test_tokenizer.c
-        tests/test_vocabulary.c
-        tests/test_model_math.c
-        tests/test_model_io.c
-        tests/test_composition.c
-        tests/test_sampling.c
-        tests/test_file_utils.c
-        tests/test_utils.c
-    )
-    target_include_directories(centroid_gai_unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(centroid_gai_unit_tests PRIVATE centroid_gai::centroid_gai)
-    cgai_enable_warnings(centroid_gai_unit_tests)
-    add_test(NAME centroid_gai_unit_tests COMMAND centroid_gai_unit_tests)
+if(CGAI_BUILD_DOCS)
+    find_package(Doxygen REQUIRED)
+    set(LIFE_DOXYGEN_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/centroid_life.h")
+    set(LIFE_DOXYGEN_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/docs")
+    configure_file(Doxyfile.in Doxyfile @ONLY)
+    add_custom_target(docs COMMAND "${DOXYGEN_EXECUTABLE}"
+        "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" VERBATIM)
 endif()

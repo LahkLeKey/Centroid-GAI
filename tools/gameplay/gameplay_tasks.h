@@ -1,7 +1,7 @@
 /** @file gameplay_tasks.h @brief Authored task registry and independent composed scenarios. */
 #ifndef CGAI_GAMEPLAY_TASKS_H
 #define CGAI_GAMEPLAY_TASKS_H
-#include "centroid_gai_gameplay.h"
+#include "gameplay/gameplay_contract.h"
 
 /** Supported authored task heads. */
 #define GAMEPLAY_TASK_COUNT 2U

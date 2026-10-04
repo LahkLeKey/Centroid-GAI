@@ -3,8 +3,6 @@
 #ifndef CGAI_TEST_INTERNAL_H
 #define CGAI_TEST_INTERNAL_H
 
-int test_composition(void);
-
 /**
  * @brief Check spelling normalization, punctuation, UTF-8 bytes, and empty input.
  *
@@ -31,7 +29,7 @@ int test_vocabulary(void);
 /**
  * @brief Build a small fixture for context, centroid, and RNG checks.
  *
- * Training initializes the centroid rows required by nearest-centroid lookup. The test helpers
+ * The fixture initializes the centroid row required by nearest-centroid lookup. The test helpers
  * borrow the model, while the runner retains responsibility for cleanup. RNG testing uses its own
  * state variables and does not alter model state.
  *
@@ -53,7 +51,7 @@ int test_model_io(void);
 /**
  * @brief Check greedy validity and fixed-seed reproducibility of weighted sampling.
  *
- * A trained small model supplies an initialized count row. The greedy case checks that an ID is
+ * An explicit small fixture supplies an initialized count row. The greedy case checks that an ID is
  * returned, while the weighted case initializes two independent RNG states equally and expects the
  * same chosen ID. The model remains unchanged throughout selection.
  *
