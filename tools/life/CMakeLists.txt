@@ -1,8 +1,0 @@
-cmake_minimum_required(VERSION 3.20)
-project(centroid_life_standalone LANGUAGES C)
-option(LIFE_BUILD_TESTS "Build native Life checks" ON)
-set(CGAI_BUILD_TESTS ${LIFE_BUILD_TESTS} CACHE BOOL "Build native C11 tests" FORCE)
-if(LIFE_BUILD_TESTS)
-    enable_testing()
-endif()
-add_subdirectory("../.." engine)

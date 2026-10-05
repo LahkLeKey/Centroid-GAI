@@ -1,8 +1,0 @@
-action_id	name	semantics
-0	fallback	safe-idle-consuming-one-decision
-1	wait	safe-idle-consuming-one-decision
-2	north	authoritative-cardinal-move
-3	east	authoritative-cardinal-move
-4	south	authoritative-cardinal-move
-5	west	authoritative-cardinal-move
-6	interact	acquire-item-or-open-prerequisite-checked-exit

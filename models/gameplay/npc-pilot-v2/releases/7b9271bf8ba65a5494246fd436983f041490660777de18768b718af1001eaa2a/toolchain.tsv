@@ -1,7 +1,0 @@
-protocol	1
-compiler	msvc 1938
-standard	c11
-fp_rounding	0
-build_flags	/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG C11 extensions-off
-hardware	12th Gen Intel(R) Core(TM) i5-12400F; win32 x64
-native_sha256	438b9d47011fe3ad9ead58bd63f33d1b2ff34c5a18d20eba9f8a09333c644eaf
