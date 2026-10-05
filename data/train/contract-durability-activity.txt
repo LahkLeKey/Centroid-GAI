@@ -1,0 +1,16 @@
+Attribution: explicit visible implementation work, October 5, 2026.
+Role: ACTIVITY. Observations, not verified answer or utility labels.
+
+The follow-up audit found loss of admitted failed-capture receipts at CLI exit,
+silent omission of two compiler-dependent integration tests, and missing retained
+pretrial model/contact provenance. Native fixes now preserve admitted failure
+receipts, make the full-suite dependency explicit, and retain contact-bound parent
+snapshots before finite evaluator processes.
+
+Regressions reopen failed-capture checkpoints in fresh native processes, compare
+all numerical/world/task state, verify complete original argv/cwd/raw identities,
+and check physical-contact proofs and receipt bindings. The first Windows runs
+exposed a test comparison between original backslashes and escaped receipt bytes;
+the test now checks exact field lengths, SHA256 identities and escaped values.
+Original failed outputs remain retained. Independent evaluation results remain
+quarantined rather than entering these observations as training answers.

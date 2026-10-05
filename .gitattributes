@@ -1,0 +1,8 @@
+# Preserve exact source, fixture and evidence bytes used by provenance hashes.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Native reports and captures retain final separators as original evidence bytes.
+research/experiments/**/report.md whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+research/verification/**/report.md whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+research/verification/**/*.activity whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+research/verification/**/*.log whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

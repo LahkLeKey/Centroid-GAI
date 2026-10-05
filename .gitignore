@@ -1,0 +1,18 @@
+/build*/
+/cmake-build*/
+/runs/
+
+# Local runtime state and native build products.
+*.clife
+*.cctx
+*.tmp
+*.obj
+*.exe
+*.pdb
+
+# Keep research design, protocol and report documents plus artifact identities.
+# Historical run outputs, copied fixtures, logs and snapshots remain local.
+/research/**/*
+!/research/**/
+!/research/**/*.md
+!/research/local-artifacts.txt

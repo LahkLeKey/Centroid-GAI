@@ -1,0 +1,5 @@
+# Frozen extension protocol
+
+Three seeds: 41,73,109. Four initial specialists. 32 parent and 32 candidate/source-comparator updates. Source prefixes including EOS, 16 distinct positions each TRAIN/DEV/AUDIT family. Shared scaling is diagonal identity-initialized, trained only with all physical contact participants; policy labels use 3-generation world-only contact/lineage lookahead and at most eight cell edits. Merge averages values/moments, retains max clock and archives retired lineage clocks; one fixed pair (0,1), chosen before evaluation.
+
+Gate: per-split average loss regression <=0.02, no accuracy loss, no completed-task retention regression >0.02. Shared phase additionally needs TRAIN improvement against matched source-only updates. Policy must make actual edits and alter encounter coverage; merging must reduce serialized model ownership without violating retention. No heldout fitting. Rejected candidates/checkpoints remain retained. Measured process peak includes the harness and allocations, not only weights.

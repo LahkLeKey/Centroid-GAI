@@ -1,0 +1,14 @@
+Attribution: explicit visible-work note, October 5, 2026.
+Role: ACTIVITY. Observations, not answer or utility labels.
+
+The implementation audit found source orchestration in the CLI, missing
+cumulative optimizer-clock bounds, and work-capture path checks occurring too
+late. Native fixes add a public bounded source-training workflow, transactional
+clock checks, preflight capture quarantine and identity-safe source refresh.
+Regression tests exercise meaningful boundary, continuation, exact-byte,
+coverage and no-child-execution contracts. Native compiler and test output is
+retained separately with command provenance.
+
+These observations describe visible work. Independent evaluations and their
+answers remain quarantined. Complete immutable SOURCE bytes provide causal
+training targets; LLM proposals and activity remain separately attributed inputs.

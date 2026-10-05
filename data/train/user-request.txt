@@ -1,0 +1,8 @@
+Manual transcript of visible user task instructions, October 5, 2026.
+Attribution: user. This is ACTIVITY context, not verified task supervision.
+
+your goal should be reimplementing anything that is a different language into native C replacements that can be ran locally using the life training method against our own codebase consuming everything you do through centroids so you can inject context from llm and improve it
+
+just give me a goal and optimial codebase in a markdown file, im going to nuke everything in this git so we can start fresh after some research given our summary of our goal
+
+go ahead and churn this implementation

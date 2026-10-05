@@ -1,6 +1,21 @@
 # Centroid Life: fresh-start goal and native C codebase
 
-Date: October 4, 2026. Status: proposed architecture and research plan.
+Archived from the repository root on October 5, 2026. The
+[roadmap](../ROADMAP.md) is the current scope and status authority; this document
+retains the original goal, design rationale and research plan.
+
+Date: October 4, 2026. Bounded implementation stages 0–7 completed October 5,
+2026. Integrated verification and measured completion evidence are tracked in
+[research/ROADMAP.md](../ROADMAP.md). The subsequent
+[blueprint contract closure](../verification/2026-10-05-blueprint-closure/README.md)
+records the bounded source workflow, capture preflight and source-alias freshness
+checks. The [subsequent durability review](../verification/2026-10-05-contract-durability/README.md)
+closes admitted failure-receipt persistence, mandatory integration-test registration
+and retained pretrial model/contact identities. This document retains the design
+and research plan. Candidate mechanisms, accepted capabilities and future expansion
+remain distinct; implementation
+completion does not establish an optimal model or general coding and
+conversational ability.
 
 This document is standalone. It describes a fresh repository and does not require
 the old source tree, installed APIs, model files, or directory structure.
@@ -203,6 +218,16 @@ when and which owned slices may update. Domain adapters supply task meaning and
 verification. Retrieval supplies inputs. Evaluation measures outcomes. The CLI
 must not hide training, persistence, or subprocess logic.
 
+The implemented source workflow is exposed as `c_source_train` in
+`include/centroid_source.h`; the CLI dispatches it. Each epoch selects the first 32
+current TRAIN SOURCE records by immutable ID and attempts four fixed,
+target-independent positions per record, including byte zero and EOS. It reports
+available, selected and omitted records and at most 128 enqueue attempts per
+epoch. Aliases count as records and duplicate positions count as attempts.
+Invalid bounds and research owners fail before mutation. Runtime failures report
+completed epochs and current committed progress; earlier successful work remains
+committed, and persistence belongs to the caller.
+
 ## 5. Native C and API rules
 
 Use strict C11 initially, with compiler extensions disabled and bounded explicit
@@ -323,6 +348,19 @@ Source scanning excludes secrets, dependencies, generated outputs, model artifac
 and held-out fixtures. Stored events still need split and provenance checks before
 becoming model inputs. An audit result may be retained in a quarantined ledger
 without becoming searchable training context.
+
+TRAIN work capture performs preflight on the working directory and raw output
+parent before launching a child or creating artifacts. Known reserved development,
+audit and held-out fixture locations and link/reparse traversal are rejected;
+Windows raw outputs also require ordinary file names. Rejected preflight preserves
+the incumbent context and capture result. These path checks complement explicit
+split declarations and honest attribution.
+
+Rescanning an allowed source refreshes its admitted absolute SOURCE aliases while
+preserving their original paths, attributions and historical versions. Windows
+case variants require matching native file identity, including in directories
+with case-sensitive lookup. Relative virtual record names retain their declared
+meaning; alias refresh uses only source files admitted by the allowed scan.
 
 ## 9. Actually migrate non-C functionality
 

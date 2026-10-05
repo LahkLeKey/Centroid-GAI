@@ -1,0 +1,34 @@
+Attribution: Codex assistant, manually recorded visible engineering activity,
+October 5, 2026. Kind: ACTIVITY. This is input context, not verified supervision.
+
+Implemented the fresh native C library and CLI, direct native subprocess capture,
+immutable source/context records, centroid mixture inference, participant-owned
+Adam, synchronous Life contacts, causal text framing, explicit replay, complete
+canonical checkpoints and isolated finite C candidate evaluation. All authored
+executable code and tests use C11. The shared byte projection is frozen in this
+recipe; learned cell interventions and merges remain future research gates.
+
+Corrected CRLF measurement parsing, stale receipt binding validation, consumed
+receipt persistence, checkpoint owner publication, code input retrieval by record
+kind, and reserved audit/development/fixture path admission. Native tests check
+these contracts. Full source versions are recorded by explicit rescans rather
+than an editor watcher. LLM proposals never provide automatic answer targets.
+
+Builds and native contract tests were executed with Windows MSVC, Windows clang,
+and Linux GCC. Each final test invocation has a complete raw capture under runs:
+final-msvc-tests.log, final-clang-tests.log and final-linux-tests.log. Platform
+models are separate. Linux tests were captured by the Linux native executable.
+These observations are activity; child exit status alone is not code utility.
+
+Formatting and static analysis were invoked through development tools; the ledger
+does not automatically capture all editor or agent tool operations. This manual
+summary records their scope. It does not include private reasoning, withheld task
+labels, or AUDIT results. Reviewable experiment reports and candidate artifacts
+are retained separately from the trainable context ledger.
+
+Final coverage correction: the scanner now admits src/model/model.c and still
+excludes generated model/checkpoint/weight artifacts. The native context test was
+captured again on all three platforms. Final rescan observed 12 new source
+versions, 11 unchanged files, 10 exclusions and no failures. A final source pass
+completed with 474 total owned updates, both active owner clocks 474, no pending
+tasks and no deferrals. These counters report activity and coverage only.

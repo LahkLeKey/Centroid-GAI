@@ -1,0 +1,18 @@
+Attribution: Codex assistant, visible implementation planning, October 5, 2026.
+Kind: LLM_PROPOSAL. This file is input context and does not supply task targets.
+
+The user requested a fresh native C system learning from its own codebase and
+visible work through Life-driven centroid encounters. The initial implementation
+should preserve exact source evidence, keep inference frozen, and authorize
+production updates only through genuine physical contacts. Separate typed text
+byte/EOS outputs from finite code-choice actions and world-cell interventions.
+
+A useful first code trial is an inclusive range predicate: examine the OR
+baseline, lower-only and upper-only alternatives, and a both-bounds candidate.
+Compile isolated C candidates and let an independent native evaluator measure
+correctness on TRAIN cases. Reserve AUDIT cases for a separate gate. Retain
+rejected sources and logs. Suggestions here require measurement before learning.
+
+Keep byte projection limitations, explicit capture coverage and experimental
+scope visible. Model-output changes and exact restart must be measured; advancing
+world generations or accumulating records alone does not show useful learning.

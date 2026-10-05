@@ -1,0 +1,19 @@
+Attribution: explicit visible-work coverage note, October 5, 2026.
+Role: ACTIVITY. This note supplies observations, not answer or utility labels.
+
+The local project now contains native C experiment orchestration, three distinct
+finite code contracts, shared representation and cellular-policy candidate forks,
+stable merge lineage with durable retired supervision, and frozen conversation
+sessions. The accepted lower-bound source was applied by the native fixed-patch
+verifier, then formatted with the declared external formatting tool.
+
+Visible fixes preserve archived supervision across promotion, bind publication to
+the live headers used in validation, and version absolute SOURCE aliases when an
+allowed file is rescanned. Source bytes, explicit LLM context and native captured
+build/test observations are consumed through provenance-bearing centroid memory.
+
+Coverage is explicit: this note records visible implementation work and declared
+operations. The native run facility retains complete command output, with bounded
+ACTIVITY views and any omitted-byte count. Source scans retain actual dirty bytes
+while excluding research, split fixtures, generated artifacts, dependencies and
+secret or linked paths. Immutable record history remains available by identity.

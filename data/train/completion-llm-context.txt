@@ -1,0 +1,22 @@
+Attribution: Codex visible implementation context, October 5, 2026.
+Role: LLM_PROPOSAL. These statements are input context, not verified targets.
+
+Use complete immutable local SOURCE bytes for causal prefix and EOS targets.
+Keep request, source evidence, proposal and observed activity roles distinct.
+Make real physical Life contacts necessary for owned training updates. Freeze
+unrelated head readouts and optimizer moments during a source-text update.
+
+For optional extensions, preserve retired task provenance and archived prefix
+integrity across promotion, retain original consumed CODE receipts, and expose
+explicit bounded retired TEXT replay with fresh task identities. Keep cell-policy
+teachers independent of domain labels and compare against a learner with editing
+disabled. Retain exact parent and candidate checkpoints for rollback.
+
+For local code publication, validate the current parent source and live header
+contracts against retained independent measurements. Use an overflow-safe binary
+search midpoint for the sorted-array lower-bound contract. Refresh absolute SOURCE
+capture aliases only when their same allowed regular file is actually scanned.
+
+Freeze conversation model, memory and history into local sessions. Return exact
+attributed evidence when supported, and preserve explicit abstention. Treat learned
+generation as unverified and keep inference separate from training and tools.

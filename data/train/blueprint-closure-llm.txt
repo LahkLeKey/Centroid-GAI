@@ -1,0 +1,16 @@
+Attribution: Codex visible implementation proposal, October 5, 2026.
+Role: LLM_PROPOSAL. Input context, not verified targets.
+
+Keep source-training orchestration in the native library. Select current TRAIN
+SOURCE records by stable immutable ID, bound the recipe to 32 records and four
+target-independent byte/EOS positions, and report omitted records explicitly.
+Preserve committed progress if a later admission or generation fails.
+
+Before publishing a Life generation, check cumulative live and retired optimizer
+clocks as well as individual clocks. Overflow must leave the model, tasks,
+receipts, policy, world, RNG and report unchanged for that generation.
+
+Validate command working directories and new raw-output parents before launch.
+Reject known held-out paths and link traversal. Retain the resolved canonical
+destination through capture. Refresh Windows case variants of absolute source
+aliases only when ordinary native file identities match the scanned source.

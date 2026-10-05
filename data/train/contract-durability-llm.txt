@@ -1,0 +1,16 @@
+Attribution: Codex visible implementation proposal, October 5, 2026.
+Role: LLM_PROPOSAL. Input context, not a verified answer or utility label.
+
+Persist every successfully admitted native capture receipt, even when the
+capture reports capacity or I/O failure. Keep the original failure status after
+successful persistence. Rejected preflight must preserve the incumbent file.
+
+Full native test configurations must register the finite evaluator and code
+publication tests. Select and check a supported native compiler explicitly;
+report dependency failure instead of silently reducing the suite. An explicitly
+disabled test configuration may build the core without that test dependency.
+
+Before executing a finite code trial, require an authentic physical encounter
+and no pending work. Retain the complete frozen parent model/context/world
+checkpoint and canonical contact proof. Bind both identities to independently
+measured TRAIN receipts. Proposal and activity inputs never provide target labels.
