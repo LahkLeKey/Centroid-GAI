@@ -10,15 +10,26 @@ Local retention and inclusion in Git are separate guarantees.
 | Native source, public/internal headers and tests | Historical copied fixtures, candidate/evaluator sources and auxiliary verification drivers |
 | Required build/test fixtures in the five `data/audit` headers | Prediction distributions, feature/target matrices, metrics, costs, sequences and traces |
 | Research Markdown protocols, reports, references and the archived design | Measurement receipts, argv/status records and raw verification logs |
-| `local-artifacts.txt` path, size and hash manifest | Frozen causal inputs, physical-contact proof files and runtime context/model/session snapshots |
+| Root/per-study `local-artifacts.txt` path, size and hash manifests; small `models/*.json` identities | Frozen causal inputs, physical-contact proof files and runtime context/model/session snapshots |
 | Optional small `data/train` request/context examples | Build executables, objects, local training runs and temporary files |
 
-Only Markdown documents and the artifact identity manifest are versioned under
+Only curated Markdown documents and the artifact identity manifests are versioned under
 `research/`. These rules do not exclude runtime source, native tests or required
 `data/audit` headers. The research tree remains quarantined from automatic TRAIN
 ingestion regardless of whether a file is versioned. Documentation refers to
 excluded raw artifacts by local filenames rather than links that would break in a
 fresh clone.
+
+The SDK study's `research/sdk-release/local-attempts/` is entirely ignored,
+including copied Markdown sidecars. Its frozen protocol, curated M4/M5/release
+reports and per-study manifest remain versioned. Deployment models under
+`models/reference-v1/` and SDK/source archives under build directories are
+separate local/release assets; Git retains their small manifests and instructions.
+The explicit native source-package allowlist includes model metadata and curated
+research documents, while excluding raw attempts, private context and model
+bytes. SDK code and original reference-model assets use the owner-approved
+[MIT License](../LICENSE); each release archive includes that notice. Private
+application context and historical research bytes remain separate retained data.
 
 [local-artifacts.txt](local-artifacts.txt) records the repository-relative path,
 complete byte count and SHA256 of each excluded research run artifact present at

@@ -254,12 +254,29 @@ c_status c_context_read_regular(const char *path, unsigned char **bytes,
 }
 
 static int excluded_name(const char *name, int directory) {
-  static const char *const directories[] = {
-      "models",    "checkpoints", "data",         "audit",     "tests",
-      "research",  "experiments", "node_modules", "deps",      "dependencies",
-      "vendor",    "third_party", "third-party",  "generated", "dist",
-      "target",    "coverage",    "output",       "outputs",   "runs",
-      "artifacts", "__pycache__"};
+  static const char *const directories[] = {"models",
+                                            "checkpoints",
+                                            "data",
+                                            "audit",
+                                            "tests",
+                                            "research",
+                                            "experiments",
+                                            "node_modules",
+                                            "deps",
+                                            "dependencies",
+                                            "vendor",
+                                            "third_party",
+                                            "third-party",
+                                            "generated",
+                                            "dist",
+                                            "target",
+                                            "coverage",
+                                            "output",
+                                            "outputs",
+                                            "runs",
+                                            "artifacts",
+                                            "__pycache__",
+                                            "source-package-verification"};
   if (name[0] == '.' || strstr(name, "secret") != NULL ||
       strstr(name, "credential") != NULL ||
       strstr(name, "private-key") != NULL ||

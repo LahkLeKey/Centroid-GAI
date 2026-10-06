@@ -4,6 +4,7 @@
 #include "centroid_extensions.h"
 #include "centroid_session.h"
 #include "centroid_source.h"
+#include "centroid_training.h"
 #include <errno.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -25,6 +26,8 @@ static void usage(void) {
        "centroid step STATE GENERATIONS\n"
        "centroid replay-retired STATE FIRST MAX ELIGIBILITY_MASK\n"
        "centroid report STATE\n"
+       "centroid export STATE MODEL_BUNDLE\n"
+       "centroid inspect-model MODEL_BUNDLE\n"
        "centroid trial STATE NEW_OUTPUT_DIRECTORY COMPILER\n"
        "centroid run STATE NEW_RAW_LOG TIMEOUT_MS PROGRAM [ARGUMENTS...]\n"
        "centroid benchmark NEW_OUTPUT_DIRECTORY\n"
@@ -307,6 +310,27 @@ int main(int argc, char **argv) {
     usage();
     return 2;
   }
+  if (!strcmp(argv[1], "inspect-model") && argc == 3) {
+    cr_model *frozen = NULL;
+    cr_status rs = cr_model_load_file(argv[2], &frozen);
+    cr_model_info info;
+    memset(&info, 0, sizeof(info));
+    info.struct_size = sizeof(info);
+    info.api_version = CR_API_VERSION;
+    if (rs == CR_OK)
+      rs = cr_model_info_get(frozen, &info);
+    if (rs == CR_OK)
+      printf("model=%s groups=%u format=%u recipe=%s qualification=%u "
+             "bytes=%" PRIu64 " provenance=%s evidence=%s\n",
+             info.metadata.model_digest, (unsigned)info.groups,
+             (unsigned)info.bundle_version, info.recipe,
+             (unsigned)info.metadata.qualification, info.bundle_bytes,
+             info.metadata.provenance, info.metadata.qualification_reference);
+    else
+      fprintf(stderr, "centroid: %s\n", cr_status_string(rs));
+    cr_model_destroy(frozen);
+    return rs == CR_OK ? 0 : 1;
+  }
   if ((!strcmp(argv[1], "benchmark") || !strcmp(argv[1], "research") ||
        !strcmp(argv[1], "extensions")) &&
       argc == 3) {
@@ -349,6 +373,12 @@ int main(int argc, char **argv) {
         if (s == C_OK)
           s = c_session_save(session, argv[3]);
         c_session_destroy(session);
+      } else if (!strcmp(argv[1], "export") && argc == 4) {
+        cr_model *frozen = NULL;
+        s = c_trainer_export_model(t, NULL, &frozen);
+        if (s == C_OK)
+          s = (c_status)cr_model_save_file(frozen, argv[3]);
+        cr_model_destroy(frozen);
       } else if (!strcmp(argv[1], "replay-retired") && argc == 6) {
         uint64_t scope = 0;
         size_t requeued = 0;

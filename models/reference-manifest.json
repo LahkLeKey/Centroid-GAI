@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "sdk_version": "0.1.0",
+  "bundle_version": 1,
+  "task_profile": "lower-bound-strategy/v1",
+  "observation_schema": "lower-bound-band2-byte-pos32/v1",
+  "action_catalog": "lower-bound-binary-forward-reverse-gallop4/v1",
+  "model_digest": "eb34dee4bb00ea02d5cef7a8eaa1214869d7fffe15c5356cabbdb96ef7c20e27",
+  "redistribution": "MIT licensed original model assets; include the copyright and permission notice",
+  "recipe": "research/sdk-release/M5_PROTOCOL.md",
+  "qualification_report": "research/sdk-release/M5_REPORT.md",
+  "artifacts": [
+    {
+      "path": "qualified.crmodel",
+      "bytes": 135980,
+      "sha256": "afa9129d652b7a40f5019b772c065efd6e38ac1e7064ab988d56df2d76688cc7"
+    },
+    {
+      "path": "qualification.md",
+      "bytes": 1627,
+      "sha256": "1bfc6c4655ba7a728d37b00044edaef01a8716ff8037128e1e47abe4af1ec2a4"
+    },
+    {
+      "path": "evidence.sha256.tsv",
+      "bytes": 6465,
+      "sha256": "03b276ce9955934bfc8e9b306d24376f0348ee9a42c95fc12d6f723d6b660a9c"
+    },
+    {
+      "path": "registered-protocol.md",
+      "bytes": 5682,
+      "sha256": "18373f4ee098f25ca246099f00594ed0013538069e45dbfada0a494af6154661"
+    },
+    {
+      "path": "report.md",
+      "bytes": 3246,
+      "sha256": "3c727da0252a47058f46e9948c7e408c37979c960af1f0942f8e1dba572a222b"
+    },
+    {
+      "path": "1409-parent.crmodel",
+      "bytes": 135980,
+      "sha256": "c4e05dabaeaeacb7a57ee6314e012e389bbf0de645cd2d2a56d41f0b15c572e7"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1078,
+      "sha256": "b00155baa208cc4fb5f975b647a4d275dcccc83f91ce0bd110ce19e30009ca3e"
+    }
+  ],
+  "license": "MIT",
+  "license_file": "LICENSE",
+  "artifact_root": "reference-v1"
+}

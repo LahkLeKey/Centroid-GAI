@@ -1,9 +1,25 @@
 # Centroid Life
 
-A local strict C11 system with Life-authorized centroid training, exact source and
-work memory, independently verified finite code edits and frozen evidence sessions.
-The [roadmap](research/ROADMAP.md) defines the current scope, implementation status,
-measured results and interpretation limits. The original design is retained in the
+The repository's main goal is an installable, local C11 AI SDK: task-specific
+centroid models for code assistance, chat and gameplay, improved through
+Life-authorized training with attributed context and independently verified
+targets. The [product plan](PRODUCT_PLAN.md) defines the delivery order and release
+gates, starting with a code-context helper for existing LLM applications.
+
+The implementation now includes an independent inference runtime, optional Life
+training/tools, portable immutable model bundles and relocatable static/shared
+CMake packages. The native code-context example returns bounded attributed
+evidence; a separately qualified small model selects a verified search strategy.
+Installation, source archives and local training/export/rollback are tested on
+Windows with MSVC/clang and Linux with GCC. See [SDK use](docs/SDK.md),
+[bundle format](docs/BUNDLE_FORMAT.md) and [reference assets](models/README.md).
+Start with the [local code-assistance walkthrough](docs/CODE_HELPER_TRIAL.md).
+The [first installed use-case check](research/sdk-release/CODE_HELPER_USE_CASE_REPORT.md)
+records source evidence, editor refresh, abstention and model rollback results.
+SDK code and original model assets are [MIT licensed](LICENSE), as authorized
+by the owner on October 6, 2026. The
+[research roadmap](research/ROADMAP.md) records implementation status, measured
+results and interpretation limits. The original design is retained in the
 [archived fresh-start blueprint](research/archive/FRESH_START_BLUEPRINT.md).
 The [blueprint closure review](research/verification/2026-10-05-blueprint-closure/README.md)
 records the final workflow, capture and source-freshness contract checks.

@@ -1,0 +1,25 @@
+@PACKAGE_INIT@
+
+# Runtime is an unconditional dependency of every optional component. Imported
+# targets locate their files relative to this configuration, enabling relocation.
+include("${CMAKE_CURRENT_LIST_DIR}/CentroidRuntimeTargets.cmake")
+set(Centroid_Runtime_FOUND TRUE)
+if(NOT Centroid_FIND_COMPONENTS)
+  set(Centroid_FIND_COMPONENTS Runtime)
+endif()
+set(Centroid_Training_FOUND FALSE)
+set(Centroid_Tools_FOUND FALSE)
+if("Training" IN_LIST Centroid_FIND_COMPONENTS OR
+   "Tools" IN_LIST Centroid_FIND_COMPONENTS)
+  if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/CentroidTrainingTargets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/CentroidTrainingTargets.cmake")
+    set(Centroid_Training_FOUND TRUE)
+  endif()
+endif()
+if("Tools" IN_LIST Centroid_FIND_COMPONENTS AND Centroid_Training_FOUND)
+  if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/CentroidToolsTargets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/CentroidToolsTargets.cmake")
+    set(Centroid_Tools_FOUND TRUE)
+  endif()
+endif()
+check_required_components(Centroid)

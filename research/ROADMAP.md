@@ -1,8 +1,35 @@
 # Native implementation, completion gates and evidence
 
+The repository's primary goal is now the
+[installable native AI SDK](../PRODUCT_PLAN.md). That plan defines product scope,
+delivery order and release gates; this roadmap records implementation and research
+evidence. Closing the earlier bounded blueprint does not complete the SDK goal.
+
+## SDK product status
+
+| Milestone | Status | Acceptance evidence or remaining boundary |
+| --- | --- | --- |
+| Existing native foundation | Implemented within the historical scope below. | Preserve tested contracts and interpretation limits during extraction. |
+| M0: product/API/asset contracts | Complete; MIT license approved October 6, 2026. | [SDK contract](../docs/SDK.md), [canonical bundle](../docs/BUNDLE_FORMAT.md), [quality protocol](sdk-release/M5_PROTOCOL.md), [prospective deployment resources](sdk-release/RESOURCE_PROTOCOL.md), [license](../LICENSE). Historical timing-host registration limitation retained. |
+| M1: independent inference runtime | Implemented and verified. | Runtime-only native consumers and symbol/dependency boundary; no updates, trainer or process launcher. |
+| M2: portable inference assets | Implemented and verified. | Read-only export; corrupt/unsupported rejection; 90 fixed rows covering both heads, framing, routing, empty/all-byte and maximum inputs, with matching decisions on MSVC, clang and GCC. |
+| M3: installed C SDK | Implemented and verified. | Relocated static/shared CMake packages and detached public-only native consumers. |
+| M4: code-context host | Implemented within deterministic fixture scope. | [Retrieval/budget/refresh/abstention and cost report](sdk-release/M4_REPORT.md); installed provider-free helper plus unsaved-source refresh and independent-context example. |
+| M5: qualified learned feature | Passed registered gates. | [Bounded search-selection result](sdk-release/M5_REPORT.md); all comparators/retention/costs retained. Schedules tied; no Life advantage or LLM coding claim. |
+| M6: complete first SDK product | Complete within the first-product scope; release assets licensed under MIT. | [Release workflow evidence](sdk-release/SDK_RELEASE_REPORT.md), [asset identity/license](../models/reference-manifest.json), installed training/export/adoption/rollback and archive checksums. |
+
+Chat and gameplay are subsequent task-profile tracks in the product plan. The
+current retrieval/session tests do not qualify learned retrieval or a fluent
+chatbot. M5 qualifies only its named finite search-selection profile; the
+Life-world policy is not a game policy. New product quality claims
+need fresh protocols and independent evidence.
+
+## Historical blueprint completion and evidence
+
 Raw artifacts named below are retained locally under the [artifact policy](ARTIFACTS.md); their identities are in the [artifact manifest](local-artifacts.txt). They are excluded from Git.
 
-Updated October 5, 2026. This is the authoritative status of the
+Updated October 5, 2026. The historical sections below give the authoritative
+status of the
 [archived fresh-start blueprint](archive/FRESH_START_BLUEPRINT.md). Its bounded stages 0–7 are
 implemented: a local native system, comparative experiments, isolated extension
 candidates, verified finite code changes and a frozen evidence conversation
@@ -276,6 +303,10 @@ representations, hierarchical BPE, broad generated patches, arbitrary LLM patch
 execution, learned merge selection, parallel kernels and larger task corpora need
 new protocols and independent quality/retention/resource gates. The negative
 sequence and chooser-transfer results justify keeping those expansions gated.
-These are future capability extensions, not silently unfinished components of
-the declared native bounded release. Primary sources and assumptions are retained
+These are outside the completed historical native bounded release. The new
+[product plan](../PRODUCT_PLAN.md) brings deployable models and host integration
+into the primary repository goal. Its first-product technical gates have local
+acceptance evidence in the SDK status table above, with MIT licensing approved
+for SDK code and original model assets. Capability expansions remain
+gated. Primary sources and assumptions are retained
 in [REFERENCES.md](REFERENCES.md).

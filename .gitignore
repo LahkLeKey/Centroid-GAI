@@ -2,13 +2,47 @@
 /cmake-build*/
 /runs/
 
+# Private local environment and authentication material.
+.env
+.env.*
+*.env
+*.env.*
+!*.env.example
+!*.env.sample
+!*.env.template
+/.aws/
+/.ssh/
+/secrets/
+/.secrets/
+.netrc
+_netrc
+.git-credentials
+credentials.local.json
+secrets.local.json
+private-key.pem
+*.private.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+
 # Local runtime state and native build products.
 *.clife
 *.cctx
+*.cmodel
+*.crmodel
+*.centroid
 *.tmp
 *.obj
 *.exe
 *.pdb
+
+# Deployment models are release/local assets; keep their small identities only.
+/models/*
+!/models/*.md
+!/models/*.json
+/sdk-source-fixture/
+/source-package-verification/
 
 # Keep research design, protocol and report documents plus artifact identities.
 # Historical run outputs, copied fixtures, logs and snapshots remain local.
@@ -16,3 +50,6 @@
 !/research/**/
 !/research/**/*.md
 !/research/local-artifacts.txt
+!/research/**/local-artifacts.txt
+# Complete raw attempts stay local, including duplicated Markdown sidecars.
+/research/sdk-release/local-attempts/**
